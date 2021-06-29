@@ -1,0 +1,5 @@
+**Janggi Korean Chess** is a chess game not that different from western chess. See the [wiki page](https://en.wikipedia.org/wiki/Janggi) for more information on game play and rules. I built a **backend system** in Pyhton to index game piece objects, simulate 1000s of moves, and determine winner by scanning for checkmate condition. It takes user input from two players two play the game.
+
+I built an accompanying program to run modulated tests to ensure integrity of game during development. The unit testing helped to keep previous development under control and to monitor integration bugs.
+
+**Design Wishes**: Although not required, I could have designed the project differently. I originally designed JanggiGame object to simulate moves for all GamePieces. However, I could have passed the Board object to each GamePiece object in order to simulate moves. I chose the former method, because I wanted to keep 'game rules' within one object. I could have easily been pursuaded the other direction if I had built the game with a team and another team member had requested the latter method. 
