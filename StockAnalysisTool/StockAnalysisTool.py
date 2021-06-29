@@ -724,14 +724,235 @@ class StockAnalysisTool(StockTable):
 
         return str()
 
+
+class StockPredictor(object):
+    """
+    Gathers specified number of random stock symbols.
+    """
+
+    def __init__(self):
+        self._stock_symbols = investpy.stocks.get_stocks_list('united states')
+
+    def get_stock_symbols(self):
+        """
+        Returns a list of all symbols.
+        """
+
+        return self._stock_symbols
+
+    def get_best_pattern_for_randomized_stocks(self):
+        """
+        Randomizes stocks picked and randomizes patterns for 30 stocks. Builds a pattern dictionary and outputs the highest frequency patterns. For example,
+        if invested on the 4th day and held for 25 days had a higher gain more often (12 times in this example) than when invested on the 3rd
+        day for 15 days (3 times in this example), then the output would appear as {(4,25): 12, (3, 15): 3}.
+        """
+        stock_list = self.get_stock_symbols()
+        random_stock = random.choices(stock_list, k=30)
+        best_pattern_dict = {(1,5):0, (2,5):0, (3,5):0, (4,5):0, (5,5):0, (1,10):0, (2,10):0, (3,10):0, (4,10):0, (5,10):0,
+                             (1,15):0, (2,15):0, (3,15):0, (4,15):0, (5,15):0, (1,20):0, (2,20):0, (3,20):0, (4,20):0, (5,20):0,
+                             (1,25):0, (2,25):0, (3,25):0, (4,25):0, (5,25):0, (1,30):0, (2,30):0, (3,30):0, (4,30):0, (5,30):0,
+                             (1,35):0, (2,35):0, (3,35):0, (4,35):0, (5,35):0, (1,40):0, (2,40):0, (3,40):0, (4,40):0, (5,40):0}
+
+        for index, stock_symbol in enumerate(random_stock):
+
+            print('Stock {}, which is {}'.format(index+1, stock_symbol))
+            stock = StockAnalysisTool(stock_symbol, date_from=None, date_to=None, price_action_move_filter=-0.05, volume_change_filter=True)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,5)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,10)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,15)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,20)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,25)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,30)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,35)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,40)
+
+            best_stock_pattern = stock.sort_total_stock_performance_for_trade_duration_after_specified_days_return_pattern(10)
+            try:
+                best_pattern_dict[best_stock_pattern] += 1
+            except:
+                continue
+
+        pprint(best_pattern_dict)
+
+    def get_best_pattern_for_randomized_stocks_five_days(self):
+        """
+        Randomizes 30 stocks picked and compares against a pattern of 1 through 5 days held after investing on the first day. Outputs a patttern frequency dictionary.
+        """
+        stock_list = self.get_stock_symbols()
+        random_stock = random.choices(stock_list, k=30)
+        best_pattern_dict = {(1,1):0, (1,2):0, (1,3):0, (1,4):0, (1,5):0}
+
+        for index, stock_symbol in enumerate(random_stock):
+
+            print('Stock {}, which is {}'.format(index+1, stock_symbol))
+            stock = StockAnalysisTool(stock_symbol, date_from='01/01/2015', date_to=None, price_action_move_filter=-0.05, volume_change_filter=False)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,1)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,2)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,3)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,4)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,5)
+
+            best_stock_pattern = stock.sort_total_stock_performance_for_trade_duration_after_specified_days_return_pattern(10)
+            try:
+                best_pattern_dict[best_stock_pattern] += 1
+            except:
+                continue
+
+        pprint(best_pattern_dict)
+
+    def get_best_pct_gain_per_trade_day_for_patterns_for_randomized_stocks(self):
+        """
+        Randomizes 30 stocks picked and returns the pattern and highest percentage gain out of the 30 stocks.
+        """
+        stock_list = self.get_stock_symbols()
+        random_stock = random.choices(stock_list, k=30)
+        best_pct_gain_per_trade_day_dict = {'first':(list(),0.0), 'second':(list(),0.0), 'third':(list(),0.0)}
+
+        for index, stock_symbol in enumerate(random_stock):
+
+            print('Stock {}, which is {}'.format(index+1, stock_symbol))
+            stock = StockAnalysisTool(stock_symbol, date_from='01/01/2015', date_to=None, price_action_move_filter=-0.05, volume_change_filter=True)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,5)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,5)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,10)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,10)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,15)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,15)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,20)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,20)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,25)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,25)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,30)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,30)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,35)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,35)
+
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(1,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(2,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(3,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(4,40)
+            stock.set_total_stock_performance_for_trade_duration_after_specified_days(5,40)
+
+            best_stock_pct_gain_per_trade_day = stock.sort_total_stock_performance_for_trade_duration_after_specified_days_return_pct_per_trade_day(10)
+            if best_stock_pct_gain_per_trade_day is not None:
+                trade_pattern, pct_gain_per_trade_day = best_stock_pct_gain_per_trade_day
+                best_stock_pct_gain_per_trade_day = (trade_pattern, pct_gain_per_trade_day, stock.get_stock_symbol())
+
+            try:
+                if best_pct_gain_per_trade_day_dict['first'][1] < best_stock_pct_gain_per_trade_day[1]:
+                    old_first = best_pct_gain_per_trade_day_dict['first']
+                    old_second = best_pct_gain_per_trade_day_dict['second']
+                    best_pct_gain_per_trade_day_dict['first'] = best_stock_pct_gain_per_trade_day 
+                    best_pct_gain_per_trade_day_dict['second'] = old_first
+                    best_pct_gain_per_trade_day_dict['third'] = old_second
+
+                elif best_pct_gain_per_trade_day_dict['second'][1] < best_stock_pct_gain_per_trade_day[1]:
+                    old_second = best_pct_gain_per_trade_day_dict['second']
+                    best_pct_gain_per_trade_day_dict['second'] = best_stock_pct_gain_per_trade_day 
+                    best_pct_gain_per_trade_day_dict['third'] = old_second
+
+                elif best_pct_gain_per_trade_day_dict['third'][1] < best_stock_pct_gain_per_trade_day[1]:
+                    best_pct_gain_per_trade_day_dict['third'] = best_stock_pct_gain_per_trade_day   
+            except:
+                continue
+
+        print(best_pct_gain_per_trade_day_dict)
+
+    def write_findings_to_csv(self, findings_list):
+        """
+        Takes in list of findings and writes findings to CSV file.
+        """
+
+        with open('output.csv', 'w', newline='') as outfile:
+            writer = csv.writer(outfile)
+            writer.writerows(findings_list)
+
+
 def main():
     """
     Main function.
     """
-    # stock = StockTable('aapl', 'united states', '01/01/2020', '03/01/2021') ## Not needed, but shows functionality.
+    ## Example provided to demonstrate functionality.
+    # stock = StockTable('aapl', 'united states', '01/01/2020', '03/01/2021') 
+
+    ## Example provide to show what StockAnalysisTool provides.
     stock = StockAnalysisTool('aapl', date_from='01/01/2020', date_to=None, price_action_move_filter=-0.05, volume_change_filter=None)
     stock.set_total_stock_performance_five_days_following_percentage_drop()
     print(stock)
+
+    ## Example provided to show what StockPredictor provides.
+    stock_predictor = StockPredictor()
+    stock_predictor.get_best_pattern_for_randomized_stocks_five_days()
+    stock_predictor.get_best_pct_gain_per_trade_day_for_patterns_for_randomized_stocks()
 
 
 # Tests whether file is ran as script and whether the main function ought be called.
