@@ -1,259 +1,166 @@
-import json
-import csv
+import investpy
+from datetime import date, timedelta
 
-class CanonTrades(object):
+
+class StockTable(object):
+    """
+    Stock contains performance data: price, percent change, volume, numerical change based on a
+    duration between two dates.
     """
 
-    """
-
-    def __init__(self, csv_file):
+    def __init__(self, stock_symbol, country='united states', date_from=None, date_to=None):
         """
-        Takes in no parameters.
-        Pulls in stock.csv to be searched.
+        Takes in stock_symbol and country (strings). Date_from (string, integer, or defaulted to NoneType) and
+        date_to (string or defaulted to NoneType) required format is '%d/%m/%Y'. investpy will throw an error if
+        not.
         """
-
-        self._stock_data = list()
-
-        with open(csv_file, 'r', newline='') as infile:
-
-            for row in list(csv.reader(infile)):
-
-                if not '-' in row[5]:
-
-                    self._stock_data.append(row)
-
-
-    def get_stock_data(self):
-        """
-        Returns _stock_data (list of lists).
-        """
-
-        return self._stock_data
-
-    def get_actual_volume_size(self, abbreviated_volume, volume_size):
-        """
-        Takes in volume and size (strings) and converts to actual volume size.
-        """
-
-        volume = abbreviated_volume
-        volume_size = volume_size.upper()
-
-        if 'B' in volume_size:
-
-            size = 1000000000
-            volume *= size
-
-        elif 'M' in volume_size:
-
-            size = 1000000
-            volume *= size
-
-        elif 'K' in volume_size:
-
-            size = 1000
-            volume *= size
         
-        return volume
+        self._stock_symbol = stock_symbol
+        self._country = country
+        self.set_date_to(date_to) # Reordered to cover defaulted procedures within set_date_from() method.
+        self.set_date_from(date_from)
+        self._investing_website_stock_data = list()
+        self._stock_price_volume_pct_gains_table = list()
 
-    def get_trade_dates_with_unusual_volume_and_price_action(self, volume, price_change):
+        self.setup_stock_table()
+
+    def setup_stock_table(self):
         """
-        Return a list of trade dates with data to input trade.
-        """
-
-        stock_data = self.get_stock_data()
-        trades = list()
-
-        for possible_trade_day in stock_data[1:]:
-
-            abbreviated_volume, volume_size = possible_trade_day[5].split('.')
-            abbreviated_volume = int(abbreviated_volume)
-            volume_size = ''.join(size for size in volume_size if not size.isdigit()).upper()
-            daily_price_change = float(possible_trade_day[6].split('%')[0])/100
-
-            daily_volume = self.get_actual_volume_size(abbreviated_volume, volume_size)
-
-            if price_change < 0:
-
-                if daily_volume > volume and daily_price_change < price_change:
-
-                    trades.append(possible_trade_day)
-
-            else:
-
-                if daily_volume > volume and daily_price_change > price_change:
-
-                    trades.append(possible_trade_day)
-
-        return trades
-
-    def get_conditioned_trades(self, volume, price_change):
-        """
-        Returns the following trade dates and related data based on a set criteria.
-
-        Best results: Invested on day 4, duration of 15, prior volume days of 3, form_factor of 2 and following days volume is 3.
+        After initialization of the stock, Stock is converted from pandas.DataFrame into lists with added performance data
+        that can be later coded into CSV file format. Performance data includes the addition of price and volume percentage
+        gain and loss and volume difference day-to-day.
         """
 
-        day_invested = 3
-        duration_of_investment = 30              # includes accumulated volume days.
-        prior_days_volume = 5                      
-        form_factor_for_volume = 1.5
-        trades = 0
+        stock_symbol = self.get_stock_symbol()
+        country = self.get_country()
+        date_from = self.get_date_from()
+        date_to = self.get_date_to()
+        investing_website_stock_data = self.get_investing_website_stock_data()
+        stock_price_volume_pct_gains_table = self.get_stock_price_volume_pct_gains_table()
 
-        stock_data = self.get_stock_data()
-        actual_trade_dates = self.get_trade_dates_with_unusual_volume_and_price_action(volume, price_change)
+        try:
+            investing_website_stock_data = investpy.stocks.get_stock_historical_data(stock_symbol, country, date_from, date_to)
+            self.set_investing_website_stock_data(investing_website_stock_data)
+        except:
+            stock_not_available = None
+            return self.set_investing_website_stock_data(stock_not_available)
 
-        wins = 0
-        losses = 0
-        overall_gain = 1.0
+        trading_date = investing_website_stock_data.reset_index()['Date']
+        price_close = investing_website_stock_data['Close'].fillna(0)
+        price_pct_change = investing_website_stock_data['Close'].pct_change().fillna(0)
+        share_volume = investing_website_stock_data['Volume'].fillna(0)
+        share_volume_change = investing_website_stock_data['Volume'].diff().fillna(0)
+        share_volume_pct_change = investing_website_stock_data['Volume'].pct_change().fillna(0)
+        table_enhanced = list(map(lambda a, b, c, d, e, f: [a, b, round(c, 2), d, int(e), round(f, 2)],\
+                         trading_date, price_close, price_pct_change, share_volume, share_volume_change, share_volume_pct_change))
+        
+        self.set_stock_price_volume_pct_gains_table(table_enhanced)
 
-        # Shift range to the right due to header row.
-        for index, trade_day in enumerate(stock_data[1:],1):
+    def get_stock_symbol(self):
+        """
+        Returns _stock_symbol.
+        """
 
-            if trade_day in actual_trade_dates:
+        return self._stock_symbol.upper()
+    
+    def get_country(self):
+        """
+        Returns _country
+        """
 
-                total_price_change = float()
-                prior_volume = int()
-                following_volume = int()
-                
-                count = 0
+        return self._country
 
-                # Total price change (%) is calculated for the next # days.
-                for day in range(day_invested+1, duration_of_investment+1):
+    def get_date_from(self):
+        """
+        Returns _date_from
+        """
 
-                    # Try/except used for edges of list.
-                    try:
+        return self._date_from
 
-                        # print(stock_data[index + 1 + day][0], stock_data[index + 1 + day][6])
 
-                        # Index is shifted to the right to account for header row.
-                        # Count may need to be used to average to get daily price gain.
-                        total_price_change += float(stock_data[index+day][6].split('%')[0])/100
-                        count += 1
+    def set_date_from(self, date_from):
+        """
+        Takes in date_from (string, integer, or NoneType).
+        Sets _date_from based on conditions of the parameter.
+        NoneType defaults _date_from to a two year look back period and uses set_date_to() to set to today's date.
+        Integer is the number of months for look back period and uses set_date_to() to set to today's date.
+        String is the actual date for look back period to begin. No changes are forced on _date_to
+        """
 
-                    except:
+        # Two year look back period from today is forced if date_from is NoneType.
+        if date_from is None:
+            date_from = date.today() - timedelta(days=365*2)
+            self._date_from = str(date_from.strftime('%d/%m/%Y'))
+            self.set_date_to(None)
 
-                        continue
+        # If date_from is an integer and not in string format, date_from is considered to be a duration in months of 31
+        # days. Date_to is forced into today's date with correct format.
+        elif isinstance(date_from, int):
+            date_from = date.today() - timedelta(days=date_from*31)
+            self._date_from = str(date_from.strftime('%d/%m/%Y'))
+            self.set_date_to(None)
 
-                count = 0
+        else:
+            self._date_from = date_from
 
-                # Total volume change for the previous five days (averaged).
-                for day in range(-1, -prior_days_volume, -1):
+    def get_date_to(self):
+        """
+        Returns _date_to
+        """
 
-                    try:
+        return self._date_to
 
-                        # Index is shifted to the right to account for header row.
-                        # Count may need to be used to average to get daily price gain.
+    def set_date_to(self, date_to):
+        """
+        Takes in date_from (string or NoneType).
+        Sets _date_from based on conditions of the parameter.
+        NoneType defaults to today's date.
+        String is the actual date for look back period to end.
+        """
 
-                        abbreviated_volume, volume_size = stock_data[index+day][5].split('.')
-                        abbreviated_volume = int(abbreviated_volume)
-                        volume_size = ''.join(size for size in volume_size if not size.isdigit()).upper()
+        # Today's date is used if NoneType is supplied.    
+        if date_to is None:
+            self._date_to = date.today().strftime('%d/%m/%Y')
 
-                        daily_volume = self.get_actual_volume_size(abbreviated_volume, volume_size)
+        else:
+            self._date_to = date_to
 
-                        prior_volume += daily_volume
-                        count += 1
+    def get_investing_website_stock_data(self):
+        """
+        Returns Investing.com's stock data from _investing_website_stock_data.
+        """
 
-                    except:
+        return self._investing_website_stock_data
 
-                        continue
+    def set_investing_website_stock_data(self, investing_website_stock_data):
+        """
+        Takes in investing_website_stock_data (list of lists or string) and sets variable.
+        String will provide a stock symbol and indicate 
+        """
 
-                count = 0
-                following_days_for_volume_measurement = day_invested # Accounts for market close on previous day with range stopping at previous value.
+        if investing_website_stock_data is None:
+            investing_website_stock_data = print('{} is not available.'.format(self.get_stock_symbol()))
+        
+        self._investing_website_stock_data = investing_website_stock_data
 
-                # Total volume change for the next two days (averaged).
-                for day in range(1, following_days_for_volume_measurement):
+    def get_stock_price_volume_pct_gains_table(self):
+        """
+        Returns _stock_price_volume_pct_gains_table.
+        """
 
-                    try:
+        return self._stock_price_volume_pct_gains_table
 
-                        # Index is shifted to the right to account for header row.
-                        # Count may need to be used to average to get daily price gain.
+    def set_stock_price_volume_pct_gains_table(self, stock_price_volume_pct_gains_table):
+        """
+        Takes stock_price_volume_pct_gains_table (list of lists) and sets _stock_price_volume_pct_gains_table to the table.
+        """
 
-                        abbreviated_volume, volume_size = stock_data[index+day][5].split('.')
-                        abbreviated_volume = int(abbreviated_volume)
-                        volume_size = ''.join(size for size in volume_size if not size.isdigit()).upper()
-
-                        daily_volume = self.get_actual_volume_size(abbreviated_volume, volume_size)
-
-                        following_volume += daily_volume
-                        count += 1
-
-                    except:
-
-                        continue
-
-                if (prior_volume//count)*form_factor_for_volume < following_volume:
-
-                    print('Trade day: ', stock_data[index])
-                    print('Percent change: ', str(round(total_price_change*100, 2))+'%')
-                    print('Prior Volume: ', prior_volume//count)
-                    print('Frwdd Volume: ', following_volume)
-                    print()
-
-                    if total_price_change != 0:
-
-                        if total_price_change < -0.02:
-
-                            overall_gain *= 0.98
-                            trades += 1
-
-                            if total_price_change > 0:
-
-                                wins += 1
-
-                            else:
-
-                                losses += 1
-
-                        else:
-
-                            overall_gain *= total_price_change + 1
-                            trades += 1
-
-                            if total_price_change > 0:
-
-                                wins += 1
-
-                            else:
-
-                                losses += 1
-
-        print('Win %: ', str(round((wins/trades)*100, 2))+'%', '   Wins:', wins, ' Losses:', losses)
-        print('Overall gain: ', str(round(overall_gain*100, 2))+'%', ' with ', trades, ' trades.')
-        print('$15000k invested would equal: ', '$' + '{:,}'.format(int(150000*(overall_gain+1))))
-
+        self._stock_price_volume_pct_gains_table = stock_price_volume_pct_gains_table
 
     def __repr__(self):
         """
-        Official representation of CanonTrades.
+        Prints to console stock price/volume/gains table.
         """
 
-        return '\n'.join(map(str, self.get_stock_data()))
-
-
-def main():
-    """
-    Main function.
-    """
-    # Check the correlation of bewiching days to returns for stocks after the four quarterly days.
-    trades = CanonTrades('chkp.csv')
-    print()
-    print()
-    trades.get_conditioned_trades(200000, -0.04)
-    print()
-    print()
-
-
-# Tests whether file is ran as script and whether the main function ought be called.
-if __name__ == '__main__':
-
-    main()
-
-
-
-
-# print('Trade day: ', stock_data[index],'\n',
-#       'Trade day+1: ', stock_data[index+1],'\n',
-#       'Trade day+2: ', stock_data[index+2],'\n',
-#       'Trade day+3: ', stock_data[index+3],'\n',
-#       'Trade day+4: ', stock_data[index+4],'\n',
-#       'Trade day+5: ', stock_data[index+5],'\n','\n')
+        stock_price_volume_pct_gains_table = self.get_stock_price_volume_pct_gains_table()
+        return '\n'.join(map(str, stock_price_volume_pct_gains_table))
