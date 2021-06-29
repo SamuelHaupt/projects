@@ -1,0 +1,3 @@
+HackAssembler is a rudimentary assembler that converts Hack assembly code into binary machine language. I built the program for a class: [Building a Modern Computer From First Principles](https://www.nand2tetris.org). Professor Noam Nisan and Shimon Schocken built a virtual computer called Hack that simulates hardware production and operation. HackAssembler converts programs, such as the Pong game program, into binary language that then can be passed to the Hack computer. See [Pong.hack](https://github.com/SamuelHaupt/projects/blob/main/HackAssembler/Pong.hack) for the binary code. The game is then operated.
+
+HackAssembler provides an early glimpse into my product development and design processes prior to more formal training.
