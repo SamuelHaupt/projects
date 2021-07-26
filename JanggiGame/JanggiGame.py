@@ -2254,6 +2254,7 @@ def main():
     print(game.make_move('a1','a4'), True) #should return True
     print(game.make_move('c7','d7'), True) #should return True
     print(game.make_move('a4','a4'), True) #this will pass the Red's turn and return True
+    print(game)
 
 
 # Tests whether file is ran as script and whether the main function ought be called.
