@@ -701,6 +701,26 @@ class JanggiGame(Board):
         Used within __init__ method by loading GamePieces onto the board.
         Generates potential moves for each GamePiece and uses set_potential_moves
         method at the end for each GamePiece to set potential moves.
+
+        [red_chariot_1, red_elephant_1, red_horse_1, red_guard_1, '____e1_____', red_guard_2, red_elephant_2, red_horse_2, red_chariot_2]
+        
+        ['____a2_____', '____b2_____', '____c2_____', '____d2_____', red_general, '____f2_____', '____g2_____', '____h2_____', '____i2_____']
+
+        ['____a3_____', red_cannon_1, '____c3_____', '____d3_____', '____e3_____', '____f3_____', '____g3_____', red_cannon_2, '____i3_____']
+
+        [red_soldier_1, '____b4_____', red_soldier_2, '____d4_____', red_soldier_3, '____f4_____', red_soldier_4, '____h4_____', red_soldier_5]
+
+        ['____a5_____', '____b5_____', '____c5_____', '____d5_____', '____e5_____', '____f5_____', '____g5_____', '____h5_____', '____i5_____']
+
+        ['____a6_____', '____b6_____', '____c6_____', '____d6_____', '____e6_____', '____f6_____', '____g6_____', '____h6_____', '____i6_____']
+
+        [blue_soldier_1, '____b7_____', blue_soldier_2, '____d7_____', blue_soldier_3, '____f7_____', blue_soldier_4, '____h7_____', blue_soldier_5]
+
+        ['____a8_____', blue_cannon_1, '____c8_____', '____d8_____', '____e8_____', '____f8_____', '____g8_____', blue_cannon_2, '____i8_____']
+
+        ['____a9_____', '____b9_____', '____c9_____', '____d9_____', blue_general, '____f9_____', '____g9_____', '____h9_____', '____i9_____']
+
+        [blue_chariot_1, blue_elephant_1, blue_horse_1, blue_guard_1, '____e10_____', blue_guard_2, blue_elephant_2, blue_horse_2, blue_chariot_2]
         """
 
         blue_general = General('blue_general', 'BLUE')
@@ -2240,6 +2260,7 @@ def main():
     Main function.
     """
     game = JanggiGame()
+    print(game)
     move_result = game.make_move('c1', 'e3') #should be False because it's not Red's turn
     print(move_result, False)
     move_result = game.make_move('a7','b7') # should return True
@@ -2254,8 +2275,7 @@ def main():
     print(game.make_move('a1','a4'), True) #should return True
     print(game.make_move('c7','d7'), True) #should return True
     print(game.make_move('a4','a4'), True) #this will pass the Red's turn and return True
-    print(game)
-
+    
 
 # Tests whether file is ran as script and whether the main function ought be called.
 if __name__ == '__main__':
