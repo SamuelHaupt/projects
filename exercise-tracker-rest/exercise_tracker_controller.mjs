@@ -27,10 +27,10 @@ app.post('/exercises', (request, response) => {
         })
         .catch(error => {
             console.error(error);
-            // Sets status code to 'Bad Request': 400.
+            // Sets status code to 'Internal Server Error': 500.
             // Future expansion: Include code to test error and set 
             // status code accordingly.
-            response.status(400).json({Error: 'Request failed.'});
+            response.status(500).json({Error: 'Request failed.'});
         });
 });
 
@@ -47,8 +47,8 @@ app.get('/exercises', (request, response) => {
         })
         .catch(error => {
             console.error(error);
-            // Sets status code to 'Bad Request': 400.
-            response.status(400).json({Error: 'Request failed.'});
+            // Sets status code to 'Internal Server Error': 500.
+            response.status(500).json({Error: 'Request failed.'});
         });
 });
 
@@ -57,10 +57,10 @@ app.get('/exercises', (request, response) => {
  * Requires all parameters for successful update.
  * {endpoint: update}
  */
-app.put('/exercises/:id', (request, response) => {
+app.put('/exercises/:_id', (request, response) => {
     exercises.updateExercise(request.params._id, request.body)
         .then(result => {
-            if (result.nModified === 1) {
+            if (nModified === 1) {
                 // Sets status code automatically to 'OK': 200.
                 // 'content-type' is updated automatiicaly to 'application/json'.
                 response.json({
@@ -78,7 +78,33 @@ app.put('/exercises/:id', (request, response) => {
         })
         .catch(error => {
             console.error(error);
-            // Sets status code to 'Bad Request': 400.
-            response.status(400).json({Error: 'Request failed.'});
+            // Sets status code to 'Internal Server Error': 500.
+            response.status(500).json({Error: 'Request failed.'});
         });
+});
+
+/**
+ * Deletes the exercise whose id is provided in the query parameters.
+ */
+app.delete('/exercises/:_id', (request, response) => {
+    exercises.deleteExercise(request.params._id)
+        .then(deletedCount => {
+            if (deletedCount === 1) {
+                // Sets status code automatically to 'No Content': 204.
+                // Deletion was successful.
+                response.status(204).send();
+            } else {
+                // Sets status code to 'Not Found': 404.
+                response.status(404).json({Error: 'Resource not found'});
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            // Sets status code to 'Internal Server Error': 500.
+            response.status(500).json({Error: 'Request failed.'});
+        });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}.`)
 });
