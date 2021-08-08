@@ -43,20 +43,47 @@ const Exercise = mongoose.model('Exercise', exerciseSchema);
  * @returns a promise. Resolves to JSON object.
  */
 const createExercise = async (name, repetitions, weight, unitMeasurement, date) => {
-    const exercise = new Exercise({ name: name,
-                                    repetitions: repetitions,
-                                    weight: weight,
-                                    unitMeasurement: unitMeasurement,
-                                    date: date });
+    const exercise = new Exercise(
+        {   name: name,
+            repetitions: repetitions,
+            weight: weight,
+            unitMeasurement: unitMeasurement,
+            date: date}
+    );
     return exercise.save(); // Persists resource to exercise_tracker_db.
 }
 
 /**
  * Retrieves all exercises in database. No filters are passed.
+ * @param
+ * @returns
  */
 const retrieveAllExercises = async () => {
     const query = Exercise.find({}); // Passes empty object to return all exercises.
     return query.exec(); // Executes query on database.
 }
 
-export {createExercise, retrieveAllExercises};
+/**
+ * Updates an exercise.
+ * @param {String} _id
+ * @param {String} name
+ * @param {Number} repetitions
+ * @param {Number} weight
+ * @param {String} unitMeasurement
+ * @param {String} date
+ * @returns a promise, which includes properties: {n, nModified, ok}
+ */
+const updateExercise = async (parameters) => {
+    const result = await Exercise.findByIdAndUpdate(
+        {_id: parameters._id}, 
+        {   name: parameters.name,
+            repetitions: parameters.repetitions,
+            weight: parameters.weight,
+            unitMeasurement: parameters.unitMeasurement,
+            date: parameters.date},
+        {omitUndefined: true, useFindAndModify: false}
+    );
+    return result;
+}
+
+export {createExercise, retrieveAllExercises, updateExercise};
