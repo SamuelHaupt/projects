@@ -22,6 +22,7 @@ app.post('/exercises', (request, response) => {
                                 request.body.date)
         .then(exercise => {
             // Sets status code to 'Created': 201.
+            // 'content-type' is updated automatiicaly to 'application/json'.
             response.status(201).json(exercise);
         })
         .catch(error => {
@@ -41,6 +42,7 @@ app.get('/exercises', (request, response) => {
     exercises.retrieveAllExercises()
         .then(exercises => {
             // Sets status code automatically to 'OK': 200.
+            // 'content-type' is updated automatiicaly to 'application/json'.
             response.json(exercises); 
         })
         .catch(error => {
@@ -59,6 +61,8 @@ app.put('/exercises/:id', (request, response) => {
     exercises.updateExercise(request.params._id, request.body)
         .then(result => {
             if (result.nModified === 1) {
+                // Sets status code automatically to 'OK': 200.
+                // 'content-type' is updated automatiicaly to 'application/json'.
                 response.json({
                     _id: request.params._id,
                     name: request.body.name,
