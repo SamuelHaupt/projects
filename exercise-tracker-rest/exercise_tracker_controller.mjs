@@ -49,3 +49,32 @@ app.get('/exercises', (request, response) => {
             response.status(400).json({Error: 'Request failed.'});
         });
 });
+
+/**
+ * Updates the exercise whose id is provided.
+ * Requires all parameters for successful update.
+ * {endpoint: update}
+ */
+app.put('/exercises/:id', (request, response) => {
+    exercises.updateExercise(request.params._id, request.body)
+        .then(result => {
+            if (result.nModified === 1) {
+                response.json({
+                    _id: request.params._id,
+                    name: request.body.name,
+                    repetitions: request.body.repetitions,
+                    weight: request.body.weight,
+                    unitMeasurement: request.body.unitMeasurement,
+                    date: request.body.date
+                });
+            } else {
+                // Sets status code to 'Not Found': 404.
+                response.status(404).json({Error: 'Resource not found'});
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            // Sets status code to 'Bad Request': 400.
+            response.status(400).json({Error: 'Request failed.'});
+        });
+});
