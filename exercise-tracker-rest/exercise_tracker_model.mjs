@@ -83,7 +83,7 @@ const updateExercise = async (_id, parameters) => {
             date: parameters.date},
         {omitUndefined: true, useFindAndModify: false}
     );
-    return result;
+    return result.nModified;
 }
 
 /**
@@ -94,7 +94,7 @@ const updateExercise = async (_id, parameters) => {
  */
 const deleteExercise = async (_id) => {
     const result = await Exercise.deleteOne({_id: _id});
-    return result;
+    return result.deletedCount;
 }
 
 export {createExercise, retrieveAllExercises, updateExercise, deleteExercise};
