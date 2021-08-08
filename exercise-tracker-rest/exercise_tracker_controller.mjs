@@ -11,7 +11,8 @@ app.use(express.urlendcoded({
 app.use(express.json());
 
 /**
- * New exercise endpoint. Create new exercise.
+ * Create new exercise.
+ * {endpoint: create}
  */
 app.post('/exercises', (request, response) => {
     exercises.createExercise(   request.body.name,
@@ -20,14 +21,31 @@ app.post('/exercises', (request, response) => {
                                 request.body.unitMeasurement,
                                 request.body.date)
         .then(exercise => {
-            // Sets status code to 'created': 201.
+            // Sets status code to 'Created': 201.
             response.status(201).json(exercise);
         })
         .catch(error => {
             console.error(error);
-            // Sets status code to 'bad request': 400.
+            // Sets status code to 'Bad Request': 400.
             // Future expansion: Include code to test error and set 
             // status code accordingly.
+            response.status(400).json({Error: 'Request failed.'});
+        });
+});
+
+/** 
+ * Retrieve all exercises.
+ * {endpoint: retrieve}
+ */
+app.get('/exercises', (request, response) => {
+    exercises.retrieveAllExercises()
+        .then(exercises => {
+            // Sets status code automatically to 'OK': 200.
+            response.json(exercises); 
+        })
+        .catch(error => {
+            console.error(error);
+            // Sets status code to 'Bad Request': 400.
             response.status(400).json({Error: 'Request failed.'});
         });
 });
