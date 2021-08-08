@@ -11,3 +11,10 @@ app.use(express.urlendcoded({
 }));
 
 app.use(express.json());
+
+/**
+ * Create an entry for new exercise ...
+ */
+app.post('', (request, response) => {
+    
+});
