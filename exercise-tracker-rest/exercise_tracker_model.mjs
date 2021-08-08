@@ -86,4 +86,15 @@ const updateExercise = async (_id, parameters) => {
     return result;
 }
 
-export {createExercise, retrieveAllExercises, updateExercise};
+/**
+ * Deletes an exercise.
+ * @param {String} _id
+ * @returns a promise, which includes properties: {deletedCount}
+ * deleteOne's result.deletedCount resolves to either 0 or 1.
+ */
+const deleteExercise = async (_id) => {
+    const result = await Exercise.deleteOne({_id: _id});
+    return result;
+}
+
+export {createExercise, retrieveAllExercises, updateExercise, deleteExercise};
