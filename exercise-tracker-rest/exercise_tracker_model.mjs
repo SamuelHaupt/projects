@@ -34,7 +34,7 @@ const exerciseSchema = mongoose.Schema({
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 
 /**
- * Create an exercise.
+ * Creates an exercise.
  * @param {String} name
  * @param {Number} repetitions
  * @param {Number} weight
@@ -50,3 +50,13 @@ const createExercise = async (name, repetitions, weight, unitMeasurement, date) 
                                     date: date });
     return exercise.save(); // Persists resource to exercise_tracker_db.
 }
+
+/**
+ * Retrieves all exercises in database. No filters are passed.
+ */
+const retrieveAllExercises = async () => {
+    const query = Exercise.find({}); // Passes empty object to return all exercises.
+    return query.exec(); // Executes query on database.
+}
+
+export {createExercise, retrieveAllExercises};
