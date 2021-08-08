@@ -66,16 +66,16 @@ const retrieveAllExercises = async () => {
 /**
  * Updates an exercise.
  * @param {String} _id
- * @param {String} name
- * @param {Number} repetitions
- * @param {Number} weight
- * @param {String} unitMeasurement
- * @param {String} date
+ * @param {String} parameters.name
+ * @param {Number} parameters.repetitions
+ * @param {Number} parameters.weight
+ * @param {String} parameters.unitMeasurement
+ * @param {String} parameters.date
  * @returns a promise, which includes properties: {n, nModified, ok}
  */
-const updateExercise = async (parameters) => {
+const updateExercise = async (_id, parameters) => {
     const result = await Exercise.findByIdAndUpdate(
-        {_id: parameters._id}, 
+        {_id: _id}, 
         {   name: parameters.name,
             repetitions: parameters.repetitions,
             weight: parameters.weight,
