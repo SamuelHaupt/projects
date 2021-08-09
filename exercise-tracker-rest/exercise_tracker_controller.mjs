@@ -10,8 +10,7 @@ app.use(express.json());
  * {endpoint: create}
  */
 app.post('/exercises', (request, response) => {
-    console.log(request.body)
-    exercises.createExercise(request.body.name,
+    exercises.createExercise(   request.body.name,
                                 request.body.reps,
                                 request.body.weight,
                                 request.body.unit,
@@ -55,7 +54,7 @@ app.get('/exercises', (request, response) => {
  */
 app.put('/exercises/:_id', (request, response) => {
     exercises.updateExercise(request.params._id, request.body)
-        .then(result => {
+        .then(nModified => {
             if (nModified === 1) {
                 // Sets status code automatically to 'OK': 200.
                 // 'content-type' is updated automatiicaly to 'application/json'.
