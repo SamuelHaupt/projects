@@ -1,0 +1,18 @@
+import React from 'react';
+import { MdDeleteForever, MdEdit } from 'react-icons/md';
+
+function ExerciseTableItem({exercise}) {
+    return (
+        <tr>
+            <td>{exercise.name}</td>
+            <td>{exercise.repetitions}</td>
+            <td>{exercise.weight}</td>
+            <td>{exercise.unit}</td>
+            <td>{exercise.date}</td>
+            <td>Edit</td>
+            <td>Delete</td>
+        </tr>
+    )
+}
+
+export default ExerciseTableItem

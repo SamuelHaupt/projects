@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
+import ExerciseTable from '../components/ExerciseTable';
 
 function HomePage() {
-    const [exercies, setExercises] = useState([]);
+    const [exercises, setExercises] = useState([]);
 
     return (
         <>
             <h2>List of Exercises</h2>
+            <ExerciseTable exercises={exercises}></ExerciseTable>
+            <Link to='/create-exercise'>Add exercise</Link>
         </>
     )
 }
