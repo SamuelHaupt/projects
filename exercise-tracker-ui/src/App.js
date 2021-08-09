@@ -2,8 +2,8 @@ import './App.css';
 import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import CreatePage from './pages/CreatePage';
-import EditPage from './pages/EditPage';
+import CreateExercisePage from './pages/CreateExercisePage';
+import EditExercisePage from './pages/EditExercisePage';
 
 function App() {
   return (
@@ -14,10 +14,10 @@ function App() {
             <HomePage />
           </Route>
           <Route path='/create-exercise'>
-            <CreatePage />
+            <CreateExercisePage />
           </Route>
           <Route path='/edit-exercise'>
-            <EditPage />
+            <EditExercisePage />
           </Route>
         </header>
       </Router>
