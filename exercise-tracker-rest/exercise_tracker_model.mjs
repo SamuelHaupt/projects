@@ -22,9 +22,9 @@ mongoose.set('useCreateIndex', true);
  */
 const exerciseSchema = mongoose.Schema({
     name: {type: String, required: true},
-    repetitions: {type: Number, required: true},
+    reps: {type: Number, required: true},
     weight: {type: Number, required: true},
-    unitMeasurement: {type: String, required: true},
+    unit: {type: String, required: true},
     date: {type: String, required: true} // Must be in format 'MM-DD-YY'.
 });
 
@@ -36,18 +36,18 @@ const Exercise = mongoose.model('Exercise', exerciseSchema);
 /**
  * Creates an exercise.
  * @param {String} name
- * @param {Number} repetitions
+ * @param {Number} reps
  * @param {Number} weight
- * @param {String} unitMeasurement
+ * @param {String} unit
  * @param {String} date
  * @returns a promise. Resolves to JSON object.
  */
-const createExercise = async (name, repetitions, weight, unitMeasurement, date) => {
+const createExercise = async (name, reps, weight, unit, date) => {
     const exercise = new Exercise(
         {   name: name,
-            repetitions: repetitions,
+            reps: reps,
             weight: weight,
-            unitMeasurement: unitMeasurement,
+            unit: unit,
             date: date}
     );
     return exercise.save(); // Persists resource to exercise_tracker_db.
@@ -67,9 +67,9 @@ const retrieveAllExercises = async () => {
  * Updates an exercise.
  * @param {String} _id
  * @param {String} parameters.name
- * @param {Number} parameters.repetitions
+ * @param {Number} parameters.reps
  * @param {Number} parameters.weight
- * @param {String} parameters.unitMeasurement
+ * @param {String} parameters.unit
  * @param {String} parameters.date
  * @returns a promise, which includes properties: {n, nModified, ok}
  */
@@ -77,9 +77,9 @@ const updateExercise = async (_id, parameters) => {
     const result = await Exercise.findByIdAndUpdate(
         {_id: _id}, 
         {   name: parameters.name,
-            repetitions: parameters.repetitions,
+            reps: parameters.reps,
             weight: parameters.weight,
-            unitMeasurement: parameters.unitMeasurement,
+            unit: parameters.unit,
             date: parameters.date},
         {omitUndefined: true, useFindAndModify: false}
     );
