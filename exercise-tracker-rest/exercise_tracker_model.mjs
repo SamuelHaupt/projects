@@ -74,7 +74,7 @@ const retrieveAllExercises = async () => {
  * @returns a promise, which includes properties: {n, nModified, ok}
  */
 const updateExercise = async (_id, parameters) => {
-    const result = await Exercise.findByIdAndUpdate(
+    const result = await Exercise.replaceOne(
         {_id: _id}, 
         {   name: parameters.name,
             reps: parameters.reps,
