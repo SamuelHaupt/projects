@@ -3,16 +3,18 @@ import * as exercises from './exercise_tracker_model.mjs';
 
 const PORT = 3000;
 const app = express();
+app.use(express.json());
 
 /**
  * Create new exercise.
  * {endpoint: create}
  */
 app.post('/exercises', (request, response) => {
-    exercises.createExercise(   request.body.name,
-                                request.body.repetitions,
+    console.log(request.body)
+    exercises.createExercise(request.body.name,
+                                request.body.reps,
                                 request.body.weight,
-                                request.body.unitMeasurement,
+                                request.body.unit,
                                 request.body.date)
         .then(exercise => {
             // Sets status code to 'Created': 201.
@@ -60,9 +62,9 @@ app.put('/exercises/:_id', (request, response) => {
                 response.json({
                     _id: request.params._id,
                     name: request.body.name,
-                    repetitions: request.body.repetitions,
+                    reps: request.body.reps,
                     weight: request.body.weight,
-                    unitMeasurement: request.body.unitMeasurement,
+                    unit: request.body.unit,
                     date: request.body.date
                 });
             } else {
