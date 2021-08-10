@@ -1,6 +1,6 @@
 import React from 'react';
 
-function UnitDefaultSelectForm ({ unit, setUnit }) {
+function EditSelectUnit ({ unit, setUnit }) {
     
     console.log(unit)
     if (unit === 'kgs') {
@@ -29,7 +29,7 @@ function UnitDefaultSelectForm ({ unit, setUnit }) {
 
 
 
-export default UnitDefaultSelectForm
+export default EditSelectUnit
 
 
 

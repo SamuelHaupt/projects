@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import UnitDefaultSelectForm from '../components/UnitDefaultSelectForm';
+import EditSelectUnit from '../components/EditSelectUnit';
 
 
 function EditExercisePage ({ exerciseToEdit }) {
@@ -61,7 +61,7 @@ function EditExercisePage ({ exerciseToEdit }) {
                             onChange={input => setWeight(input.target.value)} />
                         </th>
                         <th>
-                            <UnitDefaultSelectForm unit={unit} setUnit={setUnit} />
+                            <EditSelectUnit unit={unit} setUnit={setUnit} />
                         </th>
                         <th><input
                             type='text'
