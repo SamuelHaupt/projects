@@ -34,9 +34,9 @@ function HomePage({ setExerciseToEdit }) {
 
     return (
         <>
-            <h2>List of Exercises</h2>
+            <h2>Exercise Tracker App</h2>
             <ExerciseTable exercises={exercises} onDelete={onDelete} onEdit={onEdit}></ExerciseTable>
-            <Link to='/create-exercise'>Add exercise</Link>
+            <Link to='/create-exercise'>Add Exercise</Link>
         </>
     )
 }
