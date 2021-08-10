@@ -37,7 +37,7 @@ app.get('/exercises', (request, response) => {
     exercises.retrieveAllExercises()
         .then(exercises => {
             // Sets status code automatically to 'OK': 200.
-            // 'content-type' is updated automatiicaly to 'application/json'.
+            // 'content-type' is updated automaticaly to 'application/json'.
             response.json(exercises); 
         })
         .catch(error => {
