@@ -1,23 +1,26 @@
 import React from 'react';
 import ExerciseTableItem from './ExerciseTableItem';
 
-function ExerciseTable({exercises}) {
+function ExerciseTable({exercises, onDelete, onEdit}) {
     return (
         <table id='exercises'>
             <thead>
                 <tr>
-                    <th>Exercise Name</th>
-                    <th>Repetitions</th>
+                    <th>Name</th>
+                    <th>Reps</th>
                     <th>Weight</th>
-                    <th>Unit of Measurement</th>
+                    <th>Unit</th>
                     <th>Date</th>
-                    <th>Edit</th>
-                    <th>Delete</th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 {exercises.map((exercise, index) =>
-                    <ExerciseTableItem exercise={exercise}
+                    <ExerciseTableItem
+                        exercise={exercise}
+                        onDelete={onDelete}
+                        onEdit={onEdit}
                         key={index} />)}
             </tbody>
         </table>
