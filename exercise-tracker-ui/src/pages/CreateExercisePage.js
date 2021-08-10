@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MdTextFields } from 'react-icons/md';
 import { useHistory } from 'react-router-dom';
 
 function CreateExercisePage () {
@@ -71,7 +70,8 @@ function CreateExercisePage () {
                                 <option value='kgs'>kgs</option>
                             </select>
                         </th>
-                        <th><input
+                        <th>
+                            <input
                             type='text'
                             value={date}
                             onChange={input => setDate(input.target.value)} />
