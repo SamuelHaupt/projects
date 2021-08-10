@@ -3,7 +3,7 @@ import ExerciseTableItem from './ExerciseTableItem';
 
 function ExerciseTable({exercises, onDelete, onEdit}) {
     return (
-        <table id='exercises'>
+        <table>
             <thead>
                 <tr>
                     <th>Name</th>

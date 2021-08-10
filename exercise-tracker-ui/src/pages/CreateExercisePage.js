@@ -47,35 +47,38 @@ function CreateExercisePage () {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <th><input
+                    <tr class='ModifyRow'>
+                        <td>
+                            <input
                             type='text'
                             value={name}
                             onChange={input => setName(input.target.value)} />
-                        </th>
-                        <th><input
+                        </td>
+                        <td>
+                            <input
                             type='number'
                             value={reps}
                             onChange={input => setReps(input.target.value)} />
-                        </th>
-                        <th><input
+                        </td>
+                        <td>
+                            <input
                             type='Number'
                             value={weight}
                             onChange={input => setWeight(input.target.value)} />
-                        </th>
-                        <th>
+                        </td>
+                        <td>
                             <select name='createUnit' onChange={input => setUnit(input.target.value)}>
                                 <option value='' selected disabled hidden>Select</option>
                                 <option value='lbs' >lbs</option>
                                 <option value='kgs'>kgs</option>
                             </select>
-                        </th>
-                        <th>
+                        </td>
+                        <td>
                             <input
                             type='text'
                             value={date}
                             onChange={input => setDate(input.target.value)} />
-                        </th>
+                        </td>
                     </tr>
                 </tbody>
             
