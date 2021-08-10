@@ -9,8 +9,8 @@ function ExerciseTableItem({exercise, onDelete, onEdit}) {
             <td>{exercise.weight}</td>
             <td>{exercise.unit}</td>
             <td>{exercise.date}</td>
-            <td><MdEdit onClick={ () => onEdit(exercise)}/></td>
-            <td><MdDeleteForever onClick={ () => onDelete(exercise._id)} /></td>
+            <td><MdEdit class='EditIcon' onClick={ () => onEdit(exercise)}/></td>
+            <td><MdDeleteForever class='DeleteIcon' onClick={ () => onDelete(exercise._id)} /></td>
         </tr>
     )
 }
