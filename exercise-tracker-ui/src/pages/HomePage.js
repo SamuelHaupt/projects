@@ -13,7 +13,7 @@ function HomePage({ setExerciseToEdit }) {
             const exercises = await getResponse.json();
             setExercises(exercises);
         } else {
-        console.error(`Failed to delete the exercise with id = ${id}, status code = ${response.status}`)
+            console.error(`Failed to delete the exercise with id = ${id}. Status code ${response.status}.`)
         }
     }	
 

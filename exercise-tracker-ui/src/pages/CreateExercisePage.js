@@ -19,15 +19,15 @@ function CreateExercisePage () {
                 'Content-Type': 'application/json'
             }
         });
-        console.log(response.body)
+
         if (response.status === 201) {
             alert('Successfully added the exercise.');
             history.push('/');
         } else {
             if (Object.values(response.body).length < 5) {
-                alert('Fields are missing. Supply inputs to all fields.');
+                alert('Field inputs are incorrect. Supply correct inputs to all fields.');
             } else {
-            alert(`Failed to add exercise. Status code ${response.status}`);
+                alert(`Failed to add exercise. Status code ${response.status}`);
             }
         }
         
