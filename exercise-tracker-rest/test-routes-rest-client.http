@@ -1,0 +1,51 @@
+### Create an exercise
+POST http://localhost:3000/exercises HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Pull Ups",
+    "reps": 5,
+    "weight": 150,
+    "unit": "lbs",
+    "date": "06-24-19"
+}
+
+### Create another exercise
+POST http://localhost:3000/exercises HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Free Weight Curls",
+    "reps": 10,
+    "weight": 25,
+    "unit": "lbs",
+    "date": "06-25-19"
+}
+
+### Retrieve should return the 2 exercises we just created
+GET http://localhost:3000/exercises HTTP/1.1
+
+
+### Edit the Free Weight Curls. 
+### NOTE: Set ID to the ID for Free Weight Curls
+PUT http://localhost:3000/exercises/6111db7ba120af3a7c1fdae2 HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Free Weight Curls",
+    "reps": 12,
+    "weight": 25,
+    "unit": "lbs",
+    "date": "06-25-19"
+}
+
+### Verify that reps value for Free Weight Curls is now 12
+GET http://localhost:3000/exercises HTTP/1.1
+
+
+### Delete the Free Weight Curls
+### NOTE: Set ID to the ID for Free Weight Curls
+DELETE http://localhost:3000/exercises/6111db7ba120af3a7c1fdae2 HTTP/1.1
+
+### Verify that the Free Weight Curls exercise has been deleted
+GET http://localhost:3000/exercises HTTP/1.1
