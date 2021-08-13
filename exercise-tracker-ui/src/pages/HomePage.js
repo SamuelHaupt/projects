@@ -6,27 +6,25 @@ function HomePage({ setExerciseToEdit }) {
     const [exercises, setExercises] = useState([]);
     const history = useHistory();
 
-    const onDelete = async id => {
-        const response = await fetch(`/exercises/${id}`, { method: 'DELETE' });
+    const onDelete = async _id => {
+        const response = await fetch(`/exercises/${_id}`, { method: 'DELETE' });
         if (response.status === 204) {
-            const getResponse = await fetch('/exercises');
-            const exercises = await getResponse.json();
-            setExercises(exercises);
+            setExercises(exercises.filter(exercise => exercise._id !== _id));
         } else {
-            console.error(`Failed to delete the exercise with id = ${id}. Status code ${response.status}.`)
+            console.error(`Failed to delete the exercise with _id = ${_id}. Status code ${response.status}.`)
         }
-    }	
+    };	
 
     const onEdit = exercise => {
         setExerciseToEdit(exercise);
         history.push('/edit-exercise');
-    }
+    };
 
     const loadExercises = async () => {
         const response = await fetch('/exercises');
         const data = await response.json();
         setExercises(data);
-    }
+    };
 
     useEffect(() => {
         loadExercises();
