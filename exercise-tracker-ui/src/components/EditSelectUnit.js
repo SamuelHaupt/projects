@@ -2,26 +2,15 @@ import React from 'react';
 
 function EditSelectUnit ({ unit, setUnit }) {
     
-    console.log(unit)
-    if (unit === 'kgs') {
         return (
             <>
-                <select name='unit' onChange={input => setUnit(input.target.value)}>
+                <select defaultValue={unit} onChange={input => setUnit(input.target.value)}>
                     <option value='lbs'>lbs</option>
-                    <option value='kgs' selected='selected'>kgs</option>
-                </select>
-            </>
-        );
-    } else {
-        return (
-            <>
-                <select name='editUnit' onChange={input => setUnit(input.target.value)}>
-                    <option value='lbs' selected='selected'>lbs</option>
                     <option value='kgs'>kgs</option>
                 </select>
             </>
         );
-    }
+    
 }
 
 

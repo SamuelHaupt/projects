@@ -67,9 +67,9 @@ function CreateExercisePage () {
                             onChange={input => setWeight(input.target.value)} />
                         </td>
                         <td>
-                            <select name='createUnit' onChange={input => setUnit(input.target.value)}>
-                                <option value='' selected disabled hidden>Select</option>
-                                <option value='lbs' >lbs</option>
+                            <select defaultValue={'blank'} onChange={input => setUnit(input.target.value)}>
+                                <option value='blank' disabled hidden>Select</option>
+                                <option value='lbs'>lbs</option>
                                 <option value='kgs'>kgs</option>
                             </select>
                         </td>
