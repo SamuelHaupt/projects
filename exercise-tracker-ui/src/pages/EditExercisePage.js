@@ -44,7 +44,7 @@ function EditExercisePage ({ exerciseToEdit }) {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class='ModifyRow'>
+                    <tr className='ModifyRow'>
                         <td><input
                             type='text'
                             value={name}

@@ -11,8 +11,8 @@ function ExerciseTable({exercises, onDelete, onEdit}) {
                     <th>Weight</th>
                     <th>Unit</th>
                     <th>Date</th>
-                    <th class='BlankColumn'></th>
-                    <th class='BlankColumn'></th>
+                    <th className='BlankColumn'></th>
+                    <th className='BlankColumn'></th>
                 </tr>
             </thead>
             <tbody>
