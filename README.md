@@ -1,0 +1,1 @@
+Exercise Tracker App is meant to provide a web based approch to tracking exercises and workouts.
