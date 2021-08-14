@@ -1,0 +1,3 @@
+[submodule "ExerciseTrackerApp"]
+	path = ExerciseTrackerApp
+	url = https://github.com/SamuelHaupt/exercise-tracker-app.git
