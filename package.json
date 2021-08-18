@@ -10,8 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node controller.mjs",
-    "build": "cd client && npm install && npm run build",
-    "client": "cd client && npm start",
+    "build": "cd client_view && npm install && npm run build",
+    "client": "cd client_view && npm start",
     "dev": "concurrently --names 'server,client' --prefix-colors 'green,blue' \"nodemon controller.mjs\" \"npm run client\""
   },
   "author": "",
