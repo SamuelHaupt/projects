@@ -1,4 +1,3 @@
-import '../App.css';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import EditSelectUnit from '../components/EditSelectUnit';
@@ -32,7 +31,7 @@ function EditExercisePage ({ exerciseToEdit }) {
     };
 
     return (
-        <div className="App-header">
+        <div>
             <h1>Edit Exercise</h1>
             <table id='exercises'>
                 <thead>

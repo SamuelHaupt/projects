@@ -1,4 +1,3 @@
-import '../App.css';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -35,7 +34,7 @@ function CreateExercisePage () {
     };
 
     return (
-        <div className="App-header">
+        <div>
             <h1>Add Exercise</h1>
             <table id='exercises'>
                 <thead>

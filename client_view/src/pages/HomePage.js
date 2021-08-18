@@ -1,4 +1,3 @@
-import '../App.css';
 import React, { useState, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import ExerciseTable from '../components/ExerciseTable';
@@ -32,7 +31,7 @@ function HomePage({ setExerciseToEdit }) {
     }, []);
 
     return (
-        <div className="App-header">
+        <div>
             <h2>Exercise Tracker App</h2>
             <ExerciseTable exercises={exercises} onDelete={onDelete} onEdit={onEdit}></ExerciseTable>
             <Link to='/create-exercise'>Add Exercise</Link>
