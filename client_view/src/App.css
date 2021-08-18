@@ -39,8 +39,7 @@ tr:hover {
 }
 
 input {
-  /* max-width: 100%; */
-  text-size-adjust: 60%;
+  text-size-adjust: 40%;
 }
 
 .ModifyRow:hover {
@@ -69,10 +68,10 @@ a:visited {
   color: lightgoldenrodyellow;
 }
 
-@media handheld, only screen and (max-width: 1024px) 
+/* @media handheld, only screen and (max-width: 1024px) 
 {
   input {
     max-width: 80%;
   }
-}
+} */
 
