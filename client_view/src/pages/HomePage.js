@@ -39,4 +39,4 @@ function HomePage({ setExerciseToEdit }) {
     )
 }
 
-export default HomePage
+export default HomePage;
