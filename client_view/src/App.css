@@ -39,7 +39,8 @@ tr:hover {
 }
 
 input {
-  max-width: 80%;
+  /* max-width: 100%; */
+  text-size-adjust: 60%;
 }
 
 .ModifyRow:hover {
