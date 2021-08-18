@@ -1,0 +1,26 @@
+{
+  "name": "exercise-tracker-app",
+  "version": "1.0.0",
+  "description": "",
+  "engines": {
+    "npm": "7.x.x",
+    "node": "14.x.x"
+  },
+  "main": "controller.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node controller.mjs",
+    "build": "cd client && npm install && npm run build",
+    "client": "cd client && npm start",
+    "dev": "concurrently --names 'server,client' --prefix-colors 'green,blue' \"nodemon controller.mjs\" \"npm run client\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^6.2.1",
+    "express": "^4.17.1",
+    "mongoose": "^5.13.5",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.12"
+  }
+}
