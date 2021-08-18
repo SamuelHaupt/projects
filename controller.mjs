@@ -6,8 +6,10 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
 
+
 // HTTP request logger
 app.use(morgan('tiny'));
+
 
 /**
  * Create new exercise.
@@ -33,6 +35,7 @@ app.post('/exercises', (request, response) => {
         });
 });
 
+
 /** 
  * Retrieve all exercises.
  * {endpoint: retrieve}
@@ -50,6 +53,7 @@ app.get('/exercises', (request, response) => {
             response.status(500).json({Error: 'Request failed.'});
         });
 });
+
 
 /**
  * Updates the exercise whose id is provided.
@@ -82,6 +86,7 @@ app.put('/exercises/:_id', (request, response) => {
         });
 });
 
+
 /**
  * Deletes the exercise whose id is provided in the query parameters.
  */
@@ -104,10 +109,12 @@ app.delete('/exercises/:_id', (request, response) => {
         });
 });
 
+
 // Imports build folder from React app into the server.
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('client/build'))
 }
+
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}.`)

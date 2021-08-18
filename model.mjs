@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 // Update password in environment variables on Heroku.
 const MONGODB_URI = `mongodb+srv://user1:${process.env.MONGODB_PASSWORD}@exerciselogdb.3hic3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const localTest = false;
-const URI = localTest ? MONGODB_URI : process.env.MONGODB_URI;
+const URI = process.env.MONGODB_URI;
 
 // Prepare the database exercise_tracker_db in the MongoDB
 // server running locally on port 27017.
