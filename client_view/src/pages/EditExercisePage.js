@@ -32,7 +32,7 @@ function EditExercisePage ({ exerciseToEdit }) {
     };
 
     return (
-        <div>
+        <div className="App-header">
             <h1>Edit Exercise</h1>
             <table id='exercises'>
                 <thead>

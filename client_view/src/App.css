@@ -1,16 +1,3 @@
-body {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-left: 10%;
-  padding-right: 10%;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
 .App {
   text-align: center;
 }
@@ -31,7 +18,7 @@ body {
 th {
   background-color: #7c99b4;
   border-radius: 4px;
-  /* width: 5%; */
+  width: 5%;
 }
 
 td {
@@ -46,8 +33,8 @@ tr:hover {
 
 .ModifyRow:hover {
   background-color: #282c34;
-  /* margin:0 2.5%; */
-  /* width: 20%; */
+  margin:0 2.5%;
+  width: 20%;
 }
 
 .BlankColumn {

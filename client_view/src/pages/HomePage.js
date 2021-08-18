@@ -32,11 +32,11 @@ function HomePage({ setExerciseToEdit }) {
     }, []);
 
     return (
-        <>
+        <div className="App-header">
             <h2>Exercise Tracker App</h2>
             <ExerciseTable exercises={exercises} onDelete={onDelete} onEdit={onEdit}></ExerciseTable>
             <Link to='/create-exercise'>Add Exercise</Link>
-        </>
+        </div>
     )
 }
 

@@ -35,7 +35,7 @@ function CreateExercisePage () {
     };
 
     return (
-        <div>
+        <div className="App-header">
             <h1>Add Exercise</h1>
             <table id='exercises'>
                 <thead>
