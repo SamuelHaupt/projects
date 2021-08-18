@@ -68,4 +68,10 @@ a:visited {
   color: lightgoldenrodyellow;
 }
 
+@media handheld, only screen and (max-width: 1024px) 
+{
+  input {
+    max-width: 80%;
+  }
+}
 

@@ -35,7 +35,7 @@ function CreateExercisePage () {
 
     return (
         <div>
-            <h1>Add Exercise</h1>
+            <h2>Add Exercise</h2>
             <table id='exercises'>
                 <thead>
                     <tr>
