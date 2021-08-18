@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 // username:password can be found under database acces on MongoDB Atlas Cloud.
 // Set local to true if running app locally. Otherwise, keep false for running
 // app on Heroku.
-const MONGODB_URI = 'mongodb+srv://user1:oLj629gEyvQTHGOP@exerciselogdb.3hic3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+// Update password in environment variables on Heroku.
+const MONGODB_URI = `mongodb+srv://user1:${process.env.MONGODB_PASSWORD}@exerciselogdb.3hic3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const localTest = false;
 const URI = localTest ? MONGODB_URI : process.env.MONGODB_URI;
 
