@@ -1,28 +1,29 @@
 import mongoose from 'mongoose';
 
-// username:password can be found under database acces on MongoDB Atlas Cloud.
-// Set local to true if running app locally. Otherwise, keep false for running
-// app on Heroku.
-// Update password in environment variables on Heroku.
-const MONGODB_URI = 'mongodb+srv://user1:PldIlXuq2ylThRfJ@exerciselogdb.3hic3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
-const URI = process.env.MONGODB_URI;
+// username:password can be changed under database access on MongoDB Atlas Cloud.
+// isLocal handles whether to run database from localhost to MongoDB Atlas Cloud (true) or
+// from Heroku to MongoDB Atlas Cloud (false).
+// Retrieve MONGODB_URI from Heroku environment variable if running development locally.
+const MONGODB_URI = '';
+const isLocal = false;
+const URI = isLocal ? MONGODB_URI : process.env.MONGODB_URI;
 
-// Prepare the database exercise_tracker_db in the MongoDB
-// server running locally on port 27017.
+// Establishes connection with MongoDB Atlas Cloud as default, if URI is defined.
+// Else prepares the MongoDB exercise_tracker_db database locally on port 27017.
 mongoose.connect( URI || 'mongodb://localhost:27017/exercise_log_db', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
 
-// Connect to the database.
-const database = mongoose.connection;
 // Establishes event upon initial opening and logs successful connection.
+const database = mongoose.connection;
 database.once('open', () => {
     console.log('Successfully connected to MongDb using Mongoose!')
 });
 
 // Indexes used with faster querying.
 mongoose.set('useCreateIndex', true);
+
 
 /**
  * Define schema.
@@ -34,6 +35,7 @@ const exerciseSchema = mongoose.Schema({
     unit: {type: String, required: true},
     date: {type: String, required: true} // Must be in format 'MM-DD-YY'.
 });
+
 
 /**
  * Compiles model from schema.
@@ -60,6 +62,7 @@ const createExercise = async (name, reps, weight, unit, date) => {
     return exercise.save(); // Persists resource to exercise_tracker_db.
 }
 
+
 /**
  * Retrieves all exercises in database. No filters are passed.
  * @param
@@ -69,6 +72,7 @@ const retrieveAllExercises = async () => {
     const query = Exercise.find({}); // Passes empty object to return all exercises.
     return query.exec(); // Executes query on database.
 }
+
 
 /**
  * Updates an exercise.
@@ -93,6 +97,7 @@ const updateExercise = async (_id, parameters) => {
     return result.nModified;
 }
 
+
 /**
  * Deletes an exercise.
  * @param {String} _id
@@ -103,5 +108,6 @@ const deleteExercise = async (_id) => {
     const result = await Exercise.deleteOne({_id: _id});
     return result.deletedCount;
 }
+
 
 export {createExercise, retrieveAllExercises, updateExercise, deleteExercise};

@@ -110,7 +110,7 @@ app.delete('/exercises/:_id', (request, response) => {
 });
 
 
-// Imports build folder from React app into the server.
+// Redirects Heroku to use client_view/build when in production.
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('client_view/build'))
 }
