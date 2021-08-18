@@ -112,7 +112,7 @@ app.delete('/exercises/:_id', (request, response) => {
 
 // Imports build folder from React app into the server.
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('client/build'))
+    app.use(express.static('client_view/build'))
 }
 
 
