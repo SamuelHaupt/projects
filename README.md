@@ -1,7 +1,7 @@
 Exercise Tracker App is meant to provide a web based approch to track exercises and workouts. The Full Stack MongoDB-Express-React-Node (MERN) app is uploaded to GitHub repository and, in turn, deployed to the Heroku cloud platform (PaaS) and servered by MongoDB Atlas, a cloud database. I designed the app to be a RESTful service using Create-Read-Update-Delete (CRUD) operations overlayed a Model-View-Controller (MVC) design pattern.
 
-Languages: JavaScript, HTML, CSS.
-Technology/Frameworks: MongoDB Cloud Atlas, Mongoose, Express, React, Node, REST API, Heroku, & Git.
++ Languages: JavaScript, HTML, CSS.
++ Technology/Frameworks: MongoDB Cloud Atlas, Mongoose, Express, React, Node, REST API, Heroku, & Git.
 
 See link for deployed application: [https://exercisetrackerapplication.herokuapp.com](https://exercisetrackerapplication.herokuapp.com).
 > Server hibernates after 30 minutes of no traffic. It can take 10 to 30 seconds to wake and load fully.
