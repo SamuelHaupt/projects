@@ -1,0 +1,43 @@
+
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <h1>Employees Page</h1>
+    <br />
+    <p><small><a href='{{ url_for("addemployee") }}'>Add Employee</a></small></p>
+    <table>
+        <thead>
+            <tr class='no-hover'>
+                <th class='table-left-head'>Last Name</th>
+                <th>First Name</th>
+                <th>Department ID</th>
+                <th class='table-right-head'>Employee ID</th>
+                <th class='BlankColumn'></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employeesList %}
+            <tr>
+                <td>{{ employee.lastName }}</td>
+                <td>{{ employee.firstName }}</td>
+                <td>{{ employee.departmentID }}</td>
+                <td>{{ employee.employeeID }}</td>
+                <td>'edit' 'delete'</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <br />
+    <br />
+    <br />
+    <p>
+        <small>
+            <a href='{{ url_for("paystubs") }}'>Pay Stubs</a>
+            <a href='{{ url_for("departments") }}'>Departments</a>
+            <a href='{{ url_for("officesites") }}'>Office Sites</a>
+        </small>
+    </p>
+
+{% endblock layout_content %}

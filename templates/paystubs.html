@@ -1,0 +1,43 @@
+
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <h1>Pay Stubs Page</h1>
+    <br />
+    <p><small><a href='{{ url_for("addpaystub") }}'>Add Pay Stub</a></small></p>
+    <table>
+        <thead>
+            <tr class='no-hover'>
+                <th class='table-left-head'>Pay Stub ID</th>
+                <th>Employee ID</th>
+                <th>Pay Date</th>
+                <th>Pay Rate</th>
+                <th>Hours Worked</th>
+                <th class='table-right-head'>Total Pay</th>
+                <th class='BlankColumn'></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paystub in paystubsList %}
+            <tr>
+                <td>{{ paystub.paystubID }}</td>
+                <td>{{ paystub.employeeID }}</td>
+                <td>{{ paystub.payDate }}</td>
+                <td>{{ paystub.payRate }}</td>
+                <td>{{ paystub.hoursWorked }}</td>
+                <td>{{ paystub.payRate * paystub.hoursWorked }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br />
+    <br />
+    <br />
+    <p>
+        <small>
+            <a href='{{ url_for("employees") }}'>Employees</a>
+        </small>
+    </p>
+
+{% endblock layout_content %}

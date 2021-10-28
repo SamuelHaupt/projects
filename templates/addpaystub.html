@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <h1>Add Pay Stub</h1>
+
+    <div>
+        <form method='POST' action=''>
+            {{ form.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+                    <div class='col'>
+                        {{ form.payDate.label(class='form-control-label') }}
+                        {% if form.payDate.errors %}
+                            {{ form.payDate(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.payDate.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.payDate(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                    <div class='col'>
+                        {{ form.payRate.label(class='form-control-label') }}
+                        {% if form.payRate.errors %}
+                            {{ form.payRate(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.payRate.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.payRate(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                    <div class='col'>
+                        {{ form.hoursWorked.label(class='form-control-label') }}
+                        {% if form.hoursWorked.errors %}
+                            {{ form.hoursWorked(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.hoursWorked.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.hoursWorked(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+            <br />
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <br />
+        </form>
+    </div>
+    <div class='border-top pt-3'>
+        <small>
+            <a href='{{ url_for("paystubs") }}'>Pay Stubs</a>
+        </small>
+    </div>
+{% endblock layout_content %}

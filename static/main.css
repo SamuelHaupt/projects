@@ -1,0 +1,63 @@
+body {
+text-align: center;
+background-color: #282c34;
+min-height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+padding-left: 10%;
+padding-right: 10%;
+font-size: calc(10px + 2vmin);
+color: white;
+}
+
+th {
+    background-color: #7c99b4;
+}
+
+th.table-left-head {
+    border-top-left-radius: 6px;
+}
+
+th.table-right-head {
+    border-top-right-radius: 6px;
+}
+
+td {
+    font-size: calc(3px + 2vmin);
+}
+
+tr:nth-child(even){
+    background-color: #333842;
+}
+
+tr:hover {
+    background-color: slategrey;
+}
+
+tr.no-hover:hover{
+    background-color: #282c34;
+}
+
+.BlankColumn {
+    background-color: #282c34;
+    width: 1%;
+}
+
+.EditIcon {
+    color: lightskyblue;
+}
+
+.DeleteIcon {
+    color: coral;
+}
+
+a {
+    color: lightgray;
+    padding: 20px;
+}
+
+a:visited {
+    color: lightgoldenrodyellow;
+}
