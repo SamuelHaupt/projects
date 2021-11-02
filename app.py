@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, flash, redirect
-from forms import AddEmployeeForm, AddPayStubForm, AddDepartmentForm, AddOfficeSiteForm
+from forms import AddEmployeeForm, AddPayStubForm, AddDepartmentForm, AddOfficeSiteForm, UodateEmployeeForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '4ae4cbd2e244edacacff32a231b7cc30'
@@ -92,6 +92,19 @@ def addemployee():
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         return redirect(url_for('employees'))
     return render_template('addemployee.html', title='Add Employee', form=form)
+
+@app.route('/updateEmployee', methods=['GET', 'POST'])
+def updateEmployee():
+    form = UodateEmployeeForm()
+    if form.validate_on_submit():
+        flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
+        return redirect(url_for('employees'))
+    return render_template('updateEmployee.html', title='Uodate Employee', form=form)
+
+@app.route('/deleteEmployee')
+def deleteEmployee():
+    # add delete backend
+    return render_template('employees.html', title='Employees')
 
 
 @app.route('/paystubs')

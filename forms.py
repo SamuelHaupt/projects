@@ -11,6 +11,12 @@ class AddEmployeeForm(FlaskForm):
     departmentID = IntegerField('Department ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     submit = SubmitField('Add Employee')
 
+class UodateEmployeeForm(FlaskForm):
+    lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
+    firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
+    departmentID = IntegerField('Department ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
+    submit = SubmitField('Update Employee')
+
 
 class AddPayStubForm(FlaskForm):
     payDate = StringField('Pay Date', validators=[DataRequired(), Length(min=2, max=25)])

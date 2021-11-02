@@ -22,7 +22,10 @@
                 <td>{{ employee.firstName }}</td>
                 <td>{{ employee.departmentID }}</td>
                 <td>{{ employee.employeeID }}</td>
-                <td>'edit' 'delete'</td>
+                <td>
+                    <p><small><a href='{{ url_for("updateEmployee") }}'>Update</a></small></p>
+                    <p><small><a href='{{ url_for("employees") }}'>Delete</a></small></p>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
