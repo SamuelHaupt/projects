@@ -11,7 +11,12 @@ class AddEmployeeForm(FlaskForm):
     departmentID = IntegerField('Department ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     submit = SubmitField('Add Employee')
 
-class UodateEmployeeForm(FlaskForm):
+class AddEmployeeOfficeForm(FlaskForm):
+    officeID = IntegerField('Office ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
+    employeeID = IntegerField('Employee ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
+    submit = SubmitField('Add Employee Office Site')
+
+class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
     departmentID = IntegerField('Department ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
@@ -25,13 +30,3 @@ class AddPayStubForm(FlaskForm):
     submit = SubmitField('Add Pay Stub')
 
     ## Use DecimalField
-
-
-class AddDepartmentForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=25)])
-    submit = SubmitField('Add Department')
-
-
-class AddOfficeSiteForm(FlaskForm):
-    address = StringField('Address', validators=[DataRequired(), Length(min=2, max=25)])
-    submit = SubmitField('Add Office Site')

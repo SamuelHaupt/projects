@@ -58,6 +58,52 @@
             <br />
         </form>
     </div>
+
+    <h1>Add Employee Office Site</h1>
+
+    <div>
+        <form method='POST' action=''>
+            {{ form2.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+                    <div class='col'>
+                        {{ form2.employeeID.label(class='form-control-label') }}
+
+                        {% if form2.employeeID.errors %}
+                            {{ form2.employeeID(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form2.employeeID.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form2.employeeID(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                    <div class='col'>
+                        {{ form2.officeID.label(class='form-control-label') }}
+                        {% if form2.officeID.errors %}
+                            {{ form2.officeID(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form2.officeID.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form2.officeID(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+            <br />
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <br />
+        </form>
+    </div>
+
     <div class='border-top pt-3'>
         <small>
             <a href='{{ url_for("employees") }}'>Employees</a>

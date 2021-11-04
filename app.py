@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, flash, redirect
-from forms import AddEmployeeForm, AddPayStubForm, AddDepartmentForm, AddOfficeSiteForm, UodateEmployeeForm
+from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '4ae4cbd2e244edacacff32a231b7cc30'
@@ -82,20 +82,21 @@ def home():
 @app.route('/employees')
 def employees():
     form = AddEmployeeForm()
-    return render_template('employees.html', title='Employees', employeesList=employeesList)
+    return render_template('employees.html', title='Employees', employeesList=employeesList, officeSitesList=officeSitesList, form=form)
 
 
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
     form = AddEmployeeForm()
+    form2 = AddEmployeeOfficeForm()
     if form.validate_on_submit():
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         return redirect(url_for('employees'))
-    return render_template('addemployee.html', title='Add Employee', form=form)
+    return render_template('addemployee.html', title='Add Employee', form=form, form2=form2)
 
 @app.route('/updateEmployee', methods=['GET', 'POST'])
 def updateEmployee():
-    form = UodateEmployeeForm()
+    form = UpdateEmployeeForm()
     if form.validate_on_submit():
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         return redirect(url_for('employees'))
@@ -124,27 +125,11 @@ def addpaystub():
 def departments():
     return render_template('departments.html', title='Departments', departmentsList=departmentsList)
 
-@app.route('/adddepartment', methods=['GET', 'POST'])
-def adddepartment():
-    form = AddDepartmentForm()
-    if form.validate_on_submit():
-        flash(f'Department added successfully.', 'success')
-        return redirect(url_for('departments'))
-    return render_template('adddepartment.html', title='Add Department', form=form)
-
-
 
 @app.route('/officesites')
 def officesites():
-    return render_template('officesites.html', title='Office Sites', officeSitesList=officeSitesList, employeesList=employeesList)
+    return render_template('officesites.html', title='Office Sites', officeSitesList=officeSitesList)
 
-@app.route('/addofficesite', methods=['GET', 'POST'])
-def addofficesite():
-    form = AddOfficeSiteForm()
-    if form.validate_on_submit():
-        flash(f'Office Site added successfully.', 'success')
-        return redirect(url_for('officesites'))
-    return render_template('addofficesite.html', title='Add Office Site', form=form)
 
 
 if __name__ == '__main__':

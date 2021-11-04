@@ -4,7 +4,6 @@
 
     <h1>Office Sites Page</h1>
     <br />
-    <p><small><a href='{{ url_for("addofficesite") }}'>Add Office Site</a></small></p>
     <table>
         <thead>
             <tr>
@@ -23,24 +22,7 @@
     </table>
 
     <br />
-    <table>
-        <thead>
-            <tr>
-                <th>Employee ID</th>
-                <th>Office Site ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for employee in employeesList %}
-            {% for officeSite in officeSitesList %}
-            <tr>
-                <td>{{ employee.employeeID }}</td>
-                <td>{{ officeSite.officeSiteID }}</td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
+
 
     <br />
     <p><a href='{{ url_for("employees") }}'>Employees</a></p>

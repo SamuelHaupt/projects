@@ -4,6 +4,12 @@
 
     <h1>Employees Page</h1>
     <br />
+
+    <input type="text" placeholder="Search Employee" name="search">
+    <button type="submit">Submit</button>
+    <br />
+
+    <br />
     <p><small><a href='{{ url_for("addemployee") }}'>Add Employee</a></small></p>
     <table>
         <thead>
@@ -31,9 +37,31 @@
         </tbody>
     </table>
 
+    <br />
 
-    <br />
-    <br />
+    <table>
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Office Site ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employeesList %}
+            {% for officeSite in officeSitesList %}
+            <tr>
+                <td>{{ employee.employeeID }}</td>
+                <td>{{ officeSite.officeSiteID }}</td>
+                <td>
+                    <p><small><a href='{{ url_for("updateEmployee") }}'>Update</a></small></p>
+                    <p><small><a href='{{ url_for("employees") }}'>Delete</a></small></p>
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
     <br />
     <p>
         <small>
