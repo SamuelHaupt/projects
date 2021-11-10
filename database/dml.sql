@@ -1,34 +1,42 @@
--- Write the query to create the 4 tables below.
+-- Display all departments
+SELECT * FROM Departments;
 
-SET FOREIGN_KEY_CHECKS = 0;
+-- Display all office sites
+SELECT * FROM OfficeSites;
 
-DROP TABLE IF EXISTS departments;
-CREATE TABLE `Departments` (
-    `departmentID` int(4) NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-    `name` varchar(255) NOT NULL
-) ENGINE=InnoDB;
+-- Display all employees
+SELECT * FROM Employees;
 
-DROP TABLE IF EXISTS officesites;
-CREATE TABLE `OfficeSites` (
-    `officeSiteID` int(4) NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-    `address` varchar(255) NOT NULL
-) ENGINE=InnoDB;
+-- Add employee
+INSERT INTO Employees (employeeID, firstName, lastName, departmentID)
+VALUES (:employee_id, :first_name, :last_name, :department_id);
 
-## DELETE AUTO-INCREMENT FOR OFFICESITEID AND EMPLOYEEID IN EMPLOYEES_OFFICESITES.
+-- Delete employee from Employees table and Employees_OfficeSites table
+DELETE FROM Employees WHERE employeeID = :employee_id AND firstName = :first_name
+AND lastName = :last_name;
+DELETE FROM Employees_OfficeSites WHERE employeeID = :employee_id;
 
-DROP TABLE IF EXISTS employees;
-CREATE TABLE `Employees` (
-    `employeeID` int(7) NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-    `departmentID` int(4) NOT NULL,
-    `firstName` varchar(255) NOT NULL,
-    `lastName` varchar(255) NOT NULL
-) ENGINE=InnoDB;
+-- Update employee first name and last name by employee id
+UPDATE Employees SET firstName = :first_name, lastName = :last_name
+WHERE employeeID = :employee_id;
 
-DROP TABLE IF EXISTS paystubs;
-CREATE TABLE `PayStubs` (
-    `payStubsID` int(12) NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-    `employeeID` int(7) NOT NULL,
-    `payDate` date NOT NULL,
-    `payRate` decimal(7,2) NOT NULL,
-    `hoursWorked` decimal(5,1) NOT NULL
-) ENGINE=InnoDB;
+-- Display all paystubs
+SELECT * FROM PayStubs;
+
+-- Add paystub
+INSERT INTO PayStubs (paystubID, payDate, payRate, hoursWorked, employeeID)
+VALUES (:paystub_id, :pay_date, :pay_rate, :hours_worked, :employee_id);
+
+-- Delete paystub by id
+DELETE FROM Paystubs WHERE paystubID = :paystub_id;
+
+-- Display employee office sites
+SELECT * FROM Employees_OfficeSites;
+
+-- Add employee office site
+INSERT INTO Employees_OfficeSites (employeeID, officeSiteID)
+VALUES (:employee_id, :office_site_ID);
+
+-- Delete employee office site
+DELETE FROM Employees_OfficeSites WHERE employeeID = :employee_id
+AND officeSiteID = :office_site_id;
