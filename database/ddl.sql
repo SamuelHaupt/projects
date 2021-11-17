@@ -47,7 +47,7 @@ CREATE TABLE `Employees_OfficeSites` (
 ) ENGINE=InnoDB;
 
 ALTER TABLE PayStubs
-ADD FOREIGN KEY `employeeID_FK` (`employeeID`) REFERENCES `Employees` (`employeeID`) ON DELETE NO ACTION;
+ADD FOREIGN KEY `employeeID_FK` (`employeeID`) REFERENCES `Employees` (`employeeID`) ON DELETE CASCADE;
 
 ALTER TABLE Employees
 ADD FOREIGN KEY `departmentID_FK` (`departmentID`) REFERENCES `Departments` (`departmentID`) ON DELETE NO ACTION;

@@ -22,11 +22,8 @@ class UpdateEmployeeForm(FlaskForm):
     departmentID = IntegerField('Department ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     submit = SubmitField('Update Employee')
 
-
 class AddPayStubForm(FlaskForm):
     payDate = StringField('Pay Date', validators=[DataRequired(), Length(min=2, max=25)])
     payRate = StringField('Pay Rate', validators=[DataRequired(), Length(min=2, max=25)]) 
     hoursWorked = IntegerField('Hours Worked', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     submit = SubmitField('Add Pay Stub')
-
-    ## Use DecimalField
