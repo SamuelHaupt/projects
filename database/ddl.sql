@@ -47,14 +47,14 @@ CREATE TABLE `Employees_OfficeSites` (
 ) ENGINE=InnoDB;
 
 ALTER TABLE PayStubs
-ADD FOREIGN KEY `employeeID_FK` (`employeeID`) REFERENCES `Employees` (`employeeID`) ON DELETE CASCADE;
+ADD FOREIGN KEY `employeeID_FK` (`employeeID`) REFERENCES `Employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE Employees
-ADD FOREIGN KEY `departmentID_FK` (`departmentID`) REFERENCES `Departments` (`departmentID`) ON DELETE NO ACTION;
+ADD FOREIGN KEY `departmentID_FK` (`departmentID`) REFERENCES `Departments` (`departmentID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE Employees_OfficeSites
-ADD FOREIGN KEY `officeSiteID_FK` (`officeSiteID`) REFERENCES `OfficeSites` (`officeSiteID`) ON DELETE NO ACTION,
-ADD FOREIGN KEY `employeeID_FK` (`employeeID`) REFERENCES `Employees` (`employeeID`) ON DELETE NO ACTION;
+ADD FOREIGN KEY `officeSiteID_FK` (`officeSiteID`) REFERENCES `OfficeSites` (`officeSiteID`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD FOREIGN KEY `employeeID_FK` (`employeeID`) REFERENCES `Employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
