@@ -45,10 +45,13 @@ def addemployee():
     form = AddEmployeeForm()
     form2 = AddEmployeeOfficeForm()
 
-    query = 'INSERT INTO Employees (firstName, lastName, departmentID) VAULES (form.firstName, form.lastName, form.departmentID);'
-    cursor = db.execute_query(db_connection=db_connection, query=query)
-    
     if form.validate_on_submit():
+
+        query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'''
+        cur = db.execute_query(db_connection=db_connection, query=query, query_params = (form.firstName.data, form.lastName.data, form.departmentID.data))
+
+        query = '''INSERT INTO `Employees_OfficeSites` (`officeSiteID`, `employeeID`) VALUES (%s, %s);'''
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form2.officeID.data, cur.lastrowid))
 
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         
@@ -71,13 +74,13 @@ def updateEmployee():
 def deleteEmployee(employeeID, firstName=None, lastName=None):
     
     ## Passed employeeID from url_for 'deleteEmployee'.
-
-    query ='DELETE FROM Employees\
-             WHERE employeeID = employeeID\
-             AND firstName = firstName\
-             AND lastName = lastName;'
+    
+    # query ='''DELETE FROM Employees\
+    #          WHERE employeeID = employeeID\
+    #          AND firstName = firstName\
+    #          AND lastName = lastName;'''
             
-    db.execute_query(db_connection=db_connection, query=query)
+    # db.execute_query(db_connection=db_connection, query=query)
 
     return redirect(url_for('employees'))
 
@@ -94,13 +97,21 @@ def paystubs():
 @app.route('/addpaystub', methods=['GET', 'POST'])
 def addpaystub():
     form = AddPayStubForm()
+
+    query = 'SELECT * FROM Employees;'
+    cursor = db.execute_query(db_connection=db_connection, query=query)
+    employees = cursor.fetchall()
     
     if form.validate_on_submit():
+        query = '''INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'''
+
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data))
+
         flash(f'Pay Stub added successfully.', 'success')
         
         return redirect(url_for('paystubs'))
     
-    return render_template('addpaystub.html', title='Add Pay Stub', form=form)
+    return render_template('addpaystub.html', title='Add Pay Stub', form=form, employeesList=employees)
 
 
 @app.route('/departments')
