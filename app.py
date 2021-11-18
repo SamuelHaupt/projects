@@ -47,6 +47,10 @@ def addemployee():
     form2 = AddEmployeeOfficeForm()
     
     if form.validate_on_submit():
+
+        query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'''
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form.firstName.data, form.lastName.data, form.departmentID.data))
+
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         
         return redirect(url_for('employees'))
@@ -68,13 +72,13 @@ def updateEmployee():
 def deleteEmployee(employeeID, firstName=None, lastName=None):
     
     ## Passed employeeID from url_for 'deleteEmployee'.
-
-    query ='DELETE FROM Employees\
-             WHERE employeeID = employeeID\
-             AND firstName = firstName\
-             AND lastName = lastName;'
+    
+    # query ='''DELETE FROM Employees\
+    #          WHERE employeeID = employeeID\
+    #          AND firstName = firstName\
+    #          AND lastName = lastName;'''
             
-    db.execute_query(db_connection=db_connection, query=query)
+    # db.execute_query(db_connection=db_connection, query=query)
 
     return redirect(url_for('employees'))
 

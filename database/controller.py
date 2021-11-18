@@ -1,7 +1,8 @@
 import MySQLdb
 import os
 
-# See following webpage for instructions on dotenv: https://dev.to/jakewitcher/using-env-files-for-environment-variables-in-python-applications-55a1
+# See following webpage for instructions on dotenv:
+# https://dev.to/jakewitcher/using-env-files-for-environment-variables-in-python-applications-55a1
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -54,8 +55,8 @@ def execute_query(db_connection = None, query = None, query_params = ()):
 
 if __name__ == '__main__':
     print('Executing a sample query')
-    db = connect_to_database(db='mod7project')
-    query = 'SELECT * from Employees;'
+    # db = connect_to_database(db='mod7project')
+    query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES ('Test', 'Test', '1');'''
     results = execute_query(db, query)
     print(f'Printing results of {query}')
 
