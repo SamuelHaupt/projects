@@ -25,6 +25,6 @@ class UpdateEmployeeForm(FlaskForm):
 class AddPayStubForm(FlaskForm):
     employeeID = IntegerField('Employee ID', validators=[DataRequired()])
     payDate = StringField('Pay Date', validators=[DataRequired(), Length(min=2, max=25)])
-    payRate = IntegerField('Hours Worked', validators=[DataRequired(), NumberRange(min=000, max=99999)])
+    payRate = IntegerField('Pay Rate', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     hoursWorked = IntegerField('Hours Worked', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     submit = SubmitField('Add Pay Stub')
