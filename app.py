@@ -1,3 +1,4 @@
+from MySQLdb import cursors
 from flask import Flask, render_template, url_for, flash, redirect
 
 from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm
@@ -18,8 +19,6 @@ Make sure to add .env file with the following info:
 340DB=cs340_lastnamef
 
 '''
-
-
 
 @app.route('/')
 @app.route('/home')
@@ -45,8 +44,12 @@ def employees():
 def addemployee():
     form = AddEmployeeForm()
     form2 = AddEmployeeOfficeForm()
+
+    query = 'INSERT INTO Employees (firstName, lastName, departmentID) VAULES (form.firstName, form.lastName, form.departmentID);'
+    cursor = db.execute_query(db_connection=db_connection, query=query)
     
     if form.validate_on_submit():
+
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         
         return redirect(url_for('employees'))

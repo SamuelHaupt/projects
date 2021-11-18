@@ -13,7 +13,7 @@ class AddEmployeeForm(FlaskForm):
 
 class AddEmployeeOfficeForm(FlaskForm):
     officeID = IntegerField('Office ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
-    employeeID = IntegerField('Employee ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
+
     submit = SubmitField('Add Employee Office Site')
 
 class UpdateEmployeeForm(FlaskForm):
