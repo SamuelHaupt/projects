@@ -13,7 +13,6 @@ class AddEmployeeForm(FlaskForm):
 
 class AddEmployeeOfficeForm(FlaskForm):
     officeID = SelectField('Office ID', choices=['202', '205', '210', '211', '9999'], validators=[DataRequired()])
-
     submit = SubmitField('Add Employee Office Site')
 
 class UpdateEmployeeForm(FlaskForm):
@@ -28,3 +27,12 @@ class AddPayStubForm(FlaskForm):
     payRate = IntegerField('Pay Rate', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     hoursWorked = IntegerField('Hours Worked', validators=[DataRequired(), NumberRange(min=000, max=99999)])
     submit = SubmitField('Add Pay Stub')
+
+class AddDepartmentForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=50)])
+    submit = SubmitField('Add Department')
+
+class AddOfficeSiteForm(FlaskForm):
+    address = StringField('Address', validators=[DataRequired(), Length(min=2, max=50)])
+    submit = SubmitField('Add Office Site')
+

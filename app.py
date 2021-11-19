@@ -1,7 +1,7 @@
 from MySQLdb import cursors
 from flask import Flask, render_template, url_for, flash, redirect
 
-from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm
+from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
 
 app = Flask(__name__)
@@ -116,23 +116,46 @@ def addpaystub():
 
 @app.route('/departments')
 def departments():
-
     query = 'SELECT * FROM Departments;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     departments = cursor.fetchall()
 
     return render_template('departments.html', title='Departments', departmentsList=departments)
 
+@app.route('/addDepart', methods=['GET', 'POST'])
+def addDepart():
+    form = AddDepartmentForm()
+
+    if form.validate_on_submit():
+        query = '''INSERT INTO `Departments` (`name`) VALUES (%s);'''
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form.name.data,))
+
+        flash(f'Department added successfully.', 'success')
+        return redirect(url_for('departments'))
+
+    return render_template('addDepart.html', title='Add Department', form=form)
+
 
 @app.route('/officesites')
 def officesites():
-
     query = 'SELECT * FROM OfficeSites;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     officeSites = cursor.fetchall()
 
     return render_template('officesites.html', title='Office Sites', officeSitesList=officeSites)
 
+@app.route('/addofficesite', methods=['GET', 'POST'])
+def addofficesite():
+    form = AddOfficeSiteForm()
+
+    if form.validate_on_submit():
+        query = '''INSERT INTO `OfficeSites` (`address`) VALUES (%s);'''
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form.address.data,))
+
+        flash(f'Office Site added successfully.', 'success')
+        return redirect(url_for('officesites'))
+
+    return render_template('addofficesite.html', title='Add Department', form=form)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <div class='border-top pt-3'>
+        <small>
+            <a href='{{ url_for("departments") }}'>Current Departments</a>
+        </small>
+    </div>
+    <br>
+
+    <h1>Add Department</h1>
+
+    <div>
+        <form method='POST' action=''>
+            {{ form.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+
+                <div class='col'>
+                        {{ form.name.label(class='form-control-label') }}
+                        {% if form.name.errors %}
+                            {{ form.name(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                </div>
+            </fieldset>
+            <br />
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <br />
+        </form>
+    </div>
+
+
+{% endblock layout_content %}
