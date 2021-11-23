@@ -1,7 +1,7 @@
 from MySQLdb import cursors
 from flask import Flask, render_template, url_for, flash, redirect
 
-from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
+from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
 
 app = Flask(__name__)
@@ -27,8 +27,26 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/employees')
+@app.route('/employees', methods=['GET', 'POST'])
 def employees():
+    form = SearchEmployeesForm()
+
+    if form.validate_on_submit():
+        query = '''SELECT lastName, firstName, departmentID, employeeID FROM `Employees`\
+                   WHERE lastName = lastName\
+                   OR firstName = firstName\
+                   OR departmentID = departmentID\
+                   OR employeeID = employeeID;'''
+
+        cursor = db.execute_query(db_connection=db_connection, query=query)
+        employeesResults = cursor.fetchall()
+
+        query = '''SELECT * FROM Employees_OfficeSites\
+                   WHERE employeeID = employeeID;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query)
+        employees_officeSitesResults = cursor.fetchall()
+
+        return render_template('employees.html', title='Employees', employeesList=employeesResults, officeSitesList=employees_officeSitesResults, form=form)
 
     query = 'SELECT * FROM Employees;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
@@ -38,7 +56,7 @@ def employees():
     cursor = db.execute_query(db_connection=db_connection, query=query)
     employees_officeSites = cursor.fetchall()
     
-    return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites)
+    return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites, form=form)
 
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
@@ -68,9 +86,9 @@ def updateEmployee():
         
         return redirect(url_for('employees'))
     
-    return render_template('updateEmployee.html', title='Uodate Employee', form=form)
+    return render_template('updateEmployee.html', title='Update Employee', form=form)
 
-@app.route('/deleteEmployee/<employeeID>/<firstName>/<lastName>', methods=['GET'])
+@app.route('/deleteEmployee/<employeeID>/<firstName>/<lastName>', methods=['GET', 'POST'])
 def deleteEmployee(employeeID, firstName=None, lastName=None):
     
     ## Passed employeeID from url_for 'deleteEmployee'.
