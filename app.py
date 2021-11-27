@@ -31,31 +31,63 @@ def home():
 def employees():
     form = SearchEmployeesForm()
 
-    if form.validate_on_submit():
-        query = '''SELECT lastName, firstName, departmentID, employeeID FROM `Employees`\
-                   WHERE lastName = lastName\
-                   OR firstName = firstName\
-                   OR departmentID = departmentID\
-                   OR employeeID = employeeID;'''
-
-        cursor = db.execute_query(db_connection=db_connection, query=query)
-        employeesResults = cursor.fetchall()
-
-        query = '''SELECT * FROM Employees_OfficeSites\
-                   WHERE employeeID = employeeID;'''
-        cursor = db.execute_query(db_connection=db_connection, query=query)
-        employees_officeSitesResults = cursor.fetchall()
-
-        return render_template('employees.html', title='Employees', employeesList=employeesResults, officeSitesList=employees_officeSitesResults, form=form)
-
-    query = 'SELECT * FROM Employees;'
+    query = '''SELECT * FROM Employees;'''
     cursor = db.execute_query(db_connection=db_connection, query=query)
     employees = cursor.fetchall()
 
-    query = 'SELECT * FROM Employees_OfficeSites;'
+    query = '''SELECT * FROM Employees_OfficeSites;'''
     cursor = db.execute_query(db_connection=db_connection, query=query)
     employees_officeSites = cursor.fetchall()
-    
+
+    if form.validate_on_submit():
+
+        searchParameter = (form.searchField.data,)
+        selectedFilter = dict(form.searchFilterChoices).get(form.searchFilter.data)
+
+        if selectedFilter == 'Last Name':
+            query = '''SELECT * FROM Employees WHERE lastName = %s;'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees = cursor.fetchall()
+
+            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE lastName = %s'''
+
+            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
+
+        elif selectedFilter == 'First Name':
+            query = '''SELECT * FROM Employees WHERE firstName = %s;'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees = cursor.fetchall()
+
+            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE firstName = %s'''
+
+            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
+
+        elif selectedFilter == 'Department ID':
+            query = '''SELECT * FROM Employees WHERE departmentID = %s;'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees = cursor.fetchall()
+
+            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE departmentID = %s'''
+
+            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
+
+        elif selectedFilter == 'Employee ID':
+            query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees = cursor.fetchall()
+
+            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE employeeID = %s'''
+
+            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
+
     return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites, form=form)
 
 @app.route('/addemployee', methods=['GET', 'POST'])

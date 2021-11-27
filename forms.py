@@ -6,11 +6,18 @@ from wtforms.validators import DataRequired, Length, NumberRange
 ## Use BooleanField validator, maybe?
 
 class SearchEmployeesForm(FlaskForm):
-    lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
-    firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking')], validators= [DataRequired()])
-    employeeID = IntegerField('Employee ID', validators=[DataRequired()])
-    submit = SubmitField('Search Employees')
+    
+    searchField = StringField('Search Parameter:', validators=[DataRequired()])     
+
+    lastName = StringField('Last Name', validators=[])
+    firstName = StringField('First Name', validators=[])
+    departmentID = IntegerField('Depart ID', validators=[])
+    employeeID = IntegerField('Employee ID', validators=[])
+
+    searchFilterChoices = [('Last Name', 'Last Name'), ('First Name', 'First Name'), ('Department ID', 'Department ID'), ('Employee ID', 'Employee ID')]
+    searchFilter = SelectField(u'Select Filter', choices=searchFilterChoices)
+
+    submit = SubmitField('Submit')
 
 class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
@@ -42,4 +49,3 @@ class AddDepartmentForm(FlaskForm):
 class AddOfficeSiteForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired(), Length(min=2, max=50)])
     submit = SubmitField('Add Office Site')
-

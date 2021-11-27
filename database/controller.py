@@ -55,9 +55,12 @@ def execute_query(db_connection = None, query = None, query_params = ()):
 
 if __name__ == '__main__':
     print('Executing a sample query')
-    # db = connect_to_database(db='mod7project')
-    query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES ('Test', 'Test', '1');'''
-    results = execute_query(db, query)
+    db = connect_to_database()
+    params = (2, 5, 6)
+    placeHolder = ', '.join(['%s'] * len(params))
+    print(placeHolder)
+    query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({placeHolder});'''
+    results = execute_query(db, query, params)
     print(f'Printing results of {query}')
 
     for result in results.fetchall():

@@ -13,60 +13,33 @@
                 <legend class='border-bottom mb-3'></legend>
                 <div class='row'>
                     <div class='col'>
-                        {{ form.firstName.label(class='form-control-label') }}
+                        {{ form.searchField.label(class='form-control-label') }}
 
-                        {% if form.firstName.errors %}
-                            {{ form.firstName(class='form-control form-control-lg is-invalid') }}
+                        {% if form.searchField.errors %}
+                            {{ form.searchField(class='form-control form-control-lg is-invalid') }}
                             <div class='invalid-feedback'>
-                                {% for error in form.firstName.errors %}
+                                {% for error in form.searchField.errors %}
                                     <span>{{ error }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form.firstName(class='form-control form-control-lg') }}
+                            {{ form.searchField(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
                     <div class='col'>
-                        {{ form.lastName.label(class='form-control-label') }}
-                        {% if form.lastName.errors %}
-                            {{ form.lastName(class='form-control form-control-lg is-invalid') }}
-                            <div class='invalid-feedback'>
-                                {% for error in form.lastName.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form.lastName(class='form-control form-control-lg') }}
-                        {% endif %}
-                    </div>
-                    <div class='col'>
-                        {{ form.departmentID.label(class='form-control-label') }}
-                        {% if form.departmentID.errors %}
-                            {{ form.departmentID(class='form-control form-control-lg is-invalid') }}
-                            <div class='invalid-feedback'>
-                                {% for error in form.departmentID.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form.departmentID(class='form-control form-control-lg') }}
-                        {% endif %}
-                    </div>
+                        {{ form.searchFilter.label(class='form-control-label') }}
 
-                    <div class='col'>
-                        {{ form.employeeID.label(class='form-control-label') }}
-                        {% if form.employeeID.errors %}
-                            {{ form.employeeID(class='form-control form-control-lg is-invalid') }}
+                        {% if form.searchFilter.errors %}
+                            {{ form.searchFilter(class='form-control form-control-lg is-invalid') }}
                             <div class='invalid-feedback'>
-                                {% for error in form.employeeID.errors %}
+                                {% for error in form.searchFilter.errors %}
                                     <span>{{ error }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form.employeeID(class='form-control form-control-lg') }}
+                            {{ form.searchFilter(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
-
                 </div>
             </fieldset>
             <br />
