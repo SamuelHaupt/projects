@@ -25,7 +25,7 @@
                 <td>{{ paystub.payDate }}</td>
                 <td>{{ paystub.payRate }}</td>
                 <td>{{ paystub.hoursWorked }}</td>
-                <td>{{ paystub.payRate * paystub.hoursWorked }}</td>
+                <td>{{ (paystub.payRate * paystub.hoursWorked) | currencyFormat }}</td>
             </tr>
             {% endfor %}
         </tbody>
