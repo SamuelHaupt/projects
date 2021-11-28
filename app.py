@@ -12,12 +12,10 @@ app.config['SECRET_KEY'] = '4ae4cbd2e244edacacff32a231b7cc30'
 
 '''
 Make sure to add .env file with the following info:
-
 340DBHOST=classmysql.engr.oregonstate.edu
 340DBUSER=cs340_lastnamef
 340DBPW=maybea4digitnumber
 340DB=cs340_lastnamef
-
 '''
 
 @app.route('/')
@@ -85,9 +83,10 @@ def updateEmployee(employeeID):
     cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
     employee = cursor.fetchone()
 
-    form.lastName.data = employee['lastName']
-    form.firstName.data = employee['firstName']
-    form.departmentID.data = employee['departmentID']
+    if request.method == 'GET':
+        form.lastName.data = employee['lastName']
+        form.firstName.data = employee['firstName']
+        form.departmentID.data = employee['departmentID']
 
     if form.validate_on_submit():
             
