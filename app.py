@@ -1,7 +1,7 @@
 from MySQLdb import cursors
 from flask import Flask, render_template, url_for, flash, redirect, request
 
-from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
+from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
 
 app = Flask(__name__)
@@ -27,17 +27,35 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/employees')
+@app.route('/employees', methods=['GET', 'POST'])
 def employees():
-    query = 'SELECT * FROM Employees;'
-    cursor = db.execute_query(db_connection=db_connection, query=query)
-    employees = cursor.fetchall()
+    form = SearchEmployeesForm()    
 
-    query = 'SELECT * FROM Employees_OfficeSites;'
-    cursor = db.execute_query(db_connection=db_connection, query=query)
-    employees_officeSites = cursor.fetchall()
+    if request.method == 'POST' and form.validate_on_submit():
+
+        searchParameter = (form.searchField.data,)
+        selectedFilter = form.searchFilter.data
+
+        query = f'''SELECT * FROM Employees WHERE {selectedFilter} = %s;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+        employees = cursor.fetchall()
+
+        employeeIDsSubquery = f'''SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'''
+
+        query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+        employees_officeSites = cursor.fetchall()
     
-    return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites)
+    else:
+        query = '''SELECT * FROM Employees;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query)
+        employees = cursor.fetchall()
+
+        query = '''SELECT * FROM Employees_OfficeSites;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query)
+        employees_officeSites = cursor.fetchall()
+
+    return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites, form=form)
 
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
@@ -83,22 +101,15 @@ def updateEmployee(employeeID):
     return render_template('updateEmployee.html', title='Update Employee', form=form)
     
     
-
-
-@app.route('/deleteEmployee/<employeeID>/<firstName>/<lastName>', methods=['GET'])
-def deleteEmployee(employeeID, firstName=None, lastName=None):
+@app.route('/employees/delete/<employeeID>', methods=['GET','POST'])
+def deleteEmployee(employeeID):
     
-    ## Passed employeeID from url_for 'deleteEmployee'.
-    
-    # query ='''DELETE FROM Employees\
-    #          WHERE employeeID = employeeID\
-    #          AND firstName = firstName\
-    #          AND lastName = lastName;'''
-            
-    # db.execute_query(db_connection=db_connection, query=query)
+    query ='''DELETE FROM Employees WHERE employeeID = %s;'''            
+    db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
+
+    flash(f'Employee deleted successfully.', 'success')
 
     return redirect(url_for('employees'))
-
 
 @app.route('/paystubs')
 def paystubs():

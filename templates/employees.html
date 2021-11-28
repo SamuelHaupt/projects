@@ -5,12 +5,53 @@
     <h1>Employees Page</h1>
     <br />
 
-    <input type="text" placeholder="Search Employee" name="search">
-    <button type="submit">Submit</button>
-    <br />
+    <h2>Search Employees</h2>
+    <div>
+        <form method='POST' action=''>
+            {{ form.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+                    <div class='col'>
+                        {{ form.searchField.label(class='form-control-label') }}
+
+                        {% if form.searchField.errors %}
+                            {{ form.searchField(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.searchField.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.searchField(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                    <div class='col'>
+                        {{ form.searchFilter.label(class='form-control-label') }}
+
+                        {% if form.searchFilter.errors %}
+                            {{ form.searchFilter(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.searchFilter.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.searchFilter(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+            <br />
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <br />
+        </form>
+    </div>
 
     <br />
-    <p><small><a href='{{ url_for("addemployee") }}'>Add Employee</a></small></p>
+    <p><small><a class='links' href='{{ url_for("addemployee") }}'>Add Employee</a></small></p>
     <table style="margin-left: auto; margin-right: auto;">
         <thead>
             <tr class='no-hover'>
@@ -29,9 +70,16 @@
                 <td>{{ employee.departmentID }}</td>
                 <td>{{ employee.employeeID }}</td>
                 <td>
+<<<<<<< HEAD
                     <p><small><a href='{{ url_for("updateEmployee", employeeID=employee.employeeID) }}'>Update</a></small></p>
 
                     <p><small><a href='{{ url_for("deleteEmployee", employeeID = employee.employeeID, firstName = employee.firstName, lastName = employee.lastName) }}'>Delete</a></small></p>
+=======
+                    <a class='btn btn-success' href='{{ url_for("updateEmployee") }}'>Edit</a>
+                </td>
+                <td>
+                    <a class='btn btn-danger' href='{{ url_for("deleteEmployee", employeeID = employee.employeeID) }}'>Delete</a>
+>>>>>>> 3d8f830d6ae52d0a4d4078343b1b89ba91df4f9c
                 </td>
             </tr>
             {% endfor %}
@@ -53,8 +101,15 @@
                 <td>{{ id.employeeID }}</td>
                 <td>{{ id.officeSiteID }}</td>
                 <td>
+<<<<<<< HEAD
                     <p><small><a href='{{ url_for("employees")}}'>Update</a></small></p>
                     <p><small><a href='{{ url_for("employees") }}'>Delete</a></small></p>
+=======
+                    <a class='btn btn-success' href='{{ url_for("updateEmployee") }}'>Edit</a>
+                </td>
+                <td>
+                    <a class='btn btn-danger' href='{{ url_for("employees") }}'>Delete</a>
+>>>>>>> 3d8f830d6ae52d0a4d4078343b1b89ba91df4f9c
                 </td>
             </tr>
             {% endfor %}
@@ -64,9 +119,9 @@
     <br />
     <p>
         <small>
-            <a href='{{ url_for("paystubs") }}'>Pay Stubs</a>
-            <a href='{{ url_for("departments") }}'>Departments</a>
-            <a href='{{ url_for("officesites") }}'>Office Sites</a>
+            <a class='links' href='{{ url_for("paystubs") }}'>Pay Stubs</a>
+            <a class='links' href='{{ url_for("departments") }}'>Departments</a>
+            <a class='links' href='{{ url_for("officesites") }}'>Office Sites</a>
         </small>
     </p>
 
