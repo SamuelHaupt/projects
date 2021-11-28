@@ -78,20 +78,21 @@ def addemployee():
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
 
-    employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
-    cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
-    employee = cursor.fetchone()
-    form.lastName.data = employee['lastName']
-    form.firstName.data = employee['firstName']
-    form.departmentID.data = employee['departmentID']
+    if request.method == 'GET':
+        employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
+        cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
+        employee = cursor.fetchone()
+        form.lastName.data = employee['lastName']
+        form.firstName.data = employee['firstName']
+        form.departmentID.data = employee['departmentID']
 
-    query = f'''SELECT officeSiteID FROM Employees_OfficeSites WHERE `employeeID` = %s;'''
-    cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(employee['employeeID'],))
-    employees_officeSite = cursor.fetchone()
-    form.officeID.data = employees_officeSite['officeSiteID']
+        query = f'''SELECT officeSiteID FROM Employees_OfficeSites WHERE `employeeID` = %s;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(employee['employeeID'],))
+        employees_officeSite = cursor.fetchone()
+        form.officeID.data = employees_officeSite['officeSiteID']
 
     if form.validate_on_submit():
-            
+            print(form.data)
             query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
 
             db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
