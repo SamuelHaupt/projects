@@ -64,22 +64,17 @@
         </thead>
         <tbody>
             {% for employee in employeesList %}
-            <tr>
+            <tr style="padding-bottom: 1em;">
                 <td>{{ employee.lastName }}</td>
                 <td>{{ employee.firstName }}</td>
                 <td>{{ employee.departmentID }}</td>
                 <td>{{ employee.employeeID }}</td>
                 <td>
-<<<<<<< HEAD
-                    <p><small><a href='{{ url_for("updateEmployee", employeeID=employee.employeeID) }}'>Update</a></small></p>
+                    <a class='btn btn-success' href='{{ url_for("updateEmployee", employeeID=employee.employeeID) }}'>Update</a>
 
-                    <p><small><a href='{{ url_for("deleteEmployee", employeeID = employee.employeeID, firstName = employee.firstName, lastName = employee.lastName) }}'>Delete</a></small></p>
-=======
-                    <a class='btn btn-success' href='{{ url_for("updateEmployee") }}'>Edit</a>
                 </td>
                 <td>
                     <a class='btn btn-danger' href='{{ url_for("deleteEmployee", employeeID = employee.employeeID) }}'>Delete</a>
->>>>>>> 3d8f830d6ae52d0a4d4078343b1b89ba91df4f9c
                 </td>
             </tr>
             {% endfor %}
@@ -101,15 +96,11 @@
                 <td>{{ id.employeeID }}</td>
                 <td>{{ id.officeSiteID }}</td>
                 <td>
-<<<<<<< HEAD
-                    <p><small><a href='{{ url_for("employees")}}'>Update</a></small></p>
-                    <p><small><a href='{{ url_for("employees") }}'>Delete</a></small></p>
-=======
-                    <a class='btn btn-success' href='{{ url_for("updateEmployee") }}'>Edit</a>
+                    <a class='btn btn-success' href='{{ url_for("employees")}}'>Update</a>
+
                 </td>
                 <td>
                     <a class='btn btn-danger' href='{{ url_for("employees") }}'>Delete</a>
->>>>>>> 3d8f830d6ae52d0a4d4078343b1b89ba91df4f9c
                 </td>
             </tr>
             {% endfor %}
