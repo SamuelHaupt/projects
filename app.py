@@ -87,6 +87,7 @@ def updateEmployee(employeeID):
     employee = cursor.fetchone()
 
     if form.validate_on_submit():
+            
             query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
 
             db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
@@ -129,8 +130,8 @@ def addpaystub():
     
     if form.validate_on_submit():
         query = '''INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'''
-
-        db.execute_query(db_connection=db_connection, query=query, query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data))
+        query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
+        db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
 
         flash(f'Pay Stub added successfully.', 'success')
         return redirect(url_for('paystubs'))
