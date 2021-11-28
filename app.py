@@ -76,7 +76,6 @@ def addemployee():
     return render_template('addemployee.html', title='Add Employee', form=form, form2=form2)
 
 
-
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
@@ -85,6 +84,10 @@ def updateEmployee(employeeID):
 
     cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
     employee = cursor.fetchone()
+
+    form.lastName.data = employee['lastName']
+    form.firstName.data = employee['firstName']
+    form.departmentID.data = employee['departmentID']
 
     if form.validate_on_submit():
             
