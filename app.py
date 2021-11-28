@@ -89,14 +89,13 @@ def updateEmployee():
 
 @app.route('/employees/delete/<employeeID>', methods=['GET','POST'])
 def deleteEmployee(employeeID):
-    print(employeeID)
     
-    query ='''DELETE FROM Employees WHERE employeeID = %s;'''
-            
+    query ='''DELETE FROM Employees WHERE employeeID = %s;'''            
     db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
 
-    return redirect(url_for('employees'))
+    flash(f'Employee deleted successfully.', 'success')
 
+    return redirect(url_for('employees'))
 
 @app.route('/paystubs')
 def paystubs():
