@@ -1,5 +1,5 @@
 from MySQLdb import cursors
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask, render_template, url_for, flash, redirect, request
 
 from forms import AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
@@ -29,7 +29,6 @@ def home():
 
 @app.route('/employees')
 def employees():
-
     query = 'SELECT * FROM Employees;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     employees = cursor.fetchall()
@@ -54,21 +53,37 @@ def addemployee():
         db.execute_query(db_connection=db_connection, query=query, query_params = (form2.officeID.data, cur.lastrowid))
 
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
-        
         return redirect(url_for('employees'))
     
     return render_template('addemployee.html', title='Add Employee', form=form, form2=form2)
 
-@app.route('/updateEmployee', methods=['GET', 'POST'])
-def updateEmployee():
+
+
+@app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
+def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
-    
+
+    employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
+
+    cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
+    employee = cursor.fetchone()
+
     if form.validate_on_submit():
-        flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
-        
-        return redirect(url_for('employees'))
+            query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
+
+            db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
+
+            query2 = '''UPDATE Employees_OfficeSites SET officeSiteID = %s WHERE employeeID = %s;'''
+
+            db.execute_query(db_connection=db_connection, query=query2, query_params=(form.officeID.data, employeeID))
+
+            flash(f'Employee {form.firstName.data} {form.lastName.data} updated successfully.', 'success')
+            return redirect(url_for('employees'))
+
+    return render_template('updateEmployee.html', title='Update Employee', form=form)
     
-    return render_template('updateEmployee.html', title='Uodate Employee', form=form)
+    
+
 
 @app.route('/deleteEmployee/<employeeID>/<firstName>/<lastName>', methods=['GET'])
 def deleteEmployee(employeeID, firstName=None, lastName=None):
@@ -87,7 +102,6 @@ def deleteEmployee(employeeID, firstName=None, lastName=None):
 
 @app.route('/paystubs')
 def paystubs():
-
     query = 'SELECT * FROM PayStubs;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     payStubs = cursor.fetchall()
@@ -108,7 +122,6 @@ def addpaystub():
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data))
 
         flash(f'Pay Stub added successfully.', 'success')
-        
         return redirect(url_for('paystubs'))
     
     return render_template('addpaystub.html', title='Add Pay Stub', form=form, employeesList=employees)

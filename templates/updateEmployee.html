@@ -4,11 +4,13 @@
     <h1>Update Employee</h1>
 
     <div>
-        <form method='POST' action=''>
+        <form method='POST'>
             {{ form.hidden_tag() }}
             <fieldset class='col'>
                 <legend class='border-bottom mb-3'></legend>
                 <div class='row'>
+
+                    <!-- first name -->
                     <div class='col'>
                         {{ form.firstName.label(class='form-control-label') }}
 
@@ -23,6 +25,8 @@
                             {{ form.firstName(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
+
+                    <!-- last name -->
                     <div class='col'>
                         {{ form.lastName.label(class='form-control-label') }}
                         {% if form.lastName.errors %}
@@ -36,6 +40,8 @@
                             {{ form.lastName(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
+
+                    <!-- department ID -->
                     <div class='col'>
                         {{ form.departmentID.label(class='form-control-label') }}
                         {% if form.departmentID.errors %}
@@ -49,6 +55,22 @@
                             {{ form.departmentID(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
+
+                    <!-- Office ID -->
+                    <div class='col'>
+                        {{ form.officeID.label(class='form-control-label') }}
+                        {% if form.officeID.errors %}
+                            {{ form.officeID(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.officeID.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.officeID(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
                 </div>
             </fieldset>
             <br />

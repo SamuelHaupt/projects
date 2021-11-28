@@ -18,7 +18,8 @@ class AddEmployeeOfficeForm(FlaskForm):
 class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = IntegerField('Department ID', validators=[DataRequired(), NumberRange(min=000, max=99999)])
+    departmentID = SelectField('Department ID', choices=['1', '2', '3'], validators= [DataRequired()])
+    officeID = SelectField('Office ID', choices=['202', '205', '210', '211', '9999'], validators=[DataRequired()])
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
