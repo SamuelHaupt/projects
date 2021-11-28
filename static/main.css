@@ -53,11 +53,11 @@ tr.no-hover:hover{
     color: coral;
 }
 
-a {
+a.links {
     color: lightgray;
     padding: 20px;
 }
 
-a:visited {
+a.links:visited {
     color: lightgoldenrodyellow;
 }

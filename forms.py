@@ -8,15 +8,8 @@ from wtforms.validators import DataRequired, Length, NumberRange
 class SearchEmployeesForm(FlaskForm):
     
     searchField = StringField('Search Parameter:', validators=[DataRequired()])     
-
-    lastName = StringField('Last Name', validators=[])
-    firstName = StringField('First Name', validators=[])
-    departmentID = IntegerField('Depart ID', validators=[])
-    employeeID = IntegerField('Employee ID', validators=[])
-
-    searchFilterChoices = [('Last Name', 'Last Name'), ('First Name', 'First Name'), ('Department ID', 'Department ID'), ('Employee ID', 'Employee ID')]
+    searchFilterChoices = [('lastName', 'Last Name'), ('firstName', 'First Name'), ('departmentID', 'Department ID'), ('employeeID', 'Employee ID')]
     searchFilter = SelectField(u'Select Filter', choices=searchFilterChoices)
-
     submit = SubmitField('Submit')
 
 class AddEmployeeForm(FlaskForm):

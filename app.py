@@ -1,5 +1,5 @@
 from MySQLdb import cursors
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask, render_template, url_for, flash, redirect, request
 
 from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
@@ -29,64 +29,31 @@ def home():
 
 @app.route('/employees', methods=['GET', 'POST'])
 def employees():
-    form = SearchEmployeesForm()
+    form = SearchEmployeesForm()    
 
-    query = '''SELECT * FROM Employees;'''
-    cursor = db.execute_query(db_connection=db_connection, query=query)
-    employees = cursor.fetchall()
-
-    query = '''SELECT * FROM Employees_OfficeSites;'''
-    cursor = db.execute_query(db_connection=db_connection, query=query)
-    employees_officeSites = cursor.fetchall()
-
-    if form.validate_on_submit():
+    if request.method == 'POST' and form.validate_on_submit():
 
         searchParameter = (form.searchField.data,)
-        selectedFilter = dict(form.searchFilterChoices).get(form.searchFilter.data)
+        selectedFilter = form.searchFilter.data
 
-        if selectedFilter == 'Last Name':
-            query = '''SELECT * FROM Employees WHERE lastName = %s;'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees = cursor.fetchall()
+        query = f'''SELECT * FROM Employees WHERE {selectedFilter} = %s;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+        employees = cursor.fetchall()
 
-            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE lastName = %s'''
+        employeeIDsSubquery = f'''SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'''
 
-            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees_officeSites = cursor.fetchall()
+        query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+        employees_officeSites = cursor.fetchall()
+    
+    else:
+        query = '''SELECT * FROM Employees;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query)
+        employees = cursor.fetchall()
 
-        elif selectedFilter == 'First Name':
-            query = '''SELECT * FROM Employees WHERE firstName = %s;'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees = cursor.fetchall()
-
-            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE firstName = %s'''
-
-            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees_officeSites = cursor.fetchall()
-
-        elif selectedFilter == 'Department ID':
-            query = '''SELECT * FROM Employees WHERE departmentID = %s;'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees = cursor.fetchall()
-
-            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE departmentID = %s'''
-
-            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees_officeSites = cursor.fetchall()
-
-        elif selectedFilter == 'Employee ID':
-            query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees = cursor.fetchall()
-
-            employeeIDsSubquery = '''SELECT employeeID FROM Employees WHERE employeeID = %s'''
-
-            query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-            employees_officeSites = cursor.fetchall()
+        query = '''SELECT * FROM Employees_OfficeSites;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query)
+        employees_officeSites = cursor.fetchall()
 
     return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites, form=form)
 
@@ -120,17 +87,13 @@ def updateEmployee():
     
     return render_template('updateEmployee.html', title='Update Employee', form=form)
 
-@app.route('/deleteEmployee/<employeeID>/<firstName>/<lastName>', methods=['GET', 'POST'])
-def deleteEmployee(employeeID, firstName=None, lastName=None):
+@app.route('/employees/delete/<employeeID>', methods=['GET','POST'])
+def deleteEmployee(employeeID):
+    print(employeeID)
     
-    ## Passed employeeID from url_for 'deleteEmployee'.
-    
-    # query ='''DELETE FROM Employees\
-    #          WHERE employeeID = employeeID\
-    #          AND firstName = firstName\
-    #          AND lastName = lastName;'''
+    query ='''DELETE FROM Employees WHERE employeeID = %s;'''
             
-    # db.execute_query(db_connection=db_connection, query=query)
+    db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
 
     return redirect(url_for('employees'))
 
