@@ -86,6 +86,8 @@ def updateEmployee(employeeID):
     cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
     employee = cursor.fetchone()
 
+    form.firstName.data = employee['firstName']
+
     if form.validate_on_submit():
             query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
 
