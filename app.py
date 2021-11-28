@@ -12,12 +12,10 @@ app.config['SECRET_KEY'] = '4ae4cbd2e244edacacff32a231b7cc30'
 
 '''
 Make sure to add .env file with the following info:
-
 340DBHOST=classmysql.engr.oregonstate.edu
 340DBUSER=cs340_lastnamef
 340DBPW=maybea4digitnumber
 340DB=cs340_lastnamef
-
 '''
 
 @app.route('/')
@@ -76,7 +74,6 @@ def addemployee():
     return render_template('addemployee.html', title='Add Employee', form=form, form2=form2)
 
 
-
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
@@ -86,9 +83,13 @@ def updateEmployee(employeeID):
     cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
     employee = cursor.fetchone()
 
-    form.firstName.data = employee['firstName']
+    if request.method == 'GET':
+        form.lastName.data = employee['lastName']
+        form.firstName.data = employee['firstName']
+        form.departmentID.data = employee['departmentID']
 
     if form.validate_on_submit():
+            
             query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
 
             db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
@@ -131,8 +132,8 @@ def addpaystub():
     
     if form.validate_on_submit():
         query = '''INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'''
-
-        db.execute_query(db_connection=db_connection, query=query, query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data))
+        query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
+        db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
 
         flash(f'Pay Stub added successfully.', 'success')
         return redirect(url_for('paystubs'))
