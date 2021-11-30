@@ -74,7 +74,8 @@ def addemployee():
     form2 = AddEmployeeOfficeForm()
 
     if form.validate_on_submit():
-        if form.departmentID.data == 'None':
+        
+        if form.departmentID.data == '0':
             form.departmentID.data = None
 
         query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'''
@@ -91,8 +92,9 @@ def addemployee():
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
-
+    print(form.departmentID.default)
     if request.method == 'GET':
+
         employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
         cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
         employee = cursor.fetchone()
@@ -100,6 +102,9 @@ def updateEmployee(employeeID):
         form.firstName.data = employee['firstName']
         form.departmentID.data = employee['departmentID']
 
+        if form.departmentID.data == None:
+            form.departmentID.data = 0
+        
         query = f'''SELECT officeSiteID FROM Employees_OfficeSites WHERE `employeeID` = %s;'''
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(employee['employeeID'],))
         employees_officeSite = cursor.fetchone()
@@ -107,7 +112,7 @@ def updateEmployee(employeeID):
 
     if form.validate_on_submit():
 
-        if form.departmentID.data == 'None':
+        if form.departmentID.data == 0:
             form.departmentID.data = None
 
         query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''

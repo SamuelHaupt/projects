@@ -15,7 +15,7 @@ class SearchEmployeesForm(FlaskForm):
 class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking'), (None, 'NULL')], validators= [DataRequired()])
+    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking'), (0, 'NULL')], validators= [InputRequired()])
     submit = SubmitField('Add Employee')
 
 class AddEmployeeOfficeForm(FlaskForm):
@@ -25,8 +25,8 @@ class AddEmployeeOfficeForm(FlaskForm):
 class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', coerce=int,  choices=[1, 2, 3], validators= [DataRequired()])
-    officeID = SelectField('Office ID', coerce=int, choices=[1, 202, 205, 210, 211, None], validators=[DataRequired()])
+    departmentID = SelectField('Depart ID', coerce=int, choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking'), (0, 'NULL')], validators= [InputRequired()])
+    officeID = SelectField('Office ID', coerce=int, choices=[1, 202, 205, 210, 211], validators=[DataRequired()])
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
