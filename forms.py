@@ -1,3 +1,4 @@
+from logging import NullHandler
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField
 from wtforms.validators import DataRequired, Length, NumberRange
@@ -15,7 +16,7 @@ class SearchEmployeesForm(FlaskForm):
 class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking')], validators= [DataRequired()])
+    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking')])
     submit = SubmitField('Add Employee')
 
 class AddEmployeeOfficeForm(FlaskForm):

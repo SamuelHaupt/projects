@@ -79,7 +79,6 @@ def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
 
     employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
-
     cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
     employee = cursor.fetchone()
 
@@ -91,11 +90,9 @@ def updateEmployee(employeeID):
     if form.validate_on_submit():
             
             query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
-
             db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
 
             query2 = '''UPDATE Employees_OfficeSites SET officeSiteID = %s WHERE employeeID = %s;'''
-
             db.execute_query(db_connection=db_connection, query=query2, query_params=(form.officeID.data, employeeID))
 
             flash(f'Employee {form.firstName.data} {form.lastName.data} updated successfully.', 'success')
