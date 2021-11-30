@@ -19,7 +19,7 @@ CREATE TABLE `OfficeSites` (
 DROP TABLE IF EXISTS employees;
 CREATE TABLE `Employees` (
     `employeeID` int(7) NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-    `departmentID` int(4) NOT NULL,
+    `departmentID` int(4),
     `firstName` varchar(255) NOT NULL,
     `lastName` varchar(255) NOT NULL
 ) ENGINE=InnoDB;

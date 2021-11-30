@@ -74,6 +74,8 @@ def addemployee():
     form2 = AddEmployeeOfficeForm()
 
     if form.validate_on_submit():
+        if form.departmentID.data == 'None':
+            form.departmentID.data = None
 
         query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'''
         cur = db.execute_query(db_connection=db_connection, query=query, query_params = (form.firstName.data, form.lastName.data, form.departmentID.data))
@@ -104,17 +106,18 @@ def updateEmployee(employeeID):
         form.officeID.data = employees_officeSite['officeSiteID']
 
     if form.validate_on_submit():
-            print(form.data)
-            query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
 
-            db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
+        if form.departmentID.data == 'None':
+            form.departmentID.data = None
 
-            query2 = '''UPDATE Employees_OfficeSites SET officeSiteID = %s WHERE employeeID = %s;'''
+        query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
 
-            db.execute_query(db_connection=db_connection, query=query2, query_params=(form.officeID.data, employeeID))
+        query2 = '''UPDATE Employees_OfficeSites SET officeSiteID = %s WHERE employeeID = %s;'''
+        db.execute_query(db_connection=db_connection, query=query2, query_params=(form.officeID.data, employeeID))
 
-            flash(f'Employee {form.firstName.data} {form.lastName.data} updated successfully.', 'success')
-            return redirect(url_for('employees'))
+        flash(f'Employee {form.firstName.data} {form.lastName.data} updated successfully.', 'success')
+        return redirect(url_for('employees'))
 
     return render_template('updateEmployee.html', title='Update Employee', form=form)
 

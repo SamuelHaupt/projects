@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, DecimalField
-from wtforms.validators import DataRequired, Length, NumberRange
+from wtforms.validators import DataRequired, InputRequired, Length, NumberRange
 
 ## Use EqualTo validator from wtforms.validators to verify if employeeID and officeSitesID are the same. 
 ## Use BooleanField validator, maybe?
@@ -15,18 +15,18 @@ class SearchEmployeesForm(FlaskForm):
 class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking')], validators= [DataRequired()])
+    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking'), (None, 'NULL')], validators= [DataRequired()])
     submit = SubmitField('Add Employee')
 
 class AddEmployeeOfficeForm(FlaskForm):
-    officeID = SelectField('Office ID', choices=['202', '205', '210', '211', '9999'], validators=[DataRequired(), NumberRange(min=0, max=9999)])
+    officeID = SelectField('Office ID', choices=[1, 202, 205, 210, 211], validators=[DataRequired(), NumberRange(min=0, max=9999)])
     submit = SubmitField('Add Employee Office Site')
 
 class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', coerce=int, choices=['1', '2', '3'], validators= [DataRequired()])
-    officeID = SelectField('Office ID',  coerce=int, choices=['202', '205', '210', '211', '9999'], validators=[DataRequired()])
+    departmentID = SelectField('Depart ID', coerce=int,  choices=[1, 2, 3], validators= [DataRequired()])
+    officeID = SelectField('Office ID', coerce=int, choices=[1, 202, 205, 210, 211, None], validators=[DataRequired()])
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
