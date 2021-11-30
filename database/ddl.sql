@@ -76,11 +76,11 @@ LOCK TABLES `OfficeSites` WRITE;
 /*!40000 ALTER TABLE `OfficeSites` DISABLE KEYS */;
 
 INSERT INTO `OfficeSites` (`officeSiteID`, `address`) VALUES
+    (0, 'REMOTE'),
     (202, '154 Sunset Boulevard, Bayview, California 90005'),
     (205, '2005 West Hills Drive, Los Angeles, California 90006'),
     (210, '5001 Santa Monica Boulevard, Santa Monica, California 90011'),
-    (NULL, '5050 Santa Clara Boulevard, Santa Monica, California 90011'),
-    (9999, 'REMOTE');
+    (NULL, '5050 Santa Clara Boulevard, Santa Monica, California 90011');
 
 /*!40000 ALTER TABLE `OfficeSites` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -106,7 +106,7 @@ INSERT INTO `Employees_OfficeSites` (`officeSiteID`, `employeeID`) VALUES
     (202, 1),
     (202, 2),
     (210, 3),
-    (9999, 4);
+    (1, 4);
 
 /*!40000 ALTER TABLE `Employees_OfficeSites` ENABLE KEYS */;
 UNLOCK TABLES;

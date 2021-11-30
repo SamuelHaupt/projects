@@ -18,6 +18,17 @@ Make sure to add .env file with the following info:
 340DB=cs340_lastnamef
 '''
 
+
+# Citation for the following function:
+# Date: 11/27/2021
+# Copied from:
+# Source URL: https://stackoverflow.com/questions/55503515/flask-jinja-template-format-a-string-to-currency
+@app.template_filter()
+def currencyFormat(value):
+    value = float(value)
+    return "${:,.2f}".format(value)
+
+
 @app.route('/')
 @app.route('/home')
 def home():
@@ -55,6 +66,8 @@ def employees():
 
     return render_template('employees.html', title='Employees', employeesList=employees, officeSitesList=employees_officeSites, form=form)
 
+
+
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
     form = AddEmployeeForm()
@@ -73,22 +86,25 @@ def addemployee():
     
     return render_template('addemployee.html', title='Add Employee', form=form, form2=form2)
 
-
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
 
-    employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
-    cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
-    employee = cursor.fetchone()
-
     if request.method == 'GET':
+        employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
+        cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
+        employee = cursor.fetchone()
         form.lastName.data = employee['lastName']
         form.firstName.data = employee['firstName']
         form.departmentID.data = employee['departmentID']
 
+        query = f'''SELECT officeSiteID FROM Employees_OfficeSites WHERE `employeeID` = %s;'''
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(employee['employeeID'],))
+        employees_officeSite = cursor.fetchone()
+        form.officeID.data = employees_officeSite['officeSiteID']
+
     if form.validate_on_submit():
-            
+            print(form.data)
             query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
             db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
 
@@ -99,8 +115,9 @@ def updateEmployee(employeeID):
             return redirect(url_for('employees'))
 
     return render_template('updateEmployee.html', title='Update Employee', form=form)
-    
-    
+
+
+
 @app.route('/employees/delete/<employeeID>', methods=['GET','POST'])
 def deleteEmployee(employeeID):
     
@@ -110,6 +127,18 @@ def deleteEmployee(employeeID):
     flash(f'Employee deleted successfully.', 'success')
 
     return redirect(url_for('employees'))
+
+@app.route('/employees/officesite/delete/<employeeID>', methods=['GET','POST'])
+def deleteEmployeeOfficeSite(employeeID):
+    
+    query ='''DELETE FROM Employees_OfficeSites WHERE employeeID = %s;'''            
+    db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
+
+    flash(f'Employee deleted successfully.', 'success')
+
+    return redirect(url_for('employees'))
+
+
 
 @app.route('/paystubs')
 def paystubs():
@@ -138,6 +167,7 @@ def addpaystub():
     return render_template('addpaystub.html', title='Add Pay Stub', form=form, employeesList=employees)
 
 
+
 @app.route('/departments')
 def departments():
     query = 'SELECT * FROM Departments;'
@@ -145,6 +175,7 @@ def departments():
     departments = cursor.fetchall()
 
     return render_template('departments.html', title='Departments', departmentsList=departments)
+
 
 @app.route('/addDepart', methods=['GET', 'POST'])
 def addDepart():
@@ -158,6 +189,7 @@ def addDepart():
         return redirect(url_for('departments'))
 
     return render_template('addDepart.html', title='Add Department', form=form)
+
 
 
 @app.route('/officesites')
@@ -180,6 +212,7 @@ def addofficesite():
         return redirect(url_for('officesites'))
 
     return render_template('addofficesite.html', title='Add Department', form=form)
+
 
 
 if __name__ == '__main__':

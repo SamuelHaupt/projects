@@ -74,7 +74,7 @@
 
                 </td>
                 <td>
-                    <a class='btn btn-danger' href='{{ url_for("deleteEmployee", employeeID = employee.employeeID) }}'>Delete</a>
+                    <a class='btn btn-danger' href='{{ url_for("deleteEmployee", employeeID=employee.employeeID) }}'>Delete</a>
                 </td>
             </tr>
             {% endfor %}
@@ -95,13 +95,13 @@
             <tr>
                 <td>{{ id.employeeID }}</td>
                 <td>{{ id.officeSiteID }}</td>
+                <!-- Keeping just in case Delete or Update is needed for intersection table.
                 <td>
                     <a class='btn btn-success' href='{{ url_for("employees")}}'>Update</a>
-
                 </td>
                 <td>
-                    <a class='btn btn-danger' href='{{ url_for("employees") }}'>Delete</a>
-                </td>
+                    <a class='btn btn-danger' href='{{ url_for("deleteEmployeeOfficeSite", employeeID=id.employeeID) }}'>Delete</a>
+                </td> -->
             </tr>
             {% endfor %}
         </tbody>
