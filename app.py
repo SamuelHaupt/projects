@@ -45,7 +45,6 @@ def employees():
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
 
-        db.ping(True)
         query = f'''SELECT * FROM Employees WHERE {selectedFilter} = %s;'''
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
         employees = cursor.fetchall()
@@ -57,7 +56,6 @@ def employees():
         employees_officeSites = cursor.fetchall()
     
     else:
-        db.ping(True)
         query = '''SELECT * FROM Employees;'''
         cursor = db.execute_query(db_connection=db_connection, query=query)
         employees = cursor.fetchall()
@@ -80,7 +78,6 @@ def addemployee():
         if form.departmentID.data == '0':
             form.departmentID.data = None
 
-        db.ping(True)
         query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'''
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params = (form.firstName.data, form.lastName.data, form.departmentID.data))
 
@@ -98,7 +95,6 @@ def updateEmployee(employeeID):
 
     if request.method == 'GET':
 
-        db.ping(True)
         employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
         cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
         employee = cursor.fetchone()
@@ -119,7 +115,6 @@ def updateEmployee(employeeID):
         if form.departmentID.data == 0:
             form.departmentID.data = None
 
-        db.ping(True)
         query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
 
@@ -135,8 +130,7 @@ def updateEmployee(employeeID):
 
 @app.route('/employees/delete/<employeeID>', methods=['GET','POST'])
 def deleteEmployee(employeeID):
-    
-    db.ping(True)
+   
     query ='''DELETE FROM Employees WHERE employeeID = %s;'''            
     db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
 
@@ -146,8 +140,7 @@ def deleteEmployee(employeeID):
 
 @app.route('/employees/officesite/delete/<employeeID>', methods=['GET','POST'])
 def deleteEmployeeOfficeSite(employeeID):
-    
-    db.ping(True)
+   
     query ='''DELETE FROM Employees_OfficeSites WHERE employeeID = %s;'''            
     db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
 
@@ -159,8 +152,6 @@ def deleteEmployeeOfficeSite(employeeID):
 
 @app.route('/paystubs')
 def paystubs():
-
-    db.ping(True)
     query = 'SELECT * FROM PayStubs;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     payStubs = cursor.fetchall()
@@ -170,14 +161,11 @@ def paystubs():
 @app.route('/addpaystub', methods=['GET', 'POST'])
 def addpaystub():
     form = AddPayStubForm()
-
-    db.ping(True)
     query = 'SELECT * FROM Employees;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     employees = cursor.fetchall()
     
     if form.validate_on_submit():
-        db.ping(True)
         query = '''INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'''
         query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
         db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
@@ -190,8 +178,7 @@ def addpaystub():
 
 
 @app.route('/departments')
-def departments():
-    db.ping(True)
+def departments()
     query = 'SELECT * FROM Departments;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     departments = cursor.fetchall()
@@ -204,7 +191,6 @@ def addDepart():
     form = AddDepartmentForm()
 
     if form.validate_on_submit():
-        db.ping(True)
         query = '''INSERT INTO `Departments` (`name`) VALUES (%s);'''
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.name.data,))
 
@@ -216,8 +202,7 @@ def addDepart():
 
 
 @app.route('/officesites')
-def officesites():
-    db.ping(True)
+def officesites()
     query = 'SELECT * FROM OfficeSites;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     officeSites = cursor.fetchall()
@@ -229,7 +214,6 @@ def addofficesite():
     form = AddOfficeSiteForm()
 
     if form.validate_on_submit():
-        db.ping(True)
         query = '''INSERT INTO `OfficeSites` (`address`) VALUES (%s);'''
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.address.data,))
 

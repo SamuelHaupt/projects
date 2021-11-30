@@ -17,6 +17,7 @@ def connect_to_database(host=host, user=user, password=password, db=db):
     Connects to a database and returns a database objects
     '''
     db_connection = MySQLdb.connect(host,user,password,db)
+    db_connection.ping(True)
     return db_connection
 
 
