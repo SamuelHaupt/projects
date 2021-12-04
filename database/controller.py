@@ -17,6 +17,7 @@ def connect_to_database(host=host, user=user, password=password, db=db):
     Connects to a database and returns a database objects
     '''
     db_connection = MySQLdb.connect(host,user,password,db)
+    db_connection.ping(True)
     return db_connection
 
 
@@ -56,10 +57,8 @@ def execute_query(db_connection = None, query = None, query_params = ()):
 if __name__ == '__main__':
     print('Executing a sample query')
     db = connect_to_database()
-    params = (2, 5, 6)
-    placeHolder = ', '.join(['%s'] * len(params))
-    print(placeHolder)
-    query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({placeHolder});'''
+    params = (None,'Nathan', 'MacTest')
+    query = '''INSERT INTO `Employees` (`departmentID`, `firstName`, `lastName`) VALUES (%s, %s, %s);'''
     results = execute_query(db, query, params)
     print(f'Printing results of {query}')
 
