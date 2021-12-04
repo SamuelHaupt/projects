@@ -161,7 +161,7 @@ def paystubs():
     cursor = db.execute_query(db_connection=db_connection, query=query)
     payStubs = cursor.fetchall()
 
-    return render_template('paystubs.html', title='Paystubs', paystubsList=payStubs)
+    return render_template('paystubs.html', title='Pay Stubs', paystubsList=payStubs)
 
 @app.route('/addpaystub', methods=['GET', 'POST'])
 def addpaystub():
