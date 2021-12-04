@@ -62,16 +62,10 @@ def employees():
             cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
             employees_officeSites = cursor.fetchall()
 
-            # Creates Tuple of employee IDs
-            employeeIDs = list()
-            for employee in employees_officeSites:
-                employeeIDs.append(employee['employeeID'])
-            employeeIDs = tuple(employeeIDs)
-            placeholders = ','.join(['%s']* len(employeeIDs))
-
             # SELECT from Employees that match employee IDs
-            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({placeholders});'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=employeeIDs)
+            subquery = '''SELECT employeeID FROM Employees_OfficeSites WHERE `officeSiteID` = %s'''
+            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({subquery});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
             employees = cursor.fetchall()
 
         # Search based on all other filters
