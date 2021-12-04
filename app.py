@@ -6,7 +6,7 @@ from MySQLdb import cursors
 # https://docs.python.org/3/library/configparser.html
 
 
-from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm
+from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm, update_form_choices
 import database.controller as db
 
 app = Flask(__name__)
@@ -45,13 +45,15 @@ def home():
 # **********************
 @app.route('/employees', methods=['GET', 'POST'])
 def employees():
-    form = SearchEmployeesForm()    
+    
+    form = SearchEmployeesForm()
 
     # if user is searching for employees based on filters.
     if request.method == 'POST' and form.validate_on_submit():
 
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
+        # departmentChoices =
 
         # Search based on Office Site ID
         if selectedFilter == 'officeSiteID':
@@ -101,6 +103,7 @@ def employees():
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
     form = AddEmployeeForm()
+    update_form_choices(db, db_connection, form)
 
     if form.validate_on_submit():
         
@@ -127,6 +130,7 @@ def addemployee():
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
+    update_form_choices(db, db_connection, form)
 
     # when user first lands on update page display selected Employee's info in update fields
     if request.method == 'GET':
