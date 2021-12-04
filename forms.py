@@ -48,6 +48,11 @@ class AddOfficeSiteForm(FlaskForm):
     submit = SubmitField('Add Office Site')
 
 
+# Citation for the following functions:
+# Date: 12/04/2021
+# Title: Custom Fields
+# Source URL: https://wtforms.readthedocs.io/en/2.3.x/fields/#custom-fields
+
 # Function to dynamically display select fields for department IDs and officeSite IDs for adding and updating Employees
 def update_form_choices(db, db_connection, form):
     query = '''SELECT officeSiteID, address FROM OfficeSites;'''
