@@ -50,15 +50,34 @@ def employees():
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
 
-        query = f'SELECT * FROM Employees WHERE {selectedFilter} = %s;'
-        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-        employees = cursor.fetchall()
+        if selectedFilter == 'officeSiteID':
 
-        employeeIDsSubquery = f'SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'
+            query = '''SELECT employeeID, officeSiteID FROM Employees_OfficeSites WHERE `officeSiteID` = %s;'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
 
-        query = f'SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'
-        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-        employees_officeSites = cursor.fetchall()
+            employeeIDs = list()
+            for employee in employees_officeSites:
+                employeeIDs.append(employee['employeeID'])
+
+            employeeIDs = tuple(employeeIDs)
+            placeholders = ','.join(['%s']* len(employeeIDs))
+
+            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({placeholders});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=employeeIDs)
+            employees = cursor.fetchall()
+
+        else:
+
+            query = f'SELECT * FROM Employees WHERE {selectedFilter} = %s;'
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees = cursor.fetchall()
+
+            employeeIDsSubquery = f'SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'
+
+            query = f'SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
     
     else:
         query = 'SELECT * FROM Employees;'
