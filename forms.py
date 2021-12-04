@@ -22,14 +22,14 @@ class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
     departmentID = SelectField('Depart ID', choices=list(), validators= [InputRequired()])
-    officeID = SelectField('Office ID', choices=list(), validators=[InputRequired(), NumberRange(min=0, max=99999)])
+    officeID = SelectField('Office ID', choices=list(), validators=[InputRequired()])
     submit = SubmitField('Add Employee')
 
 class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
     departmentID = SelectField('Depart ID', coerce=int, choices=list(), validators= [InputRequired()])
-    officeID = SelectField('Office ID', coerce=int, choices=list(), validators=[InputRequired(), NumberRange(min=0, max=99999)])
+    officeID = SelectField('Office ID', coerce=int, choices=list(), validators=[InputRequired()])
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
