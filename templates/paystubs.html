@@ -7,6 +7,8 @@
     <p><small><a class='links' href='{{ url_for("addpaystub") }}'>Add Pay Stub</a></small></p>
     <table style="margin-left: auto; margin-right: auto;">
         <thead>
+
+            <!-- Display all payStubs information -->
             <tr class='no-hover'>
                 <th class='table-left-head'>Pay Stub ID</th>
                 <th>Employee ID</th>
@@ -18,6 +20,8 @@
             </tr>
         </thead>
         <tbody>
+
+            <!-- Get all payStubs' IDs and pay date and pay rate and hours worked -->
             {% for paystub in paystubsList %}
             <tr>
                 <td>{{ paystub.payStubID }}</td>
