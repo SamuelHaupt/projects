@@ -58,16 +58,16 @@
 
                     <!-- Add in employee office ID-->
                     <div class='col'>
-                        {{ form2.officeID.label(class='form-control-label') }}
-                        {% if form2.officeID.errors %}
-                            {{ form2.officeID(class='form-control form-control-lg is-invalid') }}
+                        {{ form.officeID.label(class='form-control-label') }}
+                        {% if form.officeID.errors %}
+                            {{ form.officeID(class='form-control form-control-lg is-invalid') }}
                             <div class='invalid-feedback'>
-                                {% for error in form2.officeID.errors %}
+                                {% for error in form.officeID.errors %}
                                     <span>{{ error }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form2.officeID(class='form-control form-control-lg') }}
+                            {{ form.officeID(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
                 </div>
@@ -78,6 +78,9 @@
 
             <div class='col'>
                 {{ form.submit(class='btn btn-light') }}
+            </div>
+            <div class='col'>
+            <a class='btn btn-light' href='{{ url_for("employees") }}'>Cancel</a>
             </div>
             <br />
         </form>

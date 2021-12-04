@@ -6,7 +6,7 @@ from MySQLdb import cursors
 # https://docs.python.org/3/library/configparser.html
 
 
-from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
+from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
 
 app = Flask(__name__)
@@ -85,7 +85,6 @@ def employees():
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
     form = AddEmployeeForm()
-    form2 = AddEmployeeOfficeForm()
 
     if form.validate_on_submit():
         
@@ -98,12 +97,12 @@ def addemployee():
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params = (form.firstName.data, form.lastName.data, form.departmentID.data))
 
         query = 'INSERT INTO `Employees_OfficeSites` (`officeSiteID`, `employeeID`) VALUES (%s, %s);'
-        db.execute_query(db_connection=db_connection, query=query, query_params = (form2.officeID.data, cursor.lastrowid))
+        db.execute_query(db_connection=db_connection, query=query, query_params = (form.officeID.data, cursor.lastrowid))
 
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
         return redirect(url_for('employees'))
     
-    return render_template('addemployee.html', title='Add Employee', form=form, form2=form2)
+    return render_template('addemployee.html', title='Add Employee', form=form)
 
 
 # *********************
@@ -191,7 +190,7 @@ def paystubs():
     cursor = db.execute_query(db_connection=db_connection, query=query)
     payStubs = cursor.fetchall()
 
-    return render_template('paystubs.html', title='Paystubs', paystubsList=payStubs)
+    return render_template('paystubs.html', title='Pay Stubs', paystubsList=payStubs)
 
 
 # ***********************

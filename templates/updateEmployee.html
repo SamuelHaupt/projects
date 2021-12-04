@@ -77,12 +77,11 @@
             <div class='col'>
                 {{ form.submit(class='btn btn-light') }}
             </div>
+            <div class='col'>
+            <a class='btn btn-light' href='{{ url_for("employees") }}'>Cancel</a>
+            </div>
             <br />
         </form>
     </div>
-    <div class='border-top pt-3'>
-        <small>
-            <a class='links' href='{{ url_for("employees") }}'>Employees</a>
-        </small>
-    </div>
+
 {% endblock layout_content %}
