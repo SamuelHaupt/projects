@@ -1,6 +1,12 @@
+from logging import NullHandler
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, DecimalField
 from wtforms.validators import DataRequired, InputRequired, Length, NumberRange
+
+# Citation for using Flask forms:
+# Date: 11/27/2021
+# Title: Form Validation with WTForms
+# Source URL: https://flask.palletsprojects.com/en/2.0.x/patterns/wtforms/
 
 ## Use EqualTo validator from wtforms.validators to verify if employeeID and officeSitesID are the same. 
 ## Use BooleanField validator, maybe?

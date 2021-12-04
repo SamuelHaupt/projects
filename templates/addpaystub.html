@@ -17,6 +17,7 @@
                 <legend class='border-bottom mb-3'></legend>
                 <div class='row'>
 
+                <!-- Add in employee ID -->
                 <div class='col'>
                         {{ form.employeeID.label(class='form-control-label') }}
                         {% if form.employeeID.errors %}
@@ -31,6 +32,7 @@
                         {% endif %}
                     </div>
 
+                    <!-- Add in pay date -->
                     <div class='col'>
                         {{ form.payDate.label(class='form-control-label') }}
                         {% if form.payDate.errors %}
@@ -45,6 +47,7 @@
                         {% endif %}
                     </div>
 
+                    <!-- Add in pay rate -->
                     <div class='col'>
                         {{ form.payRate.label(class='form-control-label') }}
                         {% if form.payRate.errors %}
@@ -59,6 +62,7 @@
                         {% endif %}
                     </div>
 
+                    <!-- Add in employee hours worked -->
                     <div class='col'>
                         {{ form.hoursWorked.label(class='form-control-label') }}
                         {% if form.hoursWorked.errors %}
@@ -85,6 +89,7 @@
         </form>
     </div>
 
+    <!-- Display all current employees -->
     <div class='border-top pt-3'>
     <h1>Current Employees</h1>
     <br>
@@ -98,6 +103,7 @@
             </tr>
         </thead>
         <tbody>
+            <!-- Get employee first name, last name, and ID to display -->
             {% for employee in employeesList %}
             <tr>
                 <td>{{ employee.lastName }}</td>

@@ -9,6 +9,8 @@
             <fieldset class='col'>
                 <legend class='border-bottom mb-3'></legend>
                 <div class='row'>
+
+                    <!-- Add in employee first name -->
                     <div class='col'>
                         {{ form.firstName.label(class='form-control-label') }}
 
@@ -23,6 +25,8 @@
                             {{ form.firstName(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
+
+                    <!-- Add in employee last name -->
                     <div class='col'>
                         {{ form.lastName.label(class='form-control-label') }}
                         {% if form.lastName.errors %}
@@ -36,6 +40,8 @@
                             {{ form.lastName(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
+
+                    <!--Add in employee department ID -->
                     <div class='col'>
                         {{ form.departmentID.label(class='form-control-label') }}
                         {% if form.departmentID.errors %}
@@ -50,6 +56,7 @@
                         {% endif %}
                     </div>
 
+                    <!-- Add in employee office ID-->
                     <div class='col'>
                         {{ form.officeID.label(class='form-control-label') }}
                         {% if form.officeID.errors %}
@@ -63,7 +70,6 @@
                             {{ form.officeID(class='form-control form-control-lg') }}
                         {% endif %}
                     </div>
-
                 </div>
             </fieldset>
             <br />

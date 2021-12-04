@@ -7,12 +7,15 @@
     <p><small><a class='links' href='{{ url_for("addofficesite") }}'>Add Office Site</a></small></p>
     <table style="margin-left: auto; margin-right: auto;">
         <thead>
+            
+            <!-- Display all officeSites information -->
             <tr>
                 <th>Office Site ID</th>
                 <th>Address</th>
             </tr>
         </thead>
         <tbody>
+            <!-- Get officeSites' ID and address -->
             {% for officeSite in officeSitesList %}
             <tr>
                 <td>{{ officeSite.officeSiteID }}</td>
