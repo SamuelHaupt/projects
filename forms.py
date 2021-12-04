@@ -1,6 +1,6 @@
 from logging import NullHandler
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, SelectField, DecimalField
+from wtforms import StringField, SubmitField, IntegerField, SelectField, DecimalField, DateField
 from wtforms.validators import DataRequired, InputRequired, Length, NumberRange
 
 # Citation for using Flask forms:
@@ -33,8 +33,8 @@ class UpdateEmployeeForm(FlaskForm):
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
-    employeeID = IntegerField('Employee ID', validators=[DataRequired()])
-    payDate = StringField('Pay Date', validators=[DataRequired(), Length(min=2, max=25)])
+    employeeID = SelectField('Employee ID', coerce=int, choices=list(), validators=[InputRequired()])
+    payDate = DateField('Pay Date', validators=[DataRequired(), Length(min=2, max=20)])
     payRate = DecimalField('Pay Rate', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     hoursWorked = DecimalField('Hrs Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     submit = SubmitField('Add Pay Stub')
@@ -48,8 +48,8 @@ class AddOfficeSiteForm(FlaskForm):
     submit = SubmitField('Add Office Site')
 
 
+# Function to dynamically display select fields for department IDs and officeSite IDs for adding and updating Employees
 def update_form_choices(db, db_connection, form):
-
     query = '''SELECT officeSiteID, address FROM OfficeSites;'''
     cursor = db.execute_query(db_connection=db_connection, query=query)
     officeSitesList = [(officeSite['officeSiteID'], officeSite['address']) for officeSite in cursor.fetchall()]
@@ -62,3 +62,11 @@ def update_form_choices(db, db_connection, form):
     form.officeID.choices = officeSitesList
     form.departmentID.choices = departmentsList
 
+    
+# Function to dynamically display select fields for employee IDs for adding a PayStub
+def update_form_choices2(db, db_connection, form):
+    query = '''SELECT employeeID FROM Employees;'''
+    cursor = db.execute_query(db_connection=db_connection, query=query)
+    employeesList = [(employee['employeeID'], employee['employeeID']) for employee in cursor.fetchall()]
+
+    form.employeeID.choices = employeesList
