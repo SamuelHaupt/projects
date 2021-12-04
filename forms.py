@@ -36,7 +36,7 @@ class AddPayStubForm(FlaskForm):
     employeeID = SelectField('Employee ID', coerce=int, choices=list(), validators=[InputRequired()])
     payDate = DateField('Pay Date', validators=[DataRequired(), Length(min=2, max=20)])
     payRate = DecimalField('Pay Rate', validators=[DataRequired(), NumberRange(min=0, max=99999)])
-    hoursWorked = DecimalField('Hours Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
+    hoursWorked = DecimalField('Hrs Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     submit = SubmitField('Add Pay Stub')
 
 class AddDepartmentForm(FlaskForm):

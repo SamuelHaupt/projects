@@ -53,19 +53,18 @@ def employees():
 
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
-        # departmentChoices =
 
         # Search based on Office Site ID
         if selectedFilter == 'officeSiteID':
 
             # SELECT from Employees_OfficeSites the matching entered field
-            query = '''SELECT employeeID, officeSiteID FROM Employees_OfficeSites WHERE `officeSiteID` = %s;'''
+            query = 'SELECT employeeID, officeSiteID FROM Employees_OfficeSites WHERE `officeSiteID` = %s;'
             cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
             employees_officeSites = cursor.fetchall()
 
             # SELECT from Employees that match employee IDs
-            subquery = '''SELECT employeeID FROM Employees_OfficeSites WHERE `officeSiteID` = %s'''
-            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({subquery});'''
+            subquery = 'SELECT employeeID FROM Employees_OfficeSites WHERE `officeSiteID` = %s'
+            query = f'SELECT * FROM Employees WHERE `employeeID` IN ({subquery});'
             cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
             employees = cursor.fetchall()
 
@@ -230,12 +229,20 @@ def addpaystub():
     
     # if user added into Paystubs
     if form.validate_on_submit():
-        query = 'INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'
-        query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
-        db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
+        query = 'SELECT * FROM Employees WHERE `employeeID` = %s;'
+        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(form.employeeID.data,))
+        employeeInDatabase = not all(cursor.fetchall())
+        
+        if employeeInDatabase:
+            query = 'INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'
+            query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
+            db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
 
-        flash(f'Pay Stub added successfully.', 'success')
-        return redirect(url_for('paystubs'))
+            flash('Pay Stub added successfully.', 'success')
+            return redirect(url_for('paystubs'))
+        
+        else:
+            flash('Employee not in database!', 'danger')
     
     return render_template('addpaystub.html', title='Add Pay Stub', form=form, employeesList=employees)
 
