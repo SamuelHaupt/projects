@@ -23,7 +23,6 @@ Make sure to add .env file with the following info:
 340DB=cs340_lastnamef
 '''
 
-
 # Citation for the following function:
 # Date: 11/27/2021
 # Copied from:
