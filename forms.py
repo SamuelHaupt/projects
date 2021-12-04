@@ -22,18 +22,18 @@ class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
     departmentID = SelectField('Depart ID', choices=list(), validators= [InputRequired()])
-    officeID = SelectField('Office ID', choices=list(), validators=[InputRequired(), NumberRange(min=0, max=99999)])
+    officeID = SelectField('Office ID', choices=list(), validators=[InputRequired()])
     submit = SubmitField('Add Employee')
 
 class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
     departmentID = SelectField('Depart ID', coerce=int, choices=list(), validators= [InputRequired()])
-    officeID = SelectField('Office ID', coerce=int, choices=list(), validators=[InputRequired(), NumberRange(min=0, max=99999)])
+    officeID = SelectField('Office ID', coerce=int, choices=list(), validators=[InputRequired()])
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
-    employeeID = SelectField('Employee ID', coerce=int, validators=[InputRequired()])
+    employeeID = SelectField('Employee ID', coerce=int, choices=list(), validators=[InputRequired()])
     payDate = DateField('Pay Date', validators=[DataRequired(), Length(min=2, max=20)])
     payRate = DecimalField('Pay Rate', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     hoursWorked = DecimalField('Hours Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
@@ -49,7 +49,6 @@ class AddOfficeSiteForm(FlaskForm):
 
 
 def update_form_choices(db, db_connection, form):
-
     query = '''SELECT officeSiteID, address FROM OfficeSites;'''
     cursor = db.execute_query(db_connection=db_connection, query=query)
     officeSitesList = [(officeSite['officeSiteID'], officeSite['address']) for officeSite in cursor.fetchall()]
@@ -58,7 +57,14 @@ def update_form_choices(db, db_connection, form):
     cursor = db.execute_query(db_connection=db_connection, query=query)
     departmentsList = [(department['departmentID'], department['name']) for department in cursor.fetchall()]
     departmentsList.append((0, 'NULL'))
-    
+
     form.officeID.choices = officeSitesList
     form.departmentID.choices = departmentsList
+    
 
+def update_form_choices2(db, db_connection, form):
+    query = '''SELECT employeeID FROM Employees;'''
+    cursor = db.execute_query(db_connection=db_connection, query=query)
+    employeesList = [(employee['employeeID'], employee['employeeID']) for employee in cursor.fetchall()]
+
+    form.employeeID.choices = employeesList

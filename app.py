@@ -6,7 +6,7 @@ from MySQLdb import cursors
 # https://docs.python.org/3/library/configparser.html
 
 
-from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm, update_form_choices
+from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm, update_form_choices, update_form_choices2
 import database.controller as db
 
 app = Flask(__name__)
@@ -103,6 +103,7 @@ def employees():
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
     form = AddEmployeeForm()
+    # dynamically display department IDs and officeSite IDs in select menu
     update_form_choices(db, db_connection, form)
 
     if form.validate_on_submit():
@@ -130,6 +131,7 @@ def addemployee():
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
+    # dynamically display department IDs and officeSite IDs in select menu
     update_form_choices(db, db_connection, form)
 
     # when user first lands on update page display selected Employee's info in update fields
@@ -219,6 +221,9 @@ def paystubs():
 @app.route('/addpaystub', methods=['GET', 'POST'])
 def addpaystub():
     form = AddPayStubForm()
+    # dynamically display employee IDs in select menu
+    update_form_choices2(db, db_connection, form)
+
     query = 'SELECT * FROM Employees;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     employees = cursor.fetchall()
