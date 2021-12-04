@@ -47,23 +47,46 @@ def home():
 def employees():
     form = SearchEmployeesForm()    
 
-    # if user is searching for specific employee
+    # if user is searching for employees based on filters.
     if request.method == 'POST' and form.validate_on_submit():
 
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
 
-        # SELECT from Employees the matching entered field
-        query = f'SELECT * FROM Employees WHERE {selectedFilter} = %s;'
-        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-        employees = cursor.fetchall()
+        # Search based on Office Site ID
+        if selectedFilter == 'officeSiteID':
 
-        employeeIDsSubquery = f'SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'
+            # SELECT from Employees_OfficeSites the matching entered field
+            query = '''SELECT employeeID, officeSiteID FROM Employees_OfficeSites WHERE `officeSiteID` = %s;'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
 
-        # SELECT from Employees_OfficeSites the matching entered field
-        query = f'SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'
-        cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
-        employees_officeSites = cursor.fetchall()
+            # Creates Tuple of employee IDs
+            employeeIDs = list()
+            for employee in employees_officeSites:
+                employeeIDs.append(employee['employeeID'])
+            employeeIDs = tuple(employeeIDs)
+            placeholders = ','.join(['%s']* len(employeeIDs))
+
+            # SELECT from Employees that match employee IDs
+            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({placeholders});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=employeeIDs)
+            employees = cursor.fetchall()
+
+        # Search based on all other filters
+        else:
+
+            # SELECT from Employees the matching entered field
+            query = f'SELECT * FROM Employees WHERE {selectedFilter} = %s;'
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees = cursor.fetchall()
+
+            employeeIDsSubquery = f'SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'
+
+            # SELECT from Employees_OfficeSites the matching entered field
+            query = f'SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
+            employees_officeSites = cursor.fetchall()
     
     # if user is not searching for specific employee, display all employee info
     else:
