@@ -48,6 +48,7 @@ class AddOfficeSiteForm(FlaskForm):
     submit = SubmitField('Add Office Site')
 
 
+# Function to dynamically display select fields for department IDs and officeSite IDs for adding and updating Employees
 def update_form_choices(db, db_connection, form):
     query = '''SELECT officeSiteID, address FROM OfficeSites;'''
     cursor = db.execute_query(db_connection=db_connection, query=query)
@@ -60,8 +61,9 @@ def update_form_choices(db, db_connection, form):
 
     form.officeID.choices = officeSitesList
     form.departmentID.choices = departmentsList
-    
 
+    
+# Function to dynamically display select fields for employee IDs for adding a PayStub
 def update_form_choices2(db, db_connection, form):
     query = '''SELECT employeeID FROM Employees;'''
     cursor = db.execute_query(db_connection=db_connection, query=query)
