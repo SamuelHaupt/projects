@@ -231,18 +231,14 @@ def addpaystub():
     if form.validate_on_submit():
         query = 'SELECT * FROM Employees WHERE `employeeID` = %s;'
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(form.employeeID.data,))
-        employeeInDatabase = not all(cursor.fetchall())
+        cursor.fetchall()
         
-        if employeeInDatabase:
-            query = 'INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'
-            query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
-            db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
+        query = 'INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'
+        query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
+        db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
 
-            flash('Pay Stub added successfully.', 'success')
-            return redirect(url_for('paystubs'))
-        
-        else:
-            flash('Employee not in database!', 'danger')
+        flash('Pay Stub added successfully.', 'success')
+        return redirect(url_for('paystubs'))
     
     return render_template('addpaystub.html', title='Add Pay Stub', form=form, employeesList=employees)
 
