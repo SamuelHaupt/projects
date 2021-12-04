@@ -1,5 +1,10 @@
-from MySQLdb import cursors
 from flask import Flask, render_template, url_for, flash, redirect, request
+from MySQLdb import cursors
+# See http://mysql-python.sourceforge.net for C API and MySQLdb user guide and troubleshooting.
+# MySQLdb has caused many issues. It is recommended to use pymysql if trying to expand on project in the future. See below for docs:
+# https://pymysql.readthedocs.io/en/latest/
+# https://docs.python.org/3/library/configparser.html
+
 
 from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddEmployeeOfficeForm, AddDepartmentForm, AddOfficeSiteForm
 import database.controller as db
@@ -45,22 +50,22 @@ def employees():
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
 
-        query = f'''SELECT * FROM Employees WHERE {selectedFilter} = %s;'''
+        query = f'SELECT * FROM Employees WHERE {selectedFilter} = %s;'
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
         employees = cursor.fetchall()
 
-        employeeIDsSubquery = f'''SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'''
+        employeeIDsSubquery = f'SELECT employeeID FROM Employees WHERE {selectedFilter} = %s'
 
-        query = f'''SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'''
+        query = f'SELECT * FROM Employees_OfficeSites WHERE `employeeID` IN ({employeeIDsSubquery});'
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
         employees_officeSites = cursor.fetchall()
     
     else:
-        query = '''SELECT * FROM Employees;'''
+        query = 'SELECT * FROM Employees;'
         cursor = db.execute_query(db_connection=db_connection, query=query)
         employees = cursor.fetchall()
 
-        query = '''SELECT * FROM Employees_OfficeSites;'''
+        query = 'SELECT * FROM Employees_OfficeSites;'
         cursor = db.execute_query(db_connection=db_connection, query=query)
         employees_officeSites = cursor.fetchall()
 
@@ -78,10 +83,10 @@ def addemployee():
         if form.departmentID.data == '0':
             form.departmentID.data = None
 
-        query = '''INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'''
+        query = 'INSERT INTO `Employees` (`firstName`, `lastName`, `departmentID`) VALUES (%s, %s, %s);'
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params = (form.firstName.data, form.lastName.data, form.departmentID.data))
 
-        query = '''INSERT INTO `Employees_OfficeSites` (`officeSiteID`, `employeeID`) VALUES (%s, %s);'''
+        query = 'INSERT INTO `Employees_OfficeSites` (`officeSiteID`, `employeeID`) VALUES (%s, %s);'
         db.execute_query(db_connection=db_connection, query=query, query_params = (form2.officeID.data, cursor.lastrowid))
 
         flash(f'Employee {form.firstName.data} {form.lastName.data} added successfully.', 'success')
@@ -95,7 +100,7 @@ def updateEmployee(employeeID):
 
     if request.method == 'GET':
 
-        employee_query = '''SELECT * FROM Employees WHERE employeeID = %s;'''
+        employee_query = 'SELECT * FROM Employees WHERE employeeID = %s;'
         cursor = db.execute_query(db_connection=db_connection, query=employee_query, query_params=(employeeID,))
         employee = cursor.fetchone()
         form.lastName.data = employee['lastName']
@@ -105,7 +110,7 @@ def updateEmployee(employeeID):
         if form.departmentID.data == None:
             form.departmentID.data = 0
         
-        query = f'''SELECT officeSiteID FROM Employees_OfficeSites WHERE `employeeID` = %s;'''
+        query = f'SELECT officeSiteID FROM Employees_OfficeSites WHERE `employeeID` = %s;'
         cursor = db.execute_query(db_connection=db_connection, query=query, query_params=(employee['employeeID'],))
         employees_officeSite = cursor.fetchone()
         form.officeID.data = employees_officeSite['officeSiteID']
@@ -115,10 +120,10 @@ def updateEmployee(employeeID):
         if form.departmentID.data == 0:
             form.departmentID.data = None
 
-        query = '''UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'''
+        query = 'UPDATE Employees SET departmentID = %s, firstName = %s, lastName = %s WHERE employeeID = %s;'
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.departmentID.data, form.firstName.data, form.lastName.data, employeeID))
 
-        query2 = '''UPDATE Employees_OfficeSites SET officeSiteID = %s WHERE employeeID = %s;'''
+        query2 = 'UPDATE Employees_OfficeSites SET officeSiteID = %s WHERE employeeID = %s;'
         db.execute_query(db_connection=db_connection, query=query2, query_params=(form.officeID.data, employeeID))
 
         flash(f'Employee {form.firstName.data} {form.lastName.data} updated successfully.', 'success')
@@ -131,7 +136,7 @@ def updateEmployee(employeeID):
 @app.route('/employees/delete/<employeeID>', methods=['GET','POST'])
 def deleteEmployee(employeeID):
    
-    query ='''DELETE FROM Employees WHERE employeeID = %s;'''            
+    query ='DELETE FROM Employees WHERE employeeID = %s;'            
     db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
 
     flash(f'Employee deleted successfully.', 'success')
@@ -141,7 +146,7 @@ def deleteEmployee(employeeID):
 @app.route('/employees/officesite/delete/<employeeID>', methods=['GET','POST'])
 def deleteEmployeeOfficeSite(employeeID):
    
-    query ='''DELETE FROM Employees_OfficeSites WHERE employeeID = %s;'''            
+    query ='DELETE FROM Employees_OfficeSites WHERE employeeID = %s;'            
     db.execute_query(db_connection=db_connection, query=query, query_params=(employeeID,))
 
     flash(f'Employee deleted successfully.', 'success')
@@ -166,7 +171,7 @@ def addpaystub():
     employees = cursor.fetchall()
     
     if form.validate_on_submit():
-        query = '''INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'''
+        query = 'INSERT INTO `PayStubs` (`employeeID`, `payDate`, `payRate`, `hoursWorked`) VALUES (%s, %s, %s, %s);'
         query_params = (form.employeeID.data, form.payDate.data, form.payRate.data, form.hoursWorked.data)
         db.execute_query(db_connection=db_connection, query=query, query_params=query_params)
 
@@ -178,7 +183,7 @@ def addpaystub():
 
 
 @app.route('/departments')
-def departments()
+def departments():
     query = 'SELECT * FROM Departments;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     departments = cursor.fetchall()
@@ -191,7 +196,7 @@ def addDepart():
     form = AddDepartmentForm()
 
     if form.validate_on_submit():
-        query = '''INSERT INTO `Departments` (`name`) VALUES (%s);'''
+        query = 'INSERT INTO `Departments` (`name`) VALUES (%s);'
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.name.data,))
 
         flash(f'Department added successfully.', 'success')
@@ -202,7 +207,7 @@ def addDepart():
 
 
 @app.route('/officesites')
-def officesites()
+def officesites():
     query = 'SELECT * FROM OfficeSites;'
     cursor = db.execute_query(db_connection=db_connection, query=query)
     officeSites = cursor.fetchall()
@@ -214,7 +219,7 @@ def addofficesite():
     form = AddOfficeSiteForm()
 
     if form.validate_on_submit():
-        query = '''INSERT INTO `OfficeSites` (`address`) VALUES (%s);'''
+        query = 'INSERT INTO `OfficeSites` (`address`) VALUES (%s);'
         db.execute_query(db_connection=db_connection, query=query, query_params = (form.address.data,))
 
         flash(f'Office Site added successfully.', 'success')
