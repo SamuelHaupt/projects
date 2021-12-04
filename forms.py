@@ -36,7 +36,7 @@ class AddPayStubForm(FlaskForm):
     employeeID = IntegerField('Employee ID', validators=[DataRequired()])
     payDate = StringField('Pay Date', validators=[DataRequired(), Length(min=2, max=25)])
     payRate = DecimalField('Pay Rate', validators=[DataRequired(), NumberRange(min=0, max=99999)])
-    hoursWorked = DecimalField('Hours Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
+    hoursWorked = DecimalField('Hrs Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     submit = SubmitField('Add Pay Stub')
 
 class AddDepartmentForm(FlaskForm):
@@ -58,7 +58,7 @@ def update_form_choices(db, db_connection, form):
     cursor = db.execute_query(db_connection=db_connection, query=query)
     departmentsList = [(department['departmentID'], department['name']) for department in cursor.fetchall()]
     departmentsList.append((0, 'NULL'))
-    
+
     form.officeID.choices = officeSitesList
     form.departmentID.choices = departmentsList
 
