@@ -21,15 +21,15 @@ class SearchEmployeesForm(FlaskForm):
 class AddEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking'), (0, 'NULL')], validators= [InputRequired()])
-    officeID = SelectField('Office ID', choices=[(1, 'REMOTE'), (202, 202), (205, 205), (210, 210), (211, 211)], validators=[InputRequired()])
+    departmentID = SelectField('Depart ID', choices=list(), validators= [InputRequired()])
+    officeID = SelectField('Office ID', choices=list(), validators=[InputRequired(), NumberRange(min=0, max=99999)])
     submit = SubmitField('Add Employee')
 
 class UpdateEmployeeForm(FlaskForm):
     lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
     firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
-    departmentID = SelectField('Depart ID', coerce=int, choices=[(1, 'Mortgage Lending'), (2, 'Investment Banking'), (3, 'Personal Banking'), (0, 'NULL')], validators= [InputRequired()])
-    officeID = SelectField('Office ID', coerce=int, choices=[(1, 'REMOTE'), (202, 202), (205, 205), (210, 210), (211, 211)], validators=[InputRequired()])
+    departmentID = SelectField('Depart ID', coerce=int, choices=list(), validators= [InputRequired()])
+    officeID = SelectField('Office ID', coerce=int, choices=list(), validators=[InputRequired(), NumberRange(min=0, max=99999)])
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
@@ -46,3 +46,19 @@ class AddDepartmentForm(FlaskForm):
 class AddOfficeSiteForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired(), Length(min=2, max=50)])
     submit = SubmitField('Add Office Site')
+
+
+def update_form_choices(db, db_connection, form):
+
+    query = '''SELECT officeSiteID, address FROM OfficeSites;'''
+    cursor = db.execute_query(db_connection=db_connection, query=query)
+    officeSitesList = [(officeSite['officeSiteID'], officeSite['address']) for officeSite in cursor.fetchall()]
+
+    query = '''SELECT departmentID, name FROM Departments;'''
+    cursor = db.execute_query(db_connection=db_connection, query=query)
+    departmentsList = [(department['departmentID'], department['name']) for department in cursor.fetchall()]
+    departmentsList.append((0, 'NULL'))
+    
+    form.officeID.choices = officeSitesList
+    form.departmentID.choices = departmentsList
+

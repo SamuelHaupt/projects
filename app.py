@@ -6,7 +6,7 @@ from MySQLdb import cursors
 # https://docs.python.org/3/library/configparser.html
 
 
-from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm
+from forms import SearchEmployeesForm, AddEmployeeForm, AddPayStubForm, UpdateEmployeeForm, AddDepartmentForm, AddOfficeSiteForm, update_form_choices
 import database.controller as db
 
 app = Flask(__name__)
@@ -45,13 +45,15 @@ def home():
 # **********************
 @app.route('/employees', methods=['GET', 'POST'])
 def employees():
-    form = SearchEmployeesForm()    
+    
+    form = SearchEmployeesForm()
 
     # if user is searching for employees based on filters.
     if request.method == 'POST' and form.validate_on_submit():
 
         searchParameter = (form.searchField.data,)
         selectedFilter = form.searchFilter.data
+        # departmentChoices =
 
         # Search based on Office Site ID
         if selectedFilter == 'officeSiteID':
@@ -61,16 +63,10 @@ def employees():
             cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
             employees_officeSites = cursor.fetchall()
 
-            # Creates Tuple of employee IDs
-            employeeIDs = list()
-            for employee in employees_officeSites:
-                employeeIDs.append(employee['employeeID'])
-            employeeIDs = tuple(employeeIDs)
-            placeholders = ','.join(['%s']* len(employeeIDs))
-
             # SELECT from Employees that match employee IDs
-            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({placeholders});'''
-            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=employeeIDs)
+            subquery = '''SELECT employeeID FROM Employees_OfficeSites WHERE `officeSiteID` = %s'''
+            query = f'''SELECT * FROM Employees WHERE `employeeID` IN ({subquery});'''
+            cursor = db.execute_query(db_connection=db_connection, query=query, query_params=searchParameter)
             employees = cursor.fetchall()
 
         # Search based on all other filters
@@ -107,6 +103,7 @@ def employees():
 @app.route('/addemployee', methods=['GET', 'POST'])
 def addemployee():
     form = AddEmployeeForm()
+    update_form_choices(db, db_connection, form)
 
     if form.validate_on_submit():
         
@@ -133,6 +130,7 @@ def addemployee():
 @app.route('/employees/update/<employeeID>', methods=['GET', 'POST'])
 def updateEmployee(employeeID):
     form = UpdateEmployeeForm()
+    update_form_choices(db, db_connection, form)
 
     # when user first lands on update page display selected Employee's info in update fields
     if request.method == 'GET':
