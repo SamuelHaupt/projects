@@ -1,7 +1,7 @@
 from logging import NullHandler
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, DecimalField, DateField
-from wtforms.validators import DataRequired, InputRequired, Length, NumberRange, ValidationError
+from wtforms.validators import DataRequired, InputRequired, Length, NumberRange
 
 # Citation for using Flask forms:
 # Date: 11/27/2021
@@ -33,8 +33,9 @@ class UpdateEmployeeForm(FlaskForm):
     submit = SubmitField('Update Employee')
 
 class AddPayStubForm(FlaskForm):
+
     employeeID = SelectField('Employee ID', coerce=int, choices=list(), validators=[InputRequired()])
-    payDate = DateField('Pay Date', validators=[DataRequired()])
+    payDate = DateField('Pay Date', validators=[InputRequired()])
     payRate = DecimalField('Pay Rate', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     hoursWorked = DecimalField('Hrs Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
     submit = SubmitField('Add Pay Stub')
