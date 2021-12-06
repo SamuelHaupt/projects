@@ -29,8 +29,8 @@ CREATE TABLE `PayStubs` (
     `payStubID` int(12) NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
     `employeeID` int(7) NOT NULL,
     `payDate` date NOT NULL,
-    `payRate` decimal(7,2) NOT NULL,
-    `hoursWorked` decimal(5,1) NOT NULL
+    `payRate` decimal(6,2) NOT NULL,
+    `hoursWorked` decimal(4,1) NOT NULL
 ) ENGINE=InnoDB;
 
 ## Change payDate to date instead of char.

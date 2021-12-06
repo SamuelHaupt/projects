@@ -1,7 +1,7 @@
 from logging import NullHandler
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, DecimalField, DateField
-from wtforms.validators import DataRequired, InputRequired, Length, NumberRange
+from wtforms.validators import InputRequired, Length, NumberRange
 
 # Citation for using Flask forms:
 # Date: 11/27/2021
@@ -13,21 +13,21 @@ from wtforms.validators import DataRequired, InputRequired, Length, NumberRange
 
 class SearchEmployeesForm(FlaskForm):
     
-    searchField = StringField('Search Parameter:', validators=[DataRequired()])     
+    searchField = StringField('Search Parameter:', validators=[InputRequired()])     
     searchFilterChoices = [('lastName', 'Last Name'), ('firstName', 'First Name'), ('departmentID', 'Department ID'), ('officeSiteID', 'Office Site ID'), ('employeeID', 'Employee ID')]
     searchFilter = SelectField(u'Select Filter', choices=searchFilterChoices)
     submit = SubmitField('Submit')
 
 class AddEmployeeForm(FlaskForm):
-    lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
-    firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
+    lastName = StringField('Last Name', validators=[InputRequired(), Length(min=2, max=255)])
+    firstName = StringField('First Name', validators=[InputRequired(), Length(min=2, max=255)])
     departmentID = SelectField('Depart ID', choices=list(), validators= [InputRequired()])
     officeID = SelectField('Office ID', choices=list(), validators=[InputRequired()])
     submit = SubmitField('Add Employee')
 
 class UpdateEmployeeForm(FlaskForm):
-    lastName = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=25)])
-    firstName = StringField('First Name', validators=[DataRequired(), Length(min=2, max=25)])
+    lastName = StringField('Last Name', validators=[InputRequired(), Length(min=2, max=255)])
+    firstName = StringField('First Name', validators=[InputRequired(), Length(min=2, max=255)])
     departmentID = SelectField('Depart ID', coerce=int, choices=list(), validators= [InputRequired()])
     officeID = SelectField('Office ID', coerce=int, choices=list(), validators=[InputRequired()])
     submit = SubmitField('Update Employee')
@@ -36,16 +36,16 @@ class AddPayStubForm(FlaskForm):
 
     employeeID = SelectField('Employee ID', coerce=int, choices=list(), validators=[InputRequired()])
     payDate = DateField('Pay Date', validators=[InputRequired()])
-    payRate = DecimalField('Pay Rate', validators=[DataRequired(), NumberRange(min=0, max=99999)])
-    hoursWorked = DecimalField('Hrs Worked', validators=[DataRequired(), NumberRange(min=0, max=99999)])
+    payRate = DecimalField('Pay Rate', validators=[InputRequired(), NumberRange(min=0, max=9999.99)])
+    hoursWorked = DecimalField('Hrs Worked', validators=[InputRequired(), NumberRange(min=0, max=999)])
     submit = SubmitField('Add Pay Stub')
 
 class AddDepartmentForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=50)])
+    name = StringField('Name', validators=[InputRequired(), Length(min=2, max=255)])
     submit = SubmitField('Add Department')
 
 class AddOfficeSiteForm(FlaskForm):
-    address = StringField('Address', validators=[DataRequired(), Length(min=2, max=50)])
+    address = StringField('Address', validators=[InputRequired(), Length(min=2, max=255)])
     submit = SubmitField('Add Office Site')
 
 
