@@ -2,3 +2,5 @@ __pycache__
 .env
 requirements.txt
 /.vscode
+.python-version
+PayrollManagement-script.txt
