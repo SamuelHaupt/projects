@@ -4,3 +4,4 @@ requirements.txt
 /.vscode
 .python-version
 PayrollManagement-script.txt
+.DS_Store
