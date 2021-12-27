@@ -1,0 +1,77 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-left: 10%;
+  padding-right: 10%;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+th {
+  background-color: #7c99b4;
+  border-radius: 4px;
+  font-size: calc(8px + 2vmin);
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding-left: .5em;
+  padding-right: .5em;
+}
+
+td {
+  font-size: calc(3px + 2vmin);
+  padding-left: .5em;
+  padding-right: .5em;
+}
+
+tr:nth-child(even){background-color: #333842;}
+
+tr:hover {
+  background-color: slategrey;
+}
+
+input {
+  text-size-adjust: 55%;
+}
+
+.ModifyRow:hover {
+  background-color: #282c34;
+}
+
+.BlankColumn {
+  background-color: #282c34;
+  width: 1%;
+}
+
+.EditIcon {
+  color: lightskyblue;
+}
+
+.DeleteIcon {
+  color: coral;
+}
+
+a {
+  color: lightgray;
+  padding: 20px;
+}
+
+a:visited {
+  color: lightgoldenrodyellow;
+}
+
+/* @media handheld, only screen and (max-width: 1024px) 
+{
+  input {
+    max-width: 80%;
+  }
+} */
+
