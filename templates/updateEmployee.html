@@ -1,0 +1,87 @@
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <h1>Update Employee</h1>
+
+    <div>
+        <form method='POST'>
+            {{ form.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+
+                    <!-- first name entry -->
+                    <div class='col'>
+                        {{ form.firstName.label(class='form-control-label') }}
+
+                        {% if form.firstName.errors %}
+                            {{ form.firstName(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.firstName.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.firstName(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- last name entry-->
+                    <div class='col'>
+                        {{ form.lastName.label(class='form-control-label') }}
+                        {% if form.lastName.errors %}
+                            {{ form.lastName(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.lastName.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.lastName(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- department ID entry -->
+                    <div class='col'>
+                        {{ form.departmentID.label(class='form-control-label') }}
+                        {% if form.departmentID.errors %}
+                            {{ form.departmentID(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.departmentID.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.departmentID(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Office ID entry -->
+                    <div class='col'>
+                        {{ form.officeID.label(class='form-control-label') }}
+                        {% if form.officeID.errors %}
+                            {{ form.officeID(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.officeID.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.officeID(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                </div>
+            </fieldset>
+            <br />
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <div class='col'>
+            <a class='btn btn-light' href='{{ url_for("employees") }}'>Cancel</a>
+            </div>
+            <br />
+        </form>
+    </div>
+
+{% endblock layout_content %}

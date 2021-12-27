@@ -1,0 +1,128 @@
+
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <h1>Employees Page</h1>
+    <br />
+
+    <h2>Search Employees</h2>
+    <div>
+        <form method='POST' action=''>
+            {{ form.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+
+                    <!-- Search fields to search for employee by selected filter -->
+                    <div class='col'>
+                        {{ form.searchField.label(class='form-control-label') }}
+
+                        {% if form.searchField.errors %}
+                            {{ form.searchField(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.searchField.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.searchField(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Search filters to search for employee by selected filter -->
+                    <div class='col'>
+                        {{ form.searchFilter.label(class='form-control-label') }}
+
+                        {% if form.searchFilter.errors %}
+                            {{ form.searchFilter(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.searchFilter.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.searchFilter(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+            <br />
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <br />
+        </form>
+    </div>
+
+    <br />
+    <p><small><a class='links' href='{{ url_for("addemployee") }}'>Add Employee</a></small></p>
+    <table style="margin-left: auto; margin-right: auto;">
+        <thead>
+
+            <!-- Display all current employee information -->
+            <tr class='no-hover'>
+                <th class='table-left-head'>Last Name</th>
+                <th>First Name</th>
+                <th>Department ID</th>
+                <th class='table-right-head'>Employee ID</th>
+                <th class='BlankColumn'></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <!-- Get employees' first and last names, department ID, and employee ID to display -->
+            {% for employee in employeesList %}
+            <tr style="padding: 5px;">
+                <td>{{ employee.lastName }}</td>
+                <td>{{ employee.firstName }}</td>
+                <td>{{ employee.departmentID }}</td>
+                <td>{{ employee.employeeID }}</td>
+                <td>
+                    <a class='btn btn-success' href='{{ url_for("updateEmployee", employeeID=employee.employeeID) }}'>Update</a>
+
+                </td>
+                <td>
+                    <a class='btn btn-danger' href='{{ url_for("deleteEmployee", employeeID=employee.employeeID) }}'>Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br />
+        <p>
+            <h6>Key: 'None' indicates NULL for the relationship with Departments.</h6>
+        </p>
+    <br />
+
+    <table>
+        <thead>
+            <!-- Display all employee_officesites information -->
+            <tr>
+                <th>Employee ID</th>
+                <th>Office Site ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Get employees_officesites employee ID and officeSite ID -->
+            {% for id in officeSitesList %}
+            <tr>
+                <td>{{ id.employeeID }}</td>
+                <td>{{ id.officeSiteID }}</td>
+                <!-- Keeping just in case Delete or Update is needed for intersection table.
+                <td>
+                    <a class='btn btn-success' href='{{ url_for("employees")}}'>Update</a>
+                </td>
+                <td>
+                    <a class='btn btn-danger' href='{{ url_for("deleteEmployeeOfficeSite", employeeID=id.employeeID) }}'>Delete</a>
+                </td> -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br />
+    <br />
+    <br />
+    <br />
+
+{% endblock layout_content %}

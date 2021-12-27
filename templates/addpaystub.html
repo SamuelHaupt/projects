@@ -1,0 +1,122 @@
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <br>
+
+    <h1>Add Pay Stub</h1>
+
+    <div>
+        <form method='POST' action=''>
+            {{ form.hidden_tag() }}
+            <fieldset class='col'>
+                <legend class='border-bottom mb-3'></legend>
+                <div class='row'>
+
+                <!-- Add in employee ID -->
+                <div class='col'>
+                        {{ form.employeeID.label(class='form-control-label') }}
+                        {% if form.employeeID.errors %}
+                            {{ form.employeeID(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.employeeID.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.employeeID(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Add in pay date -->
+                    <div class='col'>
+                        {{ form.payDate.label(class='form-control-label') }}
+                        {% if form.payDate.errors %}
+                            {{ form.payDate(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.payDate.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.payDate(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Add in pay rate -->
+                    <div class='col'>
+                        {{ form.payRate.label(class='form-control-label') }}
+                        {% if form.payRate.errors %}
+                            {{ form.payRate(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.payRate.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.payRate(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Add in employee hours worked -->
+                    <div class='col'>
+                        {{ form.hoursWorked.label(class='form-control-label') }}
+                        {% if form.hoursWorked.errors %}
+                            {{ form.hoursWorked(class='form-control form-control-lg is-invalid') }}
+                            <div class='invalid-feedback'>
+                                {% for error in form.hoursWorked.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.hoursWorked(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <br />
+            <h6>Click in Employee ID field for a list of options.</h6>
+            <h6>Note: Pay Date field must be in YYYY-MM-DD format.</h6>
+            <br />
+
+            <div class='col'>
+                {{ form.submit(class='btn btn-light') }}
+            </div>
+            <div class='col'>
+            <a class='btn btn-light' href='{{ url_for("paystubs") }}'>Cancel</a>
+            </div>
+            <br />
+        </form>
+    </div>
+
+    <!-- Display all current employees -->
+    <div class='border-top pt-3'>
+    <h1>Current Employees</h1>
+    <br>
+    <table style="margin-left: auto; margin-right: auto;">
+        <thead>
+            <tr class='no-hover'>
+                <th class='table-left-head'>Last Name</th>
+                <th>First Name</th>
+                <th class='table-right-head'>Employee ID</th>
+                <th class='BlankColumn'></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Get employee first name, last name, and ID to display -->
+            {% for employee in employeesList %}
+            <tr>
+                <td>{{ employee.lastName }}</td>
+                <td>{{ employee.firstName }}</td>
+                <td>{{ employee.employeeID }}</td>
+                <td>
+  
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+
+
+{% endblock layout_content %}

@@ -1,0 +1,32 @@
+
+{% extends 'layout.html' %}
+{% block layout_content %}
+
+    <h1>Departments Page</h1>
+    <br />
+    <p><small><a class='links' href='{{ url_for("addDepart") }}'>Add Department</a></small></p>
+    <table style="margin-left: auto; margin-right: auto;">
+        <thead>
+            <tr class='no-hover'>
+                <th class='table-left-head'>Name</th>
+                <th class='table-right-head'>Department ID</th>
+                <th class='BlankColumn'></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Display all current department's name and IDs -->
+            {% for department in departmentsList %}
+            <tr>
+                <td>{{ department.name }}</td>
+                <td>{{ department.departmentID }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br />
+    <br />
+    <br />
+    <br />
+
+{% endblock layout_content %}

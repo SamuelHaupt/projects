@@ -22,3 +22,10 @@ exercise-tracker-app-script.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+__pycache__
+.env
+requirements.txt
+/.vscode
+.python-version
+PayrollManagement-script.txt
