@@ -25,7 +25,6 @@ yarn-error.log*
 
 __pycache__
 .env
-requirements.txt
 /.vscode
 .python-version
 payroll-management-app-script.txt
