@@ -1,8 +1,8 @@
 TITLE Designing Low Level Input Output Procedures     (Proj6_hauptsa.asm)
 
 ; Author: Samuel Haupt
-; Last Modified: 05/25/2022
-; Course number/section:   CS271 Section 400
+; Last Modified: 05/30/2022
+; Course number/section: Oregon State Uni:   CS271 Section 400
 ; Project Number: Project 6         Due Date: 06/05/2022
 ; Description: COMMMMMMMMPPPPPPPLLLLLLLLLLEEEEEETTTTTTTTEEEEEEEE
 
@@ -81,6 +81,12 @@ userPromptError   BYTE  "ERROR: You did not enter a signed number or your number
 userArray     SDWORD  10 DUP(?)
 commaSpace      BYTE  ", ",0
 
+finalNumbersTitle BYTE  "You entered the following numbers: ",13,10,0
+sumOfNumbersTitle BYTE  "The sum of these numbers is: ",0
+sumOfNumbers    SDWORD  0
+truncAverageTitle BYTE  "The truncated average is: ",0
+goodbyeMessage    BYTE  "Come again!",13,10,0
+
 .code
 main PROC
 
@@ -121,14 +127,19 @@ _ReadValLoop:
   CMP ECX, 0
   JG  _ReadValLoop
 
+  CALL  CrLf
+  MOV EDX, OFFSET finalNumbersTitle
+  CALL  WriteString
+
   MOV ESI, OFFSET userArray
   MOV ECX, 9
 
 _WriteValLOOP:
   
-  
-  PUSH  charCountRead
-  PUSH  ESI   ;OFFSET OF ARRAY //// push value only
+  MOV EAX, [ESI]
+  ADD sumOfNumbers, EAX
+
+  PUSH  [ESI]   ;OFFSET OF ARRAY //// push value only
   CALL  WriteVal
 
   MOV EDX, OFFSET commaSpace
@@ -136,9 +147,35 @@ _WriteValLOOP:
   ADD ESI, FOUR_BYTES
   LOOP  _WriteValLOOP
   
-  PUSH  ESI   
+  MOV EAX, [ESI]
+  ADD sumOfNumbers, EAX
+
+  PUSH  [ESI] 
   CALL  WriteVal
-  
+  CALL  CrLf
+
+  MOV EDX, OFFSET sumOfNumbersTitle
+  CALL  WriteString
+
+  PUSH  sumOfNumbers
+  CALL  WriteVal
+  CALL  CrLf
+
+  MOV EDX, OFFSET truncAverageTitle
+  CALL  WriteString
+
+  MOV EAX, sumOfNumbers
+  CDQ
+  MOV EBX, 10
+  IDIV  EBX
+  PUSH  EAX
+  CALL  WriteVal
+
+  CALL  CrLf
+  CALL  CrLf
+
+  MOV EDX, OFFSET goodbyeMessage
+  CALL  WriteString
 
   Invoke ExitProcess,0  ; exit to operating system
 main ENDP
@@ -313,20 +350,20 @@ ReadVal ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: WriteVal
 ;
-; Description:  Displays programmer's name and program's title. Displays description of
-;       program. Calls WriteString.
-; Preconditions:  
-;         introTitle needs to be on stack at EBP + 20.
-;         intro3 needs to be on stack at EBP + 16.
-;         intro2 needs to be on stack at EBP + 12.
-;         intro1 needs to be on stack at EBP + 8.
-; Postconditions: None.
-; Receives:   introTitle (input) offset that references the starting point of the variable.
-;       intro1 (input) offset that references the starting point of the variable.
-;       intro2 (input) offset that references the starting point of the variable.
-;       intro3 (input) offset that references the starting point of the variable.
-;       FOUR_BYTES global constant that provides the constant value 4.
-; returns:    No parameters or global constants are changed.
+; Description:  Converts signed integer to ASCII byte string and writes to console.  
+;       Calls DigitsCount for the total number of characters needed for  
+;       string conversion. Sets the front of string array with negative symbol
+;       and zero at the end of array for null-termination. Divides by 10 to
+;       obtain the least significant digit and converts this value by shifting
+;       with the constant ASCII_SHIFT. Uses mDisplayString to write ASCII version
+;       of the signed integer.
+; Preconditions:  Data type needs to be signed/unsigned integer.
+; Receives:   [EBP + 8]   = indexed signed integer (input: value).
+;       ASCII_SHIFT = 48d
+;       NEGATIVE_SYMBOL = 2Dh
+;       TEN_SHIFT   = 10d
+;       FOUR_BYTES  = 4d
+; returns:    None.
 ; ---------------------------------------------------------------------------------
 WriteVal PROC
   LOCAL remainingIntegerVal:DWORD
@@ -337,15 +374,17 @@ WriteVal PROC
   PUSH  EBX
   PUSH  ECX
   PUSH  EDX
+  PUSH  EDI
   PUSH  ESI
 
-;Set up local variables.
-  MOV EBX, [EBP + 2*FOUR_BYTES] ;pass address of array
-  MOV EAX, [EBX]          ;Loaded Integer into EAX
-  MOV remainingIntegerVal, EAX  ;saving value in local variable
-  TEST  AL, AL
-  CDQ               ;sign extend EAX into EDX. Sets SF/PL (sign) flag.
+;---------------------------
+; Set local variables with passed parameter, sets negative symbol,
+; and retrieves character count from DigitsCount procedure.
+;---------------------------
+  MOV EAX, [EBP + 2*FOUR_BYTES]
+  MOV remainingIntegerVal, EAX
   MOV negativeSymbol, 0
+  CMP EAX, 0
   JNS _DoNotSetNegativeSymbol
   MOV negativeSymbol, NEGATIVE_SYMBOL
 _DoNotSetNegativeSymbol:
@@ -355,53 +394,67 @@ _DoNotSetNegativeSymbol:
   PUSH  remainingIntegerVal
   CALL  DigitsCount
 
-
-  MOV AL, 0
-  MOV negativeSymbol, AL
-  STD
+;---------------------------
+; Load negative symbol to string array and
+; set null-termination in string array.
+;---------------------------
+  LEA EDI, asciiConvertedToStr
+  MOV AL, negativeSymbol
+  CLD
   STOSB
 
-  MOV EBX, [EBP + 2*FOUR_BYTES] ;pass address of array
-  MOV EAX, [EBX]          ;Loaded Integer into EAX
-  MOV remainingIntegerVal, EAX  ;saving value in local variable
+  LEA EDI, asciiConvertedToStr  
+  ADD EDI, ECX
+  MOV AL, 0
+  STD
+  STOSB                 
   MOV EBX, TEN_SHIFT
-  CMP EAX, 0
-  JGE _IntegerNotNegative
-  MOV AL, NEGATIVE_SYMBOL
-
-
-_IntegerNotNegative:
 
 _ConvertToAsciiLOOP:
   MOV EAX, remainingIntegerVal
-  MOV EDX, 0
+  CDQ
   IDIV  EBX
   MOV remainingIntegerVal, EAX
+
+  CMP negativeSymbol, NEGATIVE_SYMBOL   ; Handles negative signed integers.
+  JNE _SkipNegationBeforeAsciiShift
+  NEG EDX
+  _SkipNegationBeforeAsciiShift:
 
   MOV AL, DL
   ADD AL, ASCII_SHIFT
   STD
   STOSB
 
+  CMP negativeSymbol, NEGATIVE_SYMBOL
+  JNE _ContinueAsciiLOOP
+
+  CMP ECX, 2
+  JNE _ContinueAsciiLOOP
+  DEC ECX                 ; Stops the conversion due to negative symbol at front.
+
+  _ContinueAsciiLOOP:
   LOOP  _ConvertToAsciiLOOP
 
-  LEA EAX, asciiConvertedToStr
-  mDisplayString EAX
+  LEA ESI, asciiConvertedToStr
+  mDisplayString ESI
 
   POP ESI
+  POP EDI
   POP EDX
   POP ECX
   POP EBX
   POP EAX
 
-  RET 2*FOUR_BYTES
+  RET 1*FOUR_BYTES
 WriteVal ENDP
 
 ; ---------------------------------------------------------------------------------
 ; Name: DigitsCount
 ;
 ; Description:  Counts the number of character digits, including the negative symbol,
-;       and returns count in ECX register.
+;       and returns count in ECX register. Uses TEN_SHIFT to divide out each 
+;       digit until quotient reaches 0.
 ; Preconditions:  Do not use ECX. Data type needs to be signed/unsigned integer.
 ; Postconditions: Changes ECX.
 ; Receives:   [EBP + 8]  = remainingIntegerVal (input: value).
@@ -419,7 +472,10 @@ DigitsCount PROC
   PUSH  EBX
   PUSH  EDX
 
-;Set up local variables.
+;---------------------------
+; Set up local variables with passed
+; parameters.
+;---------------------------
   MOV EAX, [EBP + 2*FOUR_BYTES]
   MOV integerToCount, EAX
   MOV charCount, 0
@@ -432,9 +488,9 @@ DigitsCount PROC
   JE  _NotNegativeDoNotIncCharCount
   INC charCount
 _NotNegativeDoNotIncCharCount:
+  
   MOV EBX, TEN_SHIFT
   MOV EAX, integerToCount
-
 _CharCountLoop: 
   CDQ
   IDIV  EBX
