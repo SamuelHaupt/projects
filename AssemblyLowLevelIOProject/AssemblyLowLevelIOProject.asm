@@ -1,8 +1,8 @@
 TITLE Designing Low Level Input Output Procedures     (Proj6_hauptsa.asm)
 
 ; Author: Samuel Haupt
-; Last Modified: 05/30/2022
-; Course number/section: Oregon State Uni:   CS271 Section 400
+; Last Modified: 05/31/2022
+; Course number/section: Oregon State Uni:  CS271 Section 400
 ; Project Number: Project 6         Due Date: 06/05/2022
 ; Description: COMMMMMMMMPPPPPPPLLLLLLLLLLEEEEEETTTTTTTTEEEEEEEE
 
@@ -11,11 +11,15 @@ INCLUDE Irvine32.inc
 ; ---------------------------------------------------------------------------------
 ; Name: mGetString
 ;
-; Description:  Calls ReadString and saves inputted value to userInput.
-; Preconditions:  Don't use EAX, ECX, and EDX as arguments.
-; Postconditions: None.
-; Receives:   userInput (output) local variable to input user input.
-; returns:    userInput is changed and filled with user input.
+; Description:  Macro awaits integer input from user. Saves it at address supplied and 
+;       returns the number of characters received.
+; Receives:   userPromptAddr = (input: reference) address of string array for user prompt.
+;       userInputAddr = (output: reference) address for where to store user input.
+;       userInputSize = (input: value) value of allowed user input size.
+;       charCountReadAddr = (output: reference) address of variable that stores value of
+;                 characters read from input.
+; returns:    Global variables are changed: userInput stored at userInputAddr and 
+;                       charCountRead stored at charCountReadAddr.
 ; ---------------------------------------------------------------------------------
 mGetString MACRO userPromptAddr:REQ, userInputAddr:REQ, userInputSize:REQ, charCountReadAddr:REQ
   PUSH  EAX
@@ -41,24 +45,23 @@ ENDM
 ; ---------------------------------------------------------------------------------
 ; Name: mDisplayString
 ;
-; Description:  
-; Preconditions:  
-; Postconditions: None.
-; Receives:   
-; returns:    
+; Description:  Macro for writing a string-converted integer to the console.
+; Preconditions:  Must receive address of string array.
+; Receives:   asciiConvertedToStrAddr = address of string array (input: address).
+; returns:    None.
 ; ---------------------------------------------------------------------------------
-mDisplayString MACRO stringifiedNumericalValueAddr:REQ
+mDisplayString MACRO asciiConvertedToStrAddr:REQ
   PUSH  EDX
 
-  MOV EDX, stringifiedNumericalValueAddr
+  MOV EDX, asciiConvertedToStrAddr
   CALL  WriteString
 
   POP EDX
 ENDM
 
-
 FOUR_BYTES    = 4d
 NEGATIVE_SYMBOL = 2Dh
+POSITIVE_SYMBOL = 2Bh
 ZERO      = 30h
 NINE      = 39h
 ASCII_SHIFT   = 48d
@@ -110,7 +113,7 @@ _ReadValLoop:
   CALL  ReadVal
   POP ECX
   
-  CMP EAX, 1    ;ReadVal returns EAX changed
+  CMP EAX, 1            ; Check if user input is valid.
   JNE _InvalidInput
   DEC ECX
 
@@ -185,18 +188,13 @@ main ENDP
 ;
 ; Description:  Displays programmer's name and program's title. Displays description of
 ;       program. Calls WriteString.
-; Preconditions:  
-;         introTitle needs to be on stack at EBP + 20.
-;         intro3 needs to be on stack at EBP + 16.
-;         intro2 needs to be on stack at EBP + 12.
-;         intro1 needs to be on stack at EBP + 8.
-; Postconditions: None.
-; Receives:   introTitle (input) offset that references the starting point of the variable.
-;       intro1 (input) offset that references the starting point of the variable.
-;       intro2 (input) offset that references the starting point of the variable.
-;       intro3 (input) offset that references the starting point of the variable.
+; Preconditions:  Must pass four variables by reference.
+; Receives:   [EBP + 20] = intro title and programmer (input: value).
+;       [EBP + 16] = intro 1 (input: value).
+;       [EBP + 12] = intro 2 (input: value).
+;       [EBP + 8]  = intro 3 (input: value).
 ;       FOUR_BYTES global constant that provides the constant value 4.
-; returns:    No parameters or global constants are changed.
+; returns:    None.
 ; ---------------------------------------------------------------------------------
 Introduction PROC
   PUSH  EBP
@@ -227,122 +225,151 @@ Introduction ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: ReadVal
 ;
-; Description:  Displays prog
-; Preconditions:  userPrompt needs to be on stack at EBP + 8.
-; Postconditions: None.
-; Receives:   userPrompt (input) offset that references the starting point of the variable.
-;       FOUR_BYTES global constant that provides the constant value 4.
-; returns:    No parameters or global constants are changed.
+; Description:  Requests user to input signed integer. Uses mGetString to read in the value.
+;       Detects if input contains symbol prefix (positive or negative) and if input
+;       is within required length. Applies an ASCII shift to match a number value.
+;       Sets EAX register to 1 or 0 to indicate user request was valid or not 
+;       valid (respectively). Calls CrLF.
+; Preconditions:  Data type needs to be signed/unsigned integer. Do not use EAX register.
+; Postconditions: EAX register is changed.
+; Receives:   [EBP + 8]   = (input: reference) address of userInputPrompt.
+;       [EBP + 12]  = (output: reference) address of userInput.
+;       [EBP + 16]  = (input: value) userInputSize value that is allowed for user input.
+;       [EBP + 20]  = (output: reference) address of userInputSignedInt.
+;       [EBP + 24]  = (output: reference) address of charCountRead.
+;       ASCII_SHIFT = 48d
+;       ZERO    = 30h
+;       NINE    = 39h
+;       NEGATIVE_SYMBOL = 2Dh
+;       POSITIVE_SYMBOL = 2Bh
+;       TEN_SHIFT   = 10d
+;       FOUR_BYTES  = 4d
+; returns:    EAX holds a boolean: true (1) or false (0).
 ; ---------------------------------------------------------------------------------
 ReadVal PROC
-  LOCAL negativeSymbol:BYTE
-  LOCAL charCountLOCAL:DWORD
+  LOCAL userInputAddr:DWORD
+  LOCAL userInputLength:DWORD
+  LOCAL inputSignedIntAddr:SDWORD
+  LOCAL charCountAddr:DWORD
+  LOCAL charCount:DWORD
+  LOCAL signSymbol:BYTE
+  LOCAL shiftedValue:SDWORD
+  LOCAL savedInteger:SDWORD
 
-  PUSH  EAX
   PUSH  EBX
   PUSH  ECX
   PUSH  EDX
+  PUSH  EDI
   PUSH  ESI
 
-  mGetString [EBP + 2*FOUR_BYTES], [EBP + 3*FOUR_BYTES], [EBP + 4*FOUR_BYTES], [EBP + 6*FOUR_BYTES]
-
+;---------------------------
+; Set up local variables with passed
+; parameters.
+;---------------------------
+  MOV EBX, [EBP + 3*FOUR_BYTES]
+  MOV userInputAddr, EBX
+  MOV EBX, [EBP + 4*FOUR_BYTES]
+  MOV userInputLength, EBX
+  MOV EBX, [EBP + 5*FOUR_BYTES]
+  MOV inputSignedIntAddr, EBX
   MOV EBX, [EBP + 6*FOUR_BYTES]
-  MOV EAX, [EBX]
-  MOV charCountLOCAL, EAX
-  MOV EDX, [EBP + 3*FOUR_BYTES]
-  CALL  WriteString
-  CALL  CrLf
+  MOV charCountAddr, EBX
+
+  mGetString [EBP + 2*FOUR_BYTES], userInputAddr, userInputLength, charCountAddr
   
 ;----------------------------
-; Validator. Sets EAX to 0 if invlad input.
-;      Otherwise, sets to 1.
+; Sets source and destination registers
+; and detects if input contains a sign symbol.
 ;----------------------------
-  MOV ESI, [EBP + 3*FOUR_BYTES]
-  MOV BL, BYTE PTR [ESI]
-  MOV negativeSymbol, BL
-  CMP BL, NEGATIVE_SYMBOL
-  JNE _NotNegativeInput
-  MOV EBX, charCountLOCAL
-  CMP EBX, 11
-  JG  _IsNotValidInput
-  JMP _InputWithinRange
-_NotNegativeInput:
-  MOV EBX, charCountLOCAL
-  CMP EBX, 10
-  JG  _IsNotValidInput
+  MOV EBX, charCountAddr
+  MOV EAX, [EBX]
+  MOV charCount, EAX
+  CALL  CrLf
 
-_InputWithinRange:
-  CLD 
-  MOV ECX, charCountLOCAL ;only for positive
-  MOV BL, negativeSymbol
+  MOV signSymbol, 0
+  MOV EDI, inputSignedIntAddr
+  MOV EBX, [EDI]
+  MOV savedInteger, EBX
+  MOV ESI, userInputAddr
+  MOV BL, BYTE PTR [ESI]
   CMP BL, NEGATIVE_SYMBOL
-  JNE _ConvertToSignedIntLOOP
-  INC ESI       ;Removes negative symbol from string
+  JNE _DoNotSetNegativeSignSymbol
+  MOV signSymbol, NEGATIVE_SYMBOL
+_DoNotSetNegativeSignSymbol:
+  CMP BL, POSITIVE_SYMBOL
+  JNE _DoNotSetPositiveSignSymbol
+  MOV signSymbol, POSITIVE_SYMBOL
+_DoNotSetPositiveSignSymbol:
+
+;-----------------------------
+; Establish if user input is within required length,
+; including an input with symbol prefix.
+;-----------------------------
+  CMP signSymbol, 0
+  JE  _InputDoesNotHavePrefix
+  MOV EBX, charCount
+  CMP EBX, 11
+  JG  _InputIsNotValid
+  JMP _InputWithinRange
+_InputDoesNotHavePrefix:
+  MOV EBX, charCount
+  CMP EBX, 10
+  JG  _InputIsNotValid
+  JMP _InputWithinRange
+
+;-----------------------------
+; Sets registers to loop over string array.
+; Decrementing if sign symbol included in user input.
+;-----------------------------
+_InputWithinRange:  
+  MOV ECX, charCount
+  CMP signSymbol, 0
+  JE  _ConvertToIntegerLOOP
+  INC ESI       
   DEC ECX
-_ConvertToSignedIntLOOP:
+_ConvertToIntegerLOOP:
   XOR EAX, EAX
+  CLD
   LODSB
   CMP   AL, ZERO
-  JL    _IsNotValidInput
+  JL    _InputIsNotValid
   CMP   AL, NINE
-  JG    _IsNotValidInput
+  JG    _InputIsNotValid
 
   SUB   AL, ASCII_SHIFT
-  MOV   EBX, EAX
+  CMP   signSymbol, NEGATIVE_SYMBOL
+  JNE   _DoNotNegateShiftedValue
+  NEG   EAX
+  _DoNotNegateShiftedValue:
+  MOV   shiftedValue, EAX
 
-  PUSH  EBX
-  MOV   EBX, [EBP + 5*FOUR_BYTES]
-  MOV   EAX, [EBX]
-  POP   EBX
-
+  MOV   EAX, savedInteger     
   MOV   EDX, TEN_SHIFT
-  MUL   EDX
-  ADD   EAX, EBX
-  MOV   EBX, [EBP + 5*FOUR_BYTES]
-  MOV   [EBX], EAX
-  JO    _PotentiallyInvalidInput
-  LOOP  _ConvertToSignedIntLOOP
+  IMUL  EDX
+  ADD   EAX, shiftedValue
+  JO    _InputIsNotValid        ; Detects boundaries: (neg)2^31 & 2^31 minus 1
+  MOV   savedInteger, EAX
+  MOV   [EDI], EAX
+  LOOP  _ConvertToIntegerLOOP
+  JMP _InputIsValid
 
-_PotentiallyInvalidInput:
-  MOV BL, negativeSymbol
-  CMP BL, NEGATIVE_SYMBOL
-  JNE _DoNotNegate
-  
-;Test for border case: -2147483648 (-2^31)
-  TEST  AL, AL
-  MOV EBX, [EBP + 5*FOUR_BYTES]
-  MOV EAX, [EBX]
-  DEC EAX         ;value is positive
-  TEST  AL, AL
-  NEG EAX       
-  JO  _IsNotValidInput
-  DEC EAX
-  MOV [EBX], EAX
-  JMP _IsValidInput
-
-;Test for border case: 2147483647 (2^31 -1)
-_DoNotNegate:  
-  TEST  AL, AL
-  MOV EBX, [EBP + 5*FOUR_BYTES]
-  MOV EAX, [EBX]
-  DEC EAX
-  JO  _IsNotValidInput
-  INC EAX
-  MOV [EBX], EAX
-  JMP _IsValidInput
-
-_IsValidInput:
+;-----------------------------
+; Sets EAX register to 1 if input is valid
+; and passed back to calling procedure.
+; Otherwise, EAX is set to 0.
+;-----------------------------
+_InputIsValid:
   MOV EAX, 1
   JMP _FinishedReadVal
-_IsNotValidInput:
+_InputIsNotValid:
   MOV EAX, 0
 _FinishedReadVal:
 
   POP ESI
+  POP EDI
   POP EDX
   POP ECX
   POP EBX
-  ;POP  EAX   ;returns EAX with boolean
   
   RET 5*FOUR_BYTES
 ReadVal ENDP
@@ -478,9 +505,9 @@ DigitsCount PROC
 ;---------------------------
   MOV EAX, [EBP + 2*FOUR_BYTES]
   MOV integerToCount, EAX
-  MOV charCount, 0
   MOV EBX, [EBP + 3*FOUR_BYTES]
   MOV negativeSymbol, BL
+  MOV charCount, 0
 
   
   MOV AL, BYTE PTR charCount
