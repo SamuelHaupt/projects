@@ -1,10 +1,19 @@
 TITLE Designing Low Level Input Output Procedures     (Proj6_hauptsa.asm)
 
 ; Author: Samuel Haupt
-; Last Modified: 05/31/2022
-; Course number/section: Oregon State Uni:  CS271 Section 400
+; Last Modified: 06/01/2022
+; Course number/section:   CS271 Section 400
 ; Project Number: Project 6         Due Date: 06/05/2022
-; Description: COMMMMMMMMPPPPPPPLLLLLLLLLLEEEEEETTTTTTTTEEEEEEEE
+; Description:  Program requests user to input 10 signed integers by recording
+;       string representation of inputs. Converts string integers into 
+;       signed integers and stores within an array. The conversion from string
+;       to integer shifts according to ASCII table value and represents the value 
+;       as hexidecimal at a low level. Tests input is valid by ensuring input
+;       is within the required range (neg)2^31 to 2^31 sub 1 and does not contain
+;       any improper characters that do not convert to an integer.
+;       Finally, the program reverses functionality and converts back to string
+;       before printing to console. Sum and truncated average are displayed also
+;       using a procedure to print strings.
 
 INCLUDE Irvine32.inc
 
@@ -88,6 +97,7 @@ finalNumbersTitle BYTE  "You entered the following numbers: ",13,10,0
 sumOfNumbersTitle BYTE  "The sum of these numbers is: ",0
 sumOfNumbers    SDWORD  0
 truncAverageTitle BYTE  "The truncated average is: ",0
+truncAverage    SDWORD  0
 goodbyeMessage    BYTE  "Come again!",13,10,0
 
 .code
@@ -99,11 +109,14 @@ main PROC
   PUSH  OFFSET introTitle
   CALL  Introduction
 
+;-----------------------------------
+; Loops through and reads user's input 10x.
+; Displays error message if input is invalid.
+; Stores in userArray when input is valid.
+;-----------------------------------
   MOV ECX, 10
   MOV EBX, 0
-
 _ReadValLoop:
-  PUSH  ECX
   MOV userInputSignedInt, 0
   PUSH  OFFSET charCountRead
   PUSH  OFFSET userInputSignedInt
@@ -111,18 +124,19 @@ _ReadValLoop:
   PUSH  OFFSET userInput
   PUSH  OFFSET userPrompt
   CALL  ReadVal
-  POP ECX
   
-  CMP EAX, 1            ; Check if user input is valid.
+;Check if user input is valid.
+  CMP EAX, 1              
   JNE _InvalidInput
   DEC ECX
+ 
 
+; Stores user input into userArray.
   MOV EAX, userInputSignedInt
   MOV EDI, OFFSET userArray
   MOV [EDI + EBX*FOUR_BYTES], EAX
   INC EBX
   JMP _ValidInput
-
   _InvalidInput:
   MOV EDX, OFFSET userPromptError
   CALL  WriteString
@@ -130,55 +144,42 @@ _ReadValLoop:
   CMP ECX, 0
   JG  _ReadValLoop
 
+;-----------------------------------
+; Loops through and writes 10 elements from array.
+;-----------------------------------
   CALL  CrLf
   MOV EDX, OFFSET finalNumbersTitle
   CALL  WriteString
 
   MOV ESI, OFFSET userArray
   MOV ECX, 9
-
 _WriteValLOOP:
-  
-  MOV EAX, [ESI]
-  ADD sumOfNumbers, EAX
-
-  PUSH  [ESI]   ;OFFSET OF ARRAY //// push value only
+  PUSH  [ESI]
   CALL  WriteVal
-
   MOV EDX, OFFSET commaSpace
   CALL  WriteString
   ADD ESI, FOUR_BYTES
   LOOP  _WriteValLOOP
-  
-  MOV EAX, [ESI]
-  ADD sumOfNumbers, EAX
-
   PUSH  [ESI] 
   CALL  WriteVal
   CALL  CrLf
+  CALL  CrLf
 
-  MOV EDX, OFFSET sumOfNumbersTitle
-  CALL  WriteString
 
+  PUSH  OFFSET truncAverage
+  PUSH  OFFSET sumOfNumbers
+  PUSH  OFFSET userArray
+  CALL  CalculateSumAndAverage
+  
+  PUSH  truncAverage
+  PUSH  OFFSET truncAverageTitle
   PUSH  sumOfNumbers
-  CALL  WriteVal
-  CALL  CrLf
-
-  MOV EDX, OFFSET truncAverageTitle
-  CALL  WriteString
-
-  MOV EAX, sumOfNumbers
-  CDQ
-  MOV EBX, 10
-  IDIV  EBX
-  PUSH  EAX
-  CALL  WriteVal
-
-  CALL  CrLf
-  CALL  CrLf
-
+  PUSH  OFFSET sumOfNumbersTitle
+  CALL  DisplaySumAndAverage
+  
   MOV EDX, OFFSET goodbyeMessage
   CALL  WriteString
+  CALL  CrLf
 
   Invoke ExitProcess,0  ; exit to operating system
 main ENDP
@@ -284,7 +285,6 @@ ReadVal PROC
   MOV EBX, charCountAddr
   MOV EAX, [EBX]
   MOV charCount, EAX
-  CALL  CrLf
 
   MOV signSymbol, 0
   MOV EDI, inputSignedIntAddr
@@ -534,5 +534,131 @@ _CharCountLoop:
   RET 2*FOUR_BYTES
 
 DigitsCount ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: CalculateSumAndAverage
+;
+; Description:  Calculate sum of 10 elements in array and stores in sumOfNumbers variable.
+;       Then calculates an average of those 10 elements and truncates to an integer.
+; Preconditions:  Requires array to hold signed/unsigned integers.
+; Receives:   [EBP + 8]  = userArray address (input: parameter).
+;       [EBP + 12] = sumOfNumbers address (output: parameter).
+;       [EBP + 16] = truncAverage address (output: parameter).
+;       FOUR_BYTES global constant that provides the constant value 4.
+; returns:    sumOfNumbers and truncAverage are filled with sum and average values.
+; ---------------------------------------------------------------------------------
+CalculateSumAndAverage PROC
+  LOCAL userArrayAddr:DWORD
+  LOCAL sumOfNumbersAddr:DWORD
+  LOCAL truncAverageAddr:DWORD
+
+  PUSH  EAX
+  PUSH  EBX
+  PUSH  ECX
+  PUSH  EDI
+  PUSH  ESI
+
+;---------------------------
+; Set up local variables with passed
+; parameters.
+;---------------------------
+  MOV EBX, [EBP + 2*FOUR_BYTES]
+  MOV userArrayAddr, EBX
+  MOV EBX, [EBP + 3*FOUR_BYTES]
+  MOV sumOfNumbersAddr, EBX
+  MOV EBX, [EBP + 4*FOUR_BYTES]
+  MOV truncAverageAddr, EBX
+
+  MOV ESI, userArrayAddr
+  MOV ECX, 10
+  XOR EAX, EAX
+_CalculateSumLOOP:
+  MOV EBX, [ESI]
+  ADD EAX, EBX
+  ADD ESI, FOUR_BYTES
+  LOOP  _CalculateSumLOOP
+
+  MOV EDI, sumOfNumbersAddr
+  MOV [EDI], EAX
+
+  CDQ
+  MOV EBX, 10
+  IDIV  EBX
+
+  MOV EDI, truncAverageAddr
+  MOV [EDI], EAX
+
+  POP ESI
+  POP EDI
+  POP ECX
+  POP EBX
+  POP EAX
+
+  RET 3*FOUR_BYTES
+
+CalculateSumAndAverage ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: DisplaySumAndAverage
+;
+; Description:  Display sum and average titles, and also display sum and average
+;       of 10 elements in user array.
+; Receives:   [EBP + 8] = sumOfNumbersTitle address (input: parameter).
+;       [EBP + 12] = sumOfNumbers address (input: parameter).
+;       [EBP + 16] = truncAverageTitle address (input: parameter).
+;       [EBP + 20] = truncAverage address (input: parameter).
+;       FOUR_BYTES global constant that provides the constant value 4.
+; returns:    None.
+; ---------------------------------------------------------------------------------
+DisplaySumAndAverage PROC
+  LOCAL sumOfNumbersTitleAddr:DWORD
+  LOCAL sumOfNumbersAddr:DWORD
+  LOCAL truncAverageTitleAddr:DWORD
+  LOCAL truncAverageAddr:DWORD
+
+  PUSH  EAX
+  PUSH  EBX
+  PUSH  EDX
+  PUSH  ESI
+
+;---------------------------
+; Set up local variables with passed
+; parameters.
+;---------------------------
+  MOV EBX, [EBP + 2*FOUR_BYTES]
+  MOV sumOfNumbersTitleAddr, EBX
+  MOV EBX, [EBP + 3*FOUR_BYTES]
+  MOV sumOfNumbersAddr, EBX
+  MOV EBX, [EBP + 4*FOUR_BYTES]
+  MOV truncAverageTitleAddr, EBX
+  MOV EBX, [EBP + 5*FOUR_BYTES]
+  MOV truncAverageAddr, EBX
+
+  MOV EDX, sumOfNumbersTitleAddr
+  CALL  WriteString
+
+  LEA ESI, sumOfNumbersAddr
+  PUSH  [ESI]
+  CALL  WriteVal
+  CALL  CrLf
+
+  MOV EDX, truncAverageTitleAddr
+  CALL  WriteString
+
+  LEA ESI, truncAverageAddr
+  PUSH  [ESI]
+  CALL  WriteVal
+
+  CALL  CrLf
+  CALL  CrLf
+
+  POP ESI
+  POP EDX
+  POP EBX
+  POP EAX
+
+  RET 4*FOUR_BYTES
+
+DisplaySumAndAverage ENDP
 
 END main
