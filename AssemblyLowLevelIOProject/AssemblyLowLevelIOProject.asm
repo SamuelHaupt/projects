@@ -1,9 +1,7 @@
-TITLE Designing Low Level Input Output Procedures     (Proj6_hauptsa.asm)
+TITLE Designing Low Level Input Output Procedures
 
 ; Author: Samuel Haupt
-; Last Modified: 06/01/2022
-; Course number/section:   CS271 Section 400
-; Project Number: Project 6         Due Date: 06/05/2022
+; Project Number: Project #6         Due Date: 06/05/2022
 ; Description:  Program requests user to input 10 signed integers by recording
 ;       string representation of inputs. Converts string integers into 
 ;       signed integers and stores within an array. The conversion from string
