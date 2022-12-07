@@ -3,9 +3,6 @@ Exercise Tracker App is meant to provide a web based approch to track exercises 
 + Languages: JavaScript, HTML, CSS.
 + Technology/Frameworks: MongoDB Cloud Atlas, Mongoose, Express, React, Node, REST API, Heroku, & Git.
 
-See link for deployed application: [https://exercisetrackerapplication.herokuapp.com](https://exercisetrackerapplication.herokuapp.com).
-> Server hibernates after 30 minutes of no traffic. It can take 10 to 30 seconds to wake and load fully.
-
 Resources used:
 1) [Oregon State University - Web Dev Course Material](https://canvas.oregonstate.edu/courses/1822080/assignments/syllabus)
 2) [GitHub Heroku CRA Node Example](https://github.com/mars/heroku-cra-node#user-content-switching-from-create-react-app-buildpack)
