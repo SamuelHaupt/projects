@@ -23,15 +23,22 @@ main(void)
   ssize_t read;
   
   while (1) {
-restart:
+    
+    /* Manage Background Processes */
+
+
+    /* Prompt & Read Line of Input */
+restartPrompt:
     fprintf(stderr, "%s", PS1);
     read = getline(&line, &n, stdin);
     if (read == -1) {
       err(errno, "getline error");
-      goto restart;
+      goto restartPrompt;
     }
-    printf("Chars read: %zu, Outputted line: %s", read, line);
+    //printf("Chars read: %zu, Outputted line: %s", read, line);
+    
 
+    /* Word Tokenization & Storage */
     token = strtok(line, IFS);
     //size_t wordIndex = 0;
     //int enableBackgroundProcess = 0;
@@ -40,10 +47,11 @@ restart:
       // Stops tokenizing if remaining text is commented with hash symbol.
       if (strncmp(token, "#", 1) == 0) break;
 
-      // Process token.
-      printf("Processing %s\n", token);
-      char * duplicatedToken = strdup(token);
-
+      // Stored Token
+      printf("Storing token: %s\n", token);
+      char *dupToken = strdup(token);
+      // Add to array
+      free(dupToken);
 
       token = strtok(NULL, IFS);
       if (!token) {
@@ -53,6 +61,22 @@ restart:
       }
       //wordIndex++;
     }
+
+
+    /* Parse commands */
+
+
+
+    /* Execution & Built-In Commands */
+
+
+    /* Execution & Non-Built-In Commands */
+
+
+
+    /* Waiting & Signal Handling */
+
+
   };
 
   free(line);
