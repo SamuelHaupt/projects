@@ -9,7 +9,9 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <string.h>
+#include "smallshlib.h"
 
 int
 main(void)
@@ -21,6 +23,8 @@ main(void)
   char *token;
   size_t n = 0;
   ssize_t read;
+  char *wordList = NULL;
+  size_t *wordCount = 0;
   
   while (1) {
     
@@ -35,13 +39,10 @@ restartPrompt:
       err(errno, "getline error");
       goto restartPrompt;
     }
-    //printf("Chars read: %zu, Outputted line: %s", read, line);
     
 
     /* Word Tokenization & Storage */
     token = strtok(line, IFS);
-    //size_t wordIndex = 0;
-    //int enableBackgroundProcess = 0;
     while (token) {
 
       // Stops tokenizing if remaining text is commented with hash symbol.
@@ -51,16 +52,41 @@ restartPrompt:
       printf("Storing token: %s\n", token);
       char *dupToken = strdup(token);
       // Add to array
+      process_token(&wordList, wordCount, dupToken);
       free(dupToken);
 
       token = strtok(NULL, IFS);
       if (!token) {
-        // Last word occurences of "&" indicates that the command is to be run in the background. 
-        //if (strcmp("&", "&") == 0) enableBackgroundProcess = 1;
         break;
       }
-      //wordIndex++;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /* Parse commands */
