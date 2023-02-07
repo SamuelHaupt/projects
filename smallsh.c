@@ -1,10 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
 
-#include <err.h>                                                                                                                                  
-#include <errno.h>                                                                                                                                
-#include <getopt.h>                                                                                                                               
-#include <stdio.h>                                                                                                                                
+#include <err.h>
+#include <errno.h>
+#include <getopt.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
