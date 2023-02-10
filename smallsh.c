@@ -1,4 +1,5 @@
-#define _POSIX_C_SOURCE 200809L
+//#define _POSIX_C_SOURCE 200809L
+//#define _XOPEN_SOURCE 700
 #define _GNU_SOURCE
 
 #include <err.h>
@@ -17,14 +18,14 @@ int
 main(void)
 {
   
-  char const *PS1 = getenv("PS1");
-  char const *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
+  char *ps1 = getenv("PS1");
+  char *ifs = getenv("IFS") ? getenv("IFS") : " \t\n";
   char *line = NULL;
-  char *token;
+  char *str_token;
   size_t n = 0;
   ssize_t read;
-  char *wordList = NULL;
-  size_t *wordCount = 0;
+  struct token_s *word_list = NULL;
+  size_t word_count = 0;
   
   while (1) {
     
@@ -32,31 +33,49 @@ main(void)
 
 
     /* Prompt & Read Line of Input */
-restartPrompt:
-    fprintf(stderr, "%s", PS1);
+restart_prompt:
+    fprintf(stderr, "%s", ps1);
     read = getline(&line, &n, stdin);
     if (read == -1) {
       err(errno, "getline error");
-      goto restartPrompt;
+      goto restart_prompt;
     }
     
+    if (1) {
+      /* Replaces $$ with smallsh pid. Uses strstr to detect if
+       * needle exists in haystack within str_gsub. */
+      char *sub = {0};
+      int converted = asprintf(&sub, "%jd", (intmax_t) getpid());
+      if (converted == -1) {
+        free(sub);
+        goto restart_prompt;
+      }
+      
+      char const *needle = "$$";
+      char *gsub_return = str_gsub(&line, needle, sub);
+      free(sub);
+      if (!gsub_return) goto restart_prompt;
+      line = gsub_return;
+    }
 
     /* Word Tokenization & Storage */
-    token = strtok(line, IFS);
-    while (token) {
+    str_token = strtok(line, ifs);
+    while (str_token) {
 
       // Stops tokenizing if remaining text is commented with hash symbol.
-      if (strncmp(token, "#", 1) == 0) break;
-
+      if (strncmp(str_token, "#", 1) == 0) break;
+      if (strcmp(str_token, "~/") == 0) {
+        printf("here %jd", (intmax_t) getpid());
+      }
       // Stored Token
-      printf("Storing token: %s\n", token);
-      char *dupToken = strdup(token);
+      char *dup_token = strdup(str_token);
       // Add to array
-      process_token(&wordList, wordCount, dupToken);
-      free(dupToken);
+      process_token(&word_list, &word_count, dup_token);
+      printf("Stored token: %s at index %zu\n", str_token, word_count);
+      free(dup_token);
 
-      token = strtok(NULL, IFS);
-      if (!token) {
+      str_token = strtok(NULL, ifs);
+      if (!str_token) {
         break;
       }
     }

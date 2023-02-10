@@ -7,10 +7,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <string.h>
 #include "smallshlib.h"
+
+#define arr_len(obj) (sizeof obj / sizeof *obj)
+
+struct token_s {
+  char *word;
+  char *info;
+};
 
 /* Function str_gsub provided by Ryan Gambord at Oregon State University Operating Systems Course */
 extern char *str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub)
@@ -19,7 +27,7 @@ extern char *str_gsub(char *restrict *restrict haystack, char const *restrict ne
   size_t haystack_len = strlen(str);
   size_t const needle_len = strlen(needle),
                sub_len = strlen(sub);
-
+  
   for (; (str = strstr(str, needle));) {
     ptrdiff_t offset = str - *haystack;
     if (sub_len > needle_len) {
@@ -45,9 +53,15 @@ exit:
   return str;
 }
 
-extern void process_token(char *restrict *restrict wordList, size_t *restrict wordCount, char const *restrict dupToken)
+extern void process_token(token_s *restrict *restrict word_array, size_t *restrict word_count, char *restrict token)
 {
+  struct token_s *array = *word_array;
 
+  ++(*word_count);
+  array = realloc(*word_array, sizeof **word_array * *word_count);
+  if (!array) return;
+  *word_array = array;
   
+  (*word_array)[(*word_count) - 1].word = strdup(token);
   return;
 }
