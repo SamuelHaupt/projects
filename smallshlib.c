@@ -15,11 +15,6 @@
 
 #define arr_len(obj) (sizeof obj / sizeof *obj)
 
-struct token_s {
-  char *word;
-  char *info;
-};
-
 /* Function str_gsub provided by Ryan Gambord at Oregon State University Operating Systems Course */
 extern char *str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub)
 {
@@ -53,7 +48,7 @@ exit:
   return str;
 }
 
-extern void process_token(token_s *restrict *restrict word_array, size_t *restrict word_count, char *restrict token)
+extern void process_token(token_s **word_array, size_t *restrict word_count, char *restrict token)
 {
   struct token_s *array = *word_array;
 
@@ -64,4 +59,9 @@ extern void process_token(token_s *restrict *restrict word_array, size_t *restri
   
   (*word_array)[(*word_count) - 1].word = strdup(token);
   return;
+}
+
+extern void free_token_array(token_s **word_array, size_t *restrict word_count)
+{
+
 }

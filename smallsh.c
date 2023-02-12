@@ -23,8 +23,8 @@ main(void)
   char *line = NULL;
   char *str_token;
   size_t n = 0;
-  ssize_t read;
-  struct token_s *word_list = NULL;
+  ssize_t read; 
+  token_s *word_list = NULL;
   size_t word_count = 0;
   
   while (1) {
@@ -41,22 +41,22 @@ restart_prompt:
       goto restart_prompt;
     }
     
-    if (1) {
+    //if (0) {
       /* Replaces $$ with smallsh pid. Uses strstr to detect if
        * needle exists in haystack within str_gsub. */
-      char *sub = {0};
-      int converted = asprintf(&sub, "%jd", (intmax_t) getpid());
-      if (converted == -1) {
-        free(sub);
-        goto restart_prompt;
-      }
+      //char *sub = {0};
+      //int converted = asprintf(&sub, "%jd", (intmax_t) getpid());
+      //if (converted == -1) {
+        //free(sub);
+        //goto restart_prompt;
+      //}
       
-      char const *needle = "$$";
-      char *gsub_return = str_gsub(&line, needle, sub);
-      free(sub);
-      if (!gsub_return) goto restart_prompt;
-      line = gsub_return;
-    }
+      //char const *needle = "$$";
+      //char *gsub_return = str_gsub(&line, needle, sub);
+      //free(sub);
+      //if (!gsub_return) goto restart_prompt;
+      //line = gsub_return;
+    //}
 
     /* Word Tokenization & Storage */
     str_token = strtok(line, ifs);
@@ -77,33 +77,9 @@ restart_prompt:
       str_token = strtok(NULL, ifs);
       if (!str_token) {
         break;
-      }
+      } 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
 
 
@@ -113,7 +89,26 @@ restart_prompt:
 
 
     /* Execution & Built-In Commands */
+    /* Adopted from Linux Programming Interface Chapter 25. */
+    pid_t child_pid;
+    switch (child_pid = fork()) {
+      case -1:
+        /* Handle error. */
+        
+        if (word_count == 1 && strcmp(word_list[0].word, "exit") == 0) { 
+          exit(EXIT_SUCCESS);
+        }
+        break;
+      case 0:
+        /* Perform actions specific to child. */
 
+        break;
+      default:
+        /* Perform actions specific to parent. */
+        
+
+        break;
+    }
 
     /* Execution & Non-Built-In Commands */
 
