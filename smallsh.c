@@ -20,12 +20,12 @@ main(void)
   
   char *PS1 = getenv("PS1") ? getenv("PS1") : "" ;
   char *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
-  char *line = NULL;
-  char *str_token;
+  char *line = 0;
+  char *str_token = 0;
   size_t n = 0;
-  ssize_t read; 
-  token_s *word_array = NULL;
-  size_t word_count = 0;
+  size_t read; 
+  char *words[512];
+  size_t words_count = 0;
   
   while (1) {
     
@@ -70,8 +70,8 @@ restart_prompt:
       // Stored Token
       char *dup_token = strdup(str_token);
       // Add to array
-      printf("Stored token: %s at index %zu\n", str_token, word_count);
-      process_token(&word_array, &word_count, dup_token);
+      printf("Stored token: %s at index %zu\n", str_token, words_count);
+      process_token(words, &words_count, dup_token);
       free(dup_token);
 
       str_token = strtok(NULL, IFS);
@@ -90,13 +90,13 @@ restart_prompt:
 
     /* Execution & Built-In Commands */
 
-    if (word_count == 1 && strcmp(word_array[0].word, "exit") == 0) { 
+    if (words_count == 1 && strcmp(words[0], "exit") == 0) { 
       exit(EXIT_SUCCESS);
     }
-    if (strcmp(word_array[0].word, "cd") == 0) {
-      if (word_count == 1) chdir(getenv("HOME"));
-      if (word_count == 2) chdir(word_array[1].word);
-      if (word_count > 2) err(errno, "cd command");
+    if (strcmp(words[0], "cd") == 0) {
+      if (words_count == 1) chdir(getenv("HOME"));
+      if (words_count == 2) chdir(words[1]);
+      if (words_count > 2) err(errno, "cd command");
       goto restart_prompt;
     }
     
@@ -109,8 +109,7 @@ restart_prompt:
         break;
       case 0:
         /* Perform actions specific to child. */
-        char const *dup[] = strdup(word_array[1].word);
-        execvp(word_array[0].word, dup);
+        execvp(words[0], words);
 
         break;
       default:
@@ -126,10 +125,10 @@ restart_prompt:
 
     /* Waiting & Signal Handling */
 
-    reset_token_array(&word_array, &word_count);
+    reset_token_array(words, &words_count);
   };
 
-  free(word_array);
+  // free(&words);
   free(line);
 
   exit(EXIT_SUCCESS);

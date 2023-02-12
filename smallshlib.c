@@ -48,23 +48,23 @@ exit:
   return str;
 }
 
-extern void process_token(token_s **word_array, size_t *restrict word_count, char *restrict token)
+extern void process_token(char **word_array, size_t *restrict word_count, char *restrict token)
 {
-  struct token_s *array = *word_array;
+  char *array = *word_array;
 
   ++(*word_count);
   array = realloc(*word_array, sizeof **word_array * *word_count);
   if (!array) return;
   *word_array = array;
   
-  (*word_array)[(*word_count) - 1].word = strdup(token);
+  word_array[(*word_count) - 1] = token;
   return;
 }
 
-extern void reset_token_array(token_s *restrict *restrict word_array, size_t *restrict word_count)
+extern void reset_token_array(char *restrict *restrict word_array, size_t *restrict word_count)
 {
   for (size_t i = 0; i < *word_count; ++i) {
-      free((*word_array)[i].word);
+      (*word_array)[i] = 0;
     }
-    *word_count = 0;
+  *word_count = 0;
 }
