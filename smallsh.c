@@ -24,7 +24,7 @@ main(void)
   char *str_token = 0;
   size_t n = 0;
   size_t read; 
-  char *words[512];
+  char *words[512] = {0};
   size_t words_count = 0;
   
   while (1) {
@@ -101,7 +101,9 @@ restart_prompt:
     }
     
     /* Adopted from Linux Programming Interface Chapter 25. */
+    int child_status;
     pid_t child_pid;
+    pid_t w_pid;
     switch (child_pid = fork()) {
       case -1:
         /* Handle error. */
@@ -114,8 +116,11 @@ restart_prompt:
         break;
       default:
         /* Perform actions specific to parent. */
-        
-
+        w_pid = waitpid(child_pid, &child_status, 0);
+        if (w_pid == -1) {
+          err(errno, "waitpid");
+          goto restart_prompt;
+        }
         break;
     }
 
