@@ -50,13 +50,7 @@ exit:
 
 extern void process_token(char **word_array, size_t *restrict word_count, char *restrict token)
 {
-  char *array = *word_array;
-
   ++(*word_count);
-  array = realloc(*word_array, sizeof **word_array * *word_count);
-  if (!array) return;
-  *word_array = array;
-  
   word_array[(*word_count) - 1] = token;
   return;
 }
