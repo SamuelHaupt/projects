@@ -61,7 +61,10 @@ extern void process_token(token_s **word_array, size_t *restrict word_count, cha
   return;
 }
 
-extern void free_token_array(token_s **word_array, size_t *restrict word_count)
+extern void reset_token_array(token_s *restrict *restrict word_array, size_t *restrict word_count)
 {
-
+  for (size_t i = 0; i < *word_count; ++i) {
+      free((*word_array)[i].word);
+    }
+    *word_count = 0;
 }

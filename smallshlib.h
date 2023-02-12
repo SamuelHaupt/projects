@@ -14,4 +14,4 @@ extern char *str_gsub(char *restrict *restrict haystack, char const *restrict ne
 
 extern void process_token(token_s **word_array, size_t *restrict word_count, char *restrict token);
 
-extern void free_token_array(token_s **word_array, size_t *restrict word_count);
+extern void reset_token_array(token_s *restrict *restrict word_array, size_t *restrict word_count);
