@@ -111,15 +111,16 @@ restart_prompt:
         break;
       case 0:
         /* Perform actions specific to child. */
+        printf("%s %s %s\n", words[1], words[2], words[3]);
         execvp(words[0], words);
-
+        perror("execvp errored");
         break;
       default:
         /* Perform actions specific to parent. */
         w_pid = waitpid(child_pid, &child_status, 0);
         if (w_pid == -1) {
           err(errno, "waitpid");
-          goto restart_prompt;
+          // goto restart_prompt;
         }
         break;
     }
