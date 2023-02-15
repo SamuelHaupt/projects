@@ -48,18 +48,24 @@ exit:
   return str;
 }
 
-extern void process_token(char **word_array, size_t *restrict word_count, char *restrict token)
+extern void process_token(char **words, size_t *restrict word_count, char *restrict token)
 {
+  char *str = *words;
   ++(*word_count);
-  word_array[(*word_count) - 1] = token;
+  str = realloc(words[(*word_count) - 1], sizeof **words * strlen(token));
+  if (!str) err(errno, "realloc in process_token");
+  *words = str;
+  words[(*word_count) - 1] = token;
+
+exit:
   return;
 }
 
-extern void reset_token_array(char *restrict *restrict word_array, size_t *restrict word_count)
+extern void reset_token_array(char *restrict *restrict words, size_t *restrict word_count)
 {
   for (size_t i = 0; i < *word_count; ++i) {
-      free(word_array[i]);
-      word_array[i] = 0;
+      free(words[i]);
+      words[i] = 0;
     }
   *word_count = 0;
 }
