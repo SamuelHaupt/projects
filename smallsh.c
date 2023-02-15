@@ -103,7 +103,7 @@ restart_prompt:
 
     /* Word Tokenization & Storage */
     str_token = strtok(line, IFS);
-    while (str_token) {
+    while (str_token && words_count < WORD_LIMIT) {
 
       // Stops tokenizing if remaining text is commented with hash symbol.
       if (strncmp(str_token, "#", 1) == 0) break;
