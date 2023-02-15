@@ -58,7 +58,8 @@ extern void process_token(char **word_array, size_t *restrict word_count, char *
 extern void reset_token_array(char *restrict *restrict word_array, size_t *restrict word_count)
 {
   for (size_t i = 0; i < *word_count; ++i) {
-      (*word_array)[i] = 0;
+      free(word_array[i]);
+      word_array[i] = 0;
     }
   *word_count = 0;
 }

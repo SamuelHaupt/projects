@@ -11,8 +11,11 @@
 #include <stdint.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <string.h>
 #include "smallshlib.h"
+
+#define WORD_LIMIT 512
 
 int
 main(void)
@@ -24,13 +27,29 @@ main(void)
   char *str_token = 0;
   size_t n = 0;
   size_t read; 
-  char *words[512] = {0};
+  char **words;
+  words = calloc(WORD_LIMIT, sizeof **words);
   size_t words_count = 0;
-  
-  while (1) {
-    
-    /* Manage Background Processes */
+  pid_t w_pid = 0;
+  pid_t bg_child_pid;
+  int bg_child_process;
 
+  
+
+  while (1) {
+    /* Manage Background Processes */
+    // while ((bg_child_pid = waitpid(0, &bg_child_process, WUNTRACED | WNOHANG)) > 0) {
+    //   // printf("child pid = %jd", (intmax_t) bg_child_pid)
+    //   if (WIFEXITED(bg_child_process)){
+    //     fprintf(stderr, "Child process %d done. Exit status %d.\n", bg_child_pid, WEXITSTATUS(bg_child_process));
+    //   } else if (WIFSIGNALED(bg_child_process)) {
+    //     fprintf(stderr, "Child process %d done. Signaled %d.\n", bg_child_pid, WTERMSIG(bg_child_process));
+    //   } else if (WIFSTOPPED(bg_child_process)) {
+    //     kill(bg_child_pid, SIGCONT);
+    //     fprintf(stderr, "Child process %d stopped. Continuing.\n", bg_child_pid);
+    //   }
+    //   break;
+    // }
 
     /* Prompt & Read Line of Input */
 restart_prompt:
@@ -70,19 +89,16 @@ restart_prompt:
       // Stored Token
       char *dup_token = strdup(str_token);
       // Add to array
-      printf("Stored token: %s at index %zu\n", str_token, words_count);
       process_token(words, &words_count, dup_token);
-      free(dup_token);
-
       str_token = strtok(NULL, IFS);
       if (!str_token) {
         break;
       } 
     }
     
-
-
-
+    // fd = open()
+    // dup2(fd, STDOUT_FILENO)
+    // close(fd)
 
     /* Parse commands */
 
@@ -97,39 +113,36 @@ restart_prompt:
       if (words_count == 1) chdir(getenv("HOME"));
       if (words_count == 2) chdir(words[1]);
       if (words_count > 2) err(errno, "cd command");
+      reset_token_array(words, &words_count);
       goto restart_prompt;
     }
     
     /* Adopted from Linux Programming Interface Chapter 25. */
-    int child_status;
-    pid_t child_pid;
-    pid_t w_pid;
-    switch (child_pid = fork()) {
+    switch (bg_child_pid = fork()) {
       case -1:
         /* Handle error. */
         
         break;
       case 0:
         /* Perform actions specific to child. */
-        printf("%s %s %s\n", words[1], words[2], words[3]);
+        /* Execution & Non-Built-In Commands */
+
         execvp(words[0], words);
         perror("execvp errored");
         break;
       default:
         /* Perform actions specific to parent. */
-        w_pid = waitpid(child_pid, &child_status, 0);
+        /* Waiting & Signal Handling */
+        w_pid = waitpid(bg_child_pid, &bg_child_process, 0);
         if (w_pid == -1) {
           err(errno, "waitpid");
-          // goto restart_prompt;
         }
         break;
     }
+  
 
-    /* Execution & Non-Built-In Commands */
-
-
-
-    /* Waiting & Signal Handling */
+  
+    
 
     reset_token_array(words, &words_count);
   };
