@@ -52,7 +52,6 @@ main(void)
   /* Ignore terminal interrupt signal (Control-C). */
   sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);
   
-restart_prompt:
   while (1) {
     /* Manage Background Processes */
     while ((bg_child_pid = waitpid(0, &bg_child_process, WUNTRACED | WNOHANG)) > 0) {
@@ -104,7 +103,7 @@ restart_prompt:
     /* Word Tokenization & Storage */
     str_token = strtok(line, IFS);
     while (str_token && words_count < WORD_LIMIT) {
-
+      // printf("%s", str_token);
       // Stops tokenizing if remaining text is commented with hash symbol.
       if (strncmp(str_token, "#", 1) == 0) break;
       if (strcmp(str_token, "~/") == 0) {
@@ -130,22 +129,38 @@ restart_prompt:
 
     /* Execution & Built-In Commands */
 
-    if (words_count == 1 && strcmp(words[0], "exit") == 0) { 
-      goto exit;
+    if (strcmp(words[0], "exit") == 0) {
+      if (words_count > 2) {    
+        fprintf(stderr, "Too many arguments passed with exit command.\n");
+        goto restart_prompt;
+      } else if (words_count == 2) {
+        int val = str_to_int(words[1]);
+        if ( val < 0) {
+          if (val == -1) fprintf(stderr, "Invalid argument passed with argument.\n");
+          if (val == -2) fprintf(stderr, "Argument value out of range 0 to 255.\n");
+          goto restart_prompt;
+        }
+        exit(val);
+      } else {
+        exit(EXIT_SUCCESS); // Add implied exit if second argument not passed.
+      }
     }
-    // if (strcmp(words[0], "cd") == 0) {
-    //   if (words_count == 1) chdir(getenv("HOME"));
-    //   if (words_count == 2) chdir(words[1]);
-    //   if (words_count > 2) err(errno, "cd command");
-    //   reset_token_array(words, &words_count);
-    //   goto restart_prompt;
-    // }
+
+    if (strcmp(words[0], "cd") == 0) {
+      if (words_count == 1) chdir(getenv("HOME"));
+      if (words_count == 2) chdir(words[1]);
+      if (words_count > 2) err(errno, "cd command");
+      reset_token_array(words, &words_count);
+      goto restart_prompt;
+    }
     
     /* Adopted from Linux Programming Interface Chapter 25. */
-    switch (w_pid = fork()) {
+    w_pid = fork();
+    switch (w_pid) {
       case -1:
         /* Handle error. */
         err(errno, "fork");
+        exit(errno);
         break;
       case 0:
         /* Perform actions specific to child. */
@@ -154,7 +169,7 @@ restart_prompt:
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
         fprintf(stderr, "execvp: %s\n", strerror(errno));
-        _exit(errno);
+        exit(errno);
         break;
       default:
         /* Perform actions specific to parent. */
@@ -163,16 +178,9 @@ restart_prompt:
         if (bg_child_pid == -1) {
           err(errno, "waitpid");
         }
-
-        if (strcmp(words[0], "cd") == 0) {
-          if (words_count == 1) chdir(getenv("HOME"));
-          if (words_count == 2) chdir(words[1]);
-          if (words_count > 2) err(errno, "cd command");
-          reset_token_array(words, &words_count);
-          // goto restart_prompt;
-        }
     }
-    reset_token_array(words, &words_count);
+restart_prompt:
+  reset_token_array(words, &words_count);
   };
 
 exit:

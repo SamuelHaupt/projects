@@ -15,3 +15,5 @@ extern char *str_gsub(char *restrict *restrict haystack, char const *restrict ne
 extern void process_token(char **words, size_t *restrict word_count, char *restrict token);
 
 extern void reset_token_array(char *restrict *restrict words, size_t *restrict word_count);
+
+extern int str_to_int(char *restrict str);
