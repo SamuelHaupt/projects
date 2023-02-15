@@ -38,16 +38,19 @@ main(void)
   pid_t w_pid = 0;
   pid_t bg_child_pid;
   int bg_child_process;
-  struct sigaction  sig_act_getline_current = {0}, 
-                    sig_act_getline_old = {0},
-                    sig_act_ignore = {0};
+  struct sigaction  sa_SIGINT_default = {0}, 
+                    sa_SIGINT_do_nothing = {0},
+                    sa_SIGINT_old = {0},
+                    sa_SIGINT_ignore = {0},
+                    sa_SIGTSTP_default = {0},
+                    sa_ignore = {0};
 
-  sig_act_getline_current.sa_handler = handler_with_no_action;
-  sig_act_ignore.sa_handler = SIG_IGN;
+  sa_SIGINT_do_nothing.sa_handler = handler_with_no_action;
+  sa_ignore.sa_handler = SIG_IGN;
   /* Ignore job-control stop signal (Control-Z). */
-  sigaction(SIGTSTP, &sig_act_ignore, NULL);
+  sigaction(SIGTSTP, &sa_ignore, &sa_SIGTSTP_default);
   /* Ignore terminal interrupt signal (Control-C). */
-  sigaction(SIGINT, &sig_act_ignore, NULL);
+  sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);
   
 restart_prompt:
   while (1) {
@@ -67,17 +70,17 @@ restart_prompt:
     /* Prompt & Read Line of Input */
 
     fprintf(stderr, "%s", PS1);
-    if (sigaction(SIGINT, &sig_act_getline_current, &sig_act_getline_old) == -1) err(errno, "sigaction set to current");
+    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, &sa_SIGINT_old) == -1) err(errno, "sigaction set to current");
     read = getline(&line, &n, stdin);
-    if (sigaction(SIGINT, &sig_act_getline_old, NULL) == -1) err(errno, "sigaction set to old");
-    if (read == 1) goto restart_prompt; // No input except newline character. Skip strtok below.
+    if (sigaction(SIGINT, &sa_SIGINT_old, NULL) == -1) err(errno, "sigaction set to old");
+    if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == -1) {
+      fprintf(stderr, "\n"); // Adds new line when interrupt signal is sent.
       if (feof(stdin)) goto exit;
       if (errno == EINTR) {
-        fprintf(stderr, "\n");
         clearerr(stdin);
         errno = 0;
-        goto restart_prompt;
+        continue;
       }
     }
     
@@ -147,14 +150,14 @@ restart_prompt:
       case 0:
         /* Perform actions specific to child. */
         /* Execution & Non-Built-In Commands */
-        // if (sigaction(SIGINT, &sig_act_getline_old, NULL) == -1) err(errno, "sigaction set to old"); ///// do I NEED THIS?
+        if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1) err(errno, "SIGTSTOP not set to default");
+        if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
         err(errno, "execvp errored FIX AT SOME POINT");
         break;
       default:
         /* Perform actions specific to parent. */
         /* Waiting & Signal Handling */
-        //////////////////////////// Perhaps delete.......
         bg_child_pid = waitpid(w_pid, &bg_child_process, 0);
         if (bg_child_pid == -1) {
           err(errno, "waitpid");
@@ -168,11 +171,6 @@ restart_prompt:
           // goto restart_prompt;
         }
     }
-  
-
-  
-    
-
     reset_token_array(words, &words_count);
   };
 
