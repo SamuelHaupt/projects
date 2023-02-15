@@ -17,6 +17,11 @@
 
 #define WORD_LIMIT 512
 
+static void
+handler_with_no_action(int signal)
+{
+}
+
 int
 main(void)
 {
@@ -33,31 +38,47 @@ main(void)
   pid_t w_pid = 0;
   pid_t bg_child_pid;
   int bg_child_process;
+  struct sigaction  sig_act_getline_current = {0}, 
+                    sig_act_getline_old = {0},
+                    sig_act_ignore = {0};
 
+  sig_act_getline_current.sa_handler = handler_with_no_action;
+  sig_act_ignore.sa_handler = SIG_IGN;
+  /* Ignore job-control stop signal (Control-Z). */
+  sigaction(SIGTSTP, &sig_act_ignore, NULL);
+  /* Ignore terminal interrupt signal (Control-C). */
+  sigaction(SIGINT, &sig_act_ignore, NULL);
   
-
+restart_prompt:
   while (1) {
     /* Manage Background Processes */
-    // while ((bg_child_pid = waitpid(0, &bg_child_process, WUNTRACED | WNOHANG)) > 0) {
-    //   // printf("child pid = %jd", (intmax_t) bg_child_pid)
-    //   if (WIFEXITED(bg_child_process)){
-    //     fprintf(stderr, "Child process %d done. Exit status %d.\n", bg_child_pid, WEXITSTATUS(bg_child_process));
-    //   } else if (WIFSIGNALED(bg_child_process)) {
-    //     fprintf(stderr, "Child process %d done. Signaled %d.\n", bg_child_pid, WTERMSIG(bg_child_process));
-    //   } else if (WIFSTOPPED(bg_child_process)) {
-    //     kill(bg_child_pid, SIGCONT);
-    //     fprintf(stderr, "Child process %d stopped. Continuing.\n", bg_child_pid);
-    //   }
-    //   break;
-    // }
+    while ((bg_child_pid = waitpid(0, &bg_child_process, WUNTRACED | WNOHANG)) > 0) {
+      if (WIFEXITED(bg_child_process)){
+        fprintf(stderr, "Child process %d done. Exit status %d.\n", bg_child_pid, WEXITSTATUS(bg_child_process));
+      } else if (WIFSIGNALED(bg_child_process)) {
+        fprintf(stderr, "Child process %d done. Signaled %d.\n", bg_child_pid, WTERMSIG(bg_child_process));
+      } else if (WIFSTOPPED(bg_child_process)) {
+        if (kill(bg_child_pid, SIGCONT) == -1) err(errno, "kill");
+        fprintf(stderr, "Child process %d stopped. Continuing.\n", bg_child_pid);
+      }
+    }
+    if (bg_child_pid == -1 && errno != ECHILD) err(errno, "waitpid");
 
     /* Prompt & Read Line of Input */
-restart_prompt:
+
     fprintf(stderr, "%s", PS1);
+    if (sigaction(SIGINT, &sig_act_getline_current, &sig_act_getline_old) == -1) err(errno, "sigaction set to current");
     read = getline(&line, &n, stdin);
+    if (sigaction(SIGINT, &sig_act_getline_old, NULL) == -1) err(errno, "sigaction set to old");
+    if (read == 1) goto restart_prompt; // No input except newline character. Skip strtok below.
     if (read == -1) {
-      err(errno, "getline error");
-      goto restart_prompt;
+      if (feof(stdin)) goto exit;
+      if (errno == EINTR) {
+        fprintf(stderr, "\n");
+        clearerr(stdin);
+        errno = 0;
+        goto restart_prompt;
+      }
     }
     
     //if (0) {
@@ -107,37 +128,45 @@ restart_prompt:
     /* Execution & Built-In Commands */
 
     if (words_count == 1 && strcmp(words[0], "exit") == 0) { 
-      exit(EXIT_SUCCESS);
+      goto exit;
     }
-    if (strcmp(words[0], "cd") == 0) {
-      if (words_count == 1) chdir(getenv("HOME"));
-      if (words_count == 2) chdir(words[1]);
-      if (words_count > 2) err(errno, "cd command");
-      reset_token_array(words, &words_count);
-      goto restart_prompt;
-    }
+    // if (strcmp(words[0], "cd") == 0) {
+    //   if (words_count == 1) chdir(getenv("HOME"));
+    //   if (words_count == 2) chdir(words[1]);
+    //   if (words_count > 2) err(errno, "cd command");
+    //   reset_token_array(words, &words_count);
+    //   goto restart_prompt;
+    // }
     
     /* Adopted from Linux Programming Interface Chapter 25. */
-    switch (bg_child_pid = fork()) {
+    switch (w_pid = fork()) {
       case -1:
         /* Handle error. */
-        
+        err(errno, "fork");
         break;
       case 0:
         /* Perform actions specific to child. */
         /* Execution & Non-Built-In Commands */
-
+        // if (sigaction(SIGINT, &sig_act_getline_old, NULL) == -1) err(errno, "sigaction set to old"); ///// do I NEED THIS?
         execvp(words[0], words);
-        perror("execvp errored");
+        err(errno, "execvp errored FIX AT SOME POINT");
         break;
       default:
         /* Perform actions specific to parent. */
         /* Waiting & Signal Handling */
-        w_pid = waitpid(bg_child_pid, &bg_child_process, 0);
-        if (w_pid == -1) {
+        //////////////////////////// Perhaps delete.......
+        bg_child_pid = waitpid(w_pid, &bg_child_process, 0);
+        if (bg_child_pid == -1) {
           err(errno, "waitpid");
         }
-        break;
+
+        if (strcmp(words[0], "cd") == 0) {
+          if (words_count == 1) chdir(getenv("HOME"));
+          if (words_count == 2) chdir(words[1]);
+          if (words_count > 2) err(errno, "cd command");
+          reset_token_array(words, &words_count);
+          // goto restart_prompt;
+        }
     }
   
 
@@ -147,8 +176,10 @@ restart_prompt:
     reset_token_array(words, &words_count);
   };
 
-  // free(&words);
-  free(line);
+exit:
+  reset_token_array(words, &words_count);
+  free(words);
+  if (line != 0) free(line);
 
   exit(EXIT_SUCCESS);
   
