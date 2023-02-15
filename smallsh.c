@@ -153,7 +153,8 @@ restart_prompt:
         if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1) err(errno, "SIGTSTOP not set to default");
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
-        err(errno, "execvp errored FIX AT SOME POINT");
+        fprintf(stderr, "execvp: %s\n", strerror(errno));
+        _exit(errno);
         break;
       default:
         /* Perform actions specific to parent. */
