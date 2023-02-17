@@ -1,3 +1,4 @@
+.PHONY: smallsh
 SOURCE := smallsh.c smallshlib.c
 EXECUTABLE := smallsh
 
