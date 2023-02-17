@@ -86,10 +86,7 @@ main(void)
     str_token = strtok(line, IFS);
     while (str_token && words_count < WORD_LIMIT) {
       // printf("%s", str_token);
-      // Stops tokenizing if remaining text is commented with hash symbol.
-      if (strcmp(str_token, "~/") == 0) {
-        printf("here %jd", (intmax_t) getpid());
-      }
+
       // Stored Token
       char *dup_token = NULL;
       if (strncmp(str_token, "#", 1) > 0) {
@@ -125,6 +122,11 @@ main(void)
       //if (!gsub_return) goto restart_prompt;
       //line = gsub_return;
     //}
+
+      // // Stops tokenizing if remaining text is commented with hash symbol.
+      // if (strcmp(str_token, "~/") == 0) {
+      //   printf("here %jd", (intmax_t) getpid());
+      // }
 
     /* Execution & Built-In Commands */
 
