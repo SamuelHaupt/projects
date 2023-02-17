@@ -65,7 +65,6 @@ main(void)
       }
     }
     if (bg_child_pid == -1 && errno != ECHILD) err(errno, "waitpid");
-    fprintf(stderr, "exit: %d\n", shell_command_previous_status);
     /* Prompt & Read Line of Input */
 
     fprintf(stderr, "%s", PS1);
