@@ -143,10 +143,16 @@ main(void)
         }
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
+        reset_token_array(words, &words_count);
+        // if (line != 0)
+        free(line);
         exit(val); // Add implied exit if second argument is passed.
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
+        reset_token_array(words, &words_count);
+        // if (line != 0)
+        free(line);
         exit(EXIT_SUCCESS);
       }
     }
