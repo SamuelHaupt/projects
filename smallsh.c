@@ -33,26 +33,23 @@ main(void)
   size_t n = 0;
   size_t read; 
   char **words;
-  words = calloc(WORD_LIMIT, sizeof **words);
+  words = calloc(WORD_LIMIT+1, sizeof **words);
   size_t words_count = 0;
-  char *proc_grp_pid;
+  static char proc_grp_pid[10];
   if (sprintf(proc_grp_pid, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "proc_grp_pid");
   pid_t wait_pid = 0;
   pid_t bg_child_pid;
   int bg_child_process;
+  static int shell_command_previous_status = 0; // Expansion of "$?"
   struct sigaction  sa_SIGINT_default = {0}, 
                     sa_SIGINT_do_nothing = {0},
-                    sa_SIGINT_old = {0},
-                    sa_SIGINT_ignore = {0},
                     sa_SIGTSTP_default = {0},
                     sa_ignore = {0};
 
   sa_SIGINT_do_nothing.sa_handler = handler_with_no_action;
   sa_ignore.sa_handler = SIG_IGN;
-  /* Ignore job-control stop signal (Control-Z). */
-  sigaction(SIGTSTP, &sa_ignore, &sa_SIGTSTP_default);
-  /* Ignore terminal interrupt signal (Control-C). */
-  sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);
+  sigaction(SIGTSTP, &sa_ignore, &sa_SIGTSTP_default);  /* Ignore job-control stop signal (Control-Z). */
+  sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);    /* Ignore terminal interrupt signal (Control-C). */
   
   while (1) {
     /* Manage Background Processes */
@@ -62,22 +59,23 @@ main(void)
       } else if (WIFSIGNALED(bg_child_process)) {
         fprintf(stderr, "Child process %d done. Signaled %d.\n", bg_child_pid, WTERMSIG(bg_child_process));
       } else if (WIFSTOPPED(bg_child_process)) {
+        shell_command_previous_status = bg_child_pid;
         if (kill(bg_child_pid, SIGCONT) == -1) err(errno, "kill");
         fprintf(stderr, "Child process %d stopped. Continuing.\n", bg_child_pid);
       }
     }
     if (bg_child_pid == -1 && errno != ECHILD) err(errno, "waitpid");
-
+    fprintf(stderr, "exit: %d\n", shell_command_previous_status);
     /* Prompt & Read Line of Input */
 
     fprintf(stderr, "%s", PS1);
-    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, &sa_SIGINT_old) == -1) err(errno, "sigaction set to current");
+    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) err(errno, "sigaction set to current");
     read = getline(&line, &n, stdin);
-    if (sigaction(SIGINT, &sa_SIGINT_old, NULL) == -1) err(errno, "sigaction set to old");
+    if (sigaction(SIGINT, &sa_ignore, NULL) == -1) err(errno, "sigaction set to old");
     if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == -1) {
       fprintf(stderr, "\n"); // Adds new line when interrupt signal is sent.
-      if (feof(stdin)) goto exit;
+      if (feof(stdin)) exit(shell_command_previous_status); // Implied exit if EOF.
       if (errno == EINTR) {
         clearerr(stdin);
         errno = 0;
@@ -85,23 +83,6 @@ main(void)
       }
     }
     
-    //if (0) {
-      /* Replaces $$ with smallsh pid. Uses strstr to detect if
-       * needle exists in haystack within str_gsub. */
-      //char *sub = {0};
-      //int converted = asprintf(&sub, "%jd", (intmax_t) getpid());
-      //if (converted == -1) {
-        //free(sub);
-        //goto restart_prompt;
-      //}
-      
-      //char const *needle = "$$";
-      //char *gsub_return = str_gsub(&line, needle, sub);
-      //free(sub);
-      //if (!gsub_return) goto restart_prompt;
-      //line = gsub_return;
-    //}
-
     /* Word Tokenization & Storage */
     str_token = strtok(line, IFS);
     while (str_token && words_count < WORD_LIMIT) {
@@ -129,7 +110,22 @@ main(void)
 
     /* Parse commands */
 
-
+    //if (0) {
+      /* Replaces $$ with smallsh pid. Uses strstr to detect if
+       * needle exists in haystack within str_gsub. */
+      //char *sub = {0};
+      //int converted = asprintf(&sub, "%jd", (intmax_t) getpid());
+      //if (converted == -1) {
+        //free(sub);
+        //goto restart_prompt;
+      //}
+      
+      //char const *needle = "$$";
+      //char *gsub_return = str_gsub(&line, needle, sub);
+      //free(sub);
+      //if (!gsub_return) goto restart_prompt;
+      //line = gsub_return;
+    //}
 
     /* Execution & Built-In Commands */
 
@@ -140,17 +136,17 @@ main(void)
       } else if (words_count == 2) {
         int val = str_to_int(words[1]);
         if ( val < 0) {
-          if (val == -1) fprintf(stderr, "Invalid argument passed with argument.\n");
-          if (val == -2) fprintf(stderr, "Argument value out of range 0 to 255.\n");
+          if (val == -1) fprintf(stderr, "Invalid argument passed with exit command.\n");
+          if (val == -2) fprintf(stderr, "Exit status out of range: 0 to 255.\n");
           goto restart_prompt;
         }
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
-        exit(val);
+        exit(val); // Add implied exit if second argument is passed.
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
-        exit(EXIT_SUCCESS); // Add implied exit if second argument not passed.
+        exit(EXIT_SUCCESS);
       }
     }
 
@@ -176,7 +172,8 @@ main(void)
         if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1) err(errno, "SIGTSTOP not set to default");
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
-        fprintf(stderr, "execvp: %s\n", strerror(errno));
+        shell_command_previous_status = 128 + WTERMSIG(bg_child_process);
+        fprintf(stderr, "Command failed to execute: %s\n", strerror(errno));
         exit(errno);
         break;
       default:
@@ -186,6 +183,7 @@ main(void)
         if (bg_child_pid == -1) {
           err(errno, "waitpid");
         }
+        shell_command_previous_status = WEXITSTATUS(bg_child_process);
     }
 restart_prompt:
   reset_token_array(words, &words_count);
@@ -194,6 +192,7 @@ restart_prompt:
 exit:
   reset_token_array(words, &words_count);
   free(words);
+  // free(proc_grp_pid);
   if (line != 0) free(line);
 
   exit(EXIT_SUCCESS);
