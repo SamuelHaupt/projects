@@ -32,8 +32,8 @@ main(void)
   char *str_token = 0;
   size_t n = 0;
   size_t read; 
-  char **words;
-  words = calloc(WORD_LIMIT+1, sizeof **words);
+  char *words[WORD_LIMIT+1] = {0};
+  // if (words = calloc(WORD_LIMIT+1, sizeof **words) == NULL) fprintf(stderr, "No more memory");
   size_t words_count = 0;
   static char proc_grp_pid[10];
   if (sprintf(proc_grp_pid, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "proc_grp_pid");
@@ -192,7 +192,7 @@ restart_prompt:
 
 exit:
   reset_token_array(words, &words_count);
-  free(words);
+  // free(words);
   // free(proc_grp_pid);
   if (line != 0) free(line);
 
