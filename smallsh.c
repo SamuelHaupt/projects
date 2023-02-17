@@ -35,7 +35,9 @@ main(void)
   char **words;
   words = calloc(WORD_LIMIT, sizeof **words);
   size_t words_count = 0;
-  pid_t w_pid = 0;
+  char *proc_grp_pid;
+  if (sprintf(proc_grp_pid, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "proc_grp_pid");
+  pid_t wait_pid = 0;
   pid_t bg_child_pid;
   int bg_child_process;
   struct sigaction  sa_SIGINT_default = {0}, 
@@ -105,12 +107,14 @@ main(void)
     while (str_token && words_count < WORD_LIMIT) {
       // printf("%s", str_token);
       // Stops tokenizing if remaining text is commented with hash symbol.
-      if (strncmp(str_token, "#", 1) == 0) break;
       if (strcmp(str_token, "~/") == 0) {
         printf("here %jd", (intmax_t) getpid());
       }
       // Stored Token
-      char *dup_token = strdup(str_token);
+      char *dup_token = NULL;
+      if (strncmp(str_token, "#", 1) > 0) {
+        dup_token = strdup(str_token);
+      }
       // Add to array
       process_token(words, &words_count, dup_token);
       str_token = strtok(NULL, IFS);
@@ -140,8 +144,12 @@ main(void)
           if (val == -2) fprintf(stderr, "Argument value out of range 0 to 255.\n");
           goto restart_prompt;
         }
+        fprintf(stderr, "\nexit\n");
+        if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         exit(val);
       } else {
+        fprintf(stderr, "\nexit\n");
+        if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         exit(EXIT_SUCCESS); // Add implied exit if second argument not passed.
       }
     }
@@ -155,8 +163,8 @@ main(void)
     }
     
     /* Adopted from Linux Programming Interface Chapter 25. */
-    w_pid = fork();
-    switch (w_pid) {
+    wait_pid = fork();
+    switch (wait_pid) {
       case -1:
         /* Handle error. */
         err(errno, "fork");
@@ -174,7 +182,7 @@ main(void)
       default:
         /* Perform actions specific to parent. */
         /* Waiting & Signal Handling */
-        bg_child_pid = waitpid(w_pid, &bg_child_process, 0);
+        bg_child_pid = waitpid(wait_pid, &bg_child_process, 0);
         if (bg_child_pid == -1) {
           err(errno, "waitpid");
         }
