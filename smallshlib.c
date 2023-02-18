@@ -54,11 +54,11 @@ extern char *str_gsub(char *restrict *restrict words,
       
       size_t size_of_move = word_len + 1 - offset - HOME_len + 1; // Remove "~" and keep "/".
       memmove(word + exp_home_len, word + HOME_len, size_of_move);
-      char *token = strdup(exp_str_home);
-      memcpy(word, token, exp_home_len);
+      // char *token = strdup(exp_str_home);
+      memcpy(word, exp_str_home, exp_home_len);
       word_len = word_len + exp_home_len - HOME_len + 1;
       word += exp_home_len;
-      free(token);
+      // free(token);
     }
 
     /* Replaces "$$" with process ID of smallsh process. */
@@ -74,11 +74,11 @@ extern char *str_gsub(char *restrict *restrict words,
       
       size_t size_of_move = word_len + 1 - offset - PID_SMALLSH_len; // Remove "$$".
       memmove(word + exp_pid_smallsh_len, word + PID_SMALLSH_len, size_of_move);
-      char *token = strdup(exp_str_pid_smallsh);
-      memcpy(word, token, exp_pid_smallsh_len);
+      // char *token = strdup(exp_str_pid_smallsh);
+      memcpy(word, exp_str_pid_smallsh, exp_pid_smallsh_len);
       word_len = word_len + exp_pid_smallsh_len - PID_SMALLSH_len;
       word += exp_pid_smallsh_len;
-      free(token);
+      // free(token);
     }
     
     word = words[w];
