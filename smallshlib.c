@@ -47,7 +47,7 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "~/" with home directory. */
     word = words[w];
     word_len = strlen(word);
-    printf("Before any expansion: %s\n", word);
+    // printf("Before any expansion: %s\n", word);
     if (strncmp(word, HOME, 2) == 0) {
       char *str_ptr = word;
       ptrdiff_t offset = str_ptr - words[w];
@@ -67,7 +67,7 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "$$" with process ID of smallsh process. */
     word = words[w];
     word_len = strlen(word);
-    printf("After ~/ expansion: %s\n", word);
+    // printf("After ~/ expansion: %s\n", word);
     for (;(word = strstr(word, PID_SMALLSH));) {
       char *str_ptr = word;
       ptrdiff_t offset = str_ptr - words[w];
@@ -91,7 +91,7 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "$?" with exit status of last foreground command. */
     word = words[w];
     word_len = strlen(word);
-    printf("After $$ expansion: %s\n", word);
+    // printf("After $$ expansion: %s\n", word);
     for (;(word = strstr(word, EXIT_STATUS));) {
       char *str_ptr = word;
       ptrdiff_t offset = str_ptr - words[w];
@@ -111,7 +111,7 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "$!" with process ID of most recent background process. */
     word = words[w];
     word_len = strlen(word);
-    printf("After $? expansion: %s\n", word);
+    // printf("After $? expansion: %s\n", word);
     for (;(word = strstr(word, BG_PID));) {
       char *str_ptr = word;
       ptrdiff_t offset = str_ptr - words[w];
@@ -130,14 +130,14 @@ extern char *str_gsub(char *restrict *restrict words,
     
     /* Decrease size of word if length has decreased since original word length. */
     word = words[w];
-    printf("After $! expansion: %s\n", word);
+    // printf("After $! expansion: %s\n", word);
     if (word_len < original_word_len) {
       char *str_ptr = word;
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1));
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
     }
-    printf("After final realloc: %s\n", word);
+    // printf("After final realloc: %s\n", word);
 
   }
 
