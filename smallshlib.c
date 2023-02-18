@@ -111,7 +111,7 @@ exit:
 extern void process_token(char **words, size_t *restrict word_count, char *restrict token)
 {
   ++(*word_count);
-  words[(*word_count) - 1] = token;
+  words[(*word_count) - 1] = strdup(token);
   return;
 }
 

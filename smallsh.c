@@ -125,6 +125,7 @@ main(void)
       char *dynamic_token;
       dynamic_token = strdup(str_token);
       process_token(words, &words_count, dynamic_token);
+      free(dynamic_token);
       str_token = strtok(NULL, IFS);
     }
     
