@@ -143,7 +143,7 @@ main(void)
       int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
       char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * length);
       if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) err(errno=EOVERFLOW, "exp_str_exit_status");
-      str_gsub(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
+      token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
       free(exp_str_exit_status);
     }
 

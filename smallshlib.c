@@ -17,8 +17,10 @@
 
 #define arr_len(obj) (sizeof obj / sizeof *obj)
 
-/* Function str_gsub provided by Ryan Gambord at Oregon State University Operating Systems Course */
-extern char *str_gsub(char *restrict *restrict words, 
+/* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
+* Oregon State University Operating Systems Course: February 2023.
+*/
+extern char *token_expansion(char *restrict *restrict words, 
                       size_t words_count, 
                       char *restrict exp_str_home, 
                       char *restrict exp_str_pid_smallsh, 
@@ -48,7 +50,6 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "~/" with home directory. */
     word = words[w];
     word_len = strlen(word);
-    printf("Before any expansion: %s\n", word);
     if (strncmp(word, HOME, 2) == 0) {
       ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_home_len - HOME_len + 1));
@@ -75,7 +76,6 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "$$" with process ID of smallsh process. */
     word = words[w];
     word_len = strlen(word);
-    printf("After ~/ expansion: %s\n", word);
     for (;(word = strstr(word, PID_SMALLSH));) {
       ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_pid_smallsh_len - PID_SMALLSH_len));
@@ -104,7 +104,6 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "$?" with exit status of last foreground command. */
     word = words[w];
     word_len = strlen(word);
-    printf("After $$ expansion: %s\n", word);
     for (;(word = strstr(word, EXIT_STATUS));) {
       ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_exit_status_len - EXIT_STATUS_len));
@@ -130,12 +129,9 @@ extern char *str_gsub(char *restrict *restrict words,
       }
     }
 
-
-
     /* Replaces "$!" with process ID of most recent background process. */
     word = words[w];
     word_len = strlen(word);
-    printf("After $? expansion: %s\n", word);
     for (;(word = strstr(word, BG_PID));) {
       ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_bg_pid_len - BG_PID_len));
@@ -160,10 +156,6 @@ extern char *str_gsub(char *restrict *restrict words,
         words[w] = str_ptr;
       }
     }
-    
-    /* Decrease size of word if length has decreased since original word length. */
-    word = words[w];
-    printf("After $! expansion: %s\n", word);
   }
 
 exit:

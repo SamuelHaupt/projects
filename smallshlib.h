@@ -7,8 +7,10 @@ typedef struct token_s {
   char *info;
 } token_s;
 
-/* Function prototype str_gsub provided by Ryan Gambord at Oregon State University Operating Systems Course */
-extern char *str_gsub(char *restrict *restrict haystack,
+/* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
+* Oregon State University Operating Systems Course: February 2023.
+*/
+extern char *token_expansion(char *restrict *restrict haystack,
                       size_t words_count,
                       char *restrict exp_home, 
                       char *restrict exp_str_pid_smallsh, 
