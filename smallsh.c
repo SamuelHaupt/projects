@@ -39,16 +39,16 @@ main(void)
   /* ********************* */
   /* Environment variables */
   /* ********************* */
-  char const *PS1 = getenv("PS1") ? getenv("PS1") : "";
-  char const *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
-  char *HOME = getenv("HOME") ? getenv("HOME") : "";
+  char const *ps1 = getenv("PS1") ? getenv("PS1") : "";
+  char const *ifs = getenv("IFS") ? getenv("IFS") : " \t\n";
+  char *home = getenv("HOME") ? getenv("HOME") : "";
 
 
   /* ************************ */
   /* Expanded token variables */
   /* ************************ */
   // Variable expansion of "~/": HOME directory with "/" appended.
-  char *exp_str_home = HOME;
+  char *exp_str_home = home;
 
   // Variable expansion of "$$": process ID of smallsh process.
   char exp_str_pid_smallsh[8] = {0};
@@ -101,14 +101,14 @@ main(void)
     /* ************************* */
     /* Print Prompt & Read Input */
     /* ************************* */
-    fprintf(stderr, "%s", PS1);
+    fprintf(stderr, "%s", ps1);
     if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) err(errno, "sigaction set to current");
     read = getline(&line, &n, stdin);
     if (sigaction(SIGINT, &sa_ignore, NULL) == -1) err(errno, "sigaction set to old");
     if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == -1) {
       fprintf(stderr, "\n"); // Adds new line when interrupt signal is sent.
-      if (feof(stdin)) exit(exp_int_fg_exit_status); // Implied exit if EOF.
+      if (feof(stdin)) exit(exp_int_fg_exit_status); // Implied exit when EOF.
       if (errno == EINTR) {
         clearerr(stdin);
         errno = 0;
@@ -120,31 +120,41 @@ main(void)
     /* *************************** */
     /* Word Tokenization & Storage */
     /* *************************** */
-    str_token = strtok(line, IFS);
-    while (str_token && strlen(str_token) >= 1 && words_count < WORD_LIMIT+1) {
-      if (strncmp(str_token, "#", 1) == 0) break; // Stops tokenizing at commented words.
-      char *dynamic_token;
-      dynamic_token = strdup(str_token);
+    
+    str_token = strtok(line, ifs);
+    if (str_token) goto start_tokenization;
+    while ((str_token = strtok(NULL, ifs)) != NULL && words_count < WORD_LIMIT+1) {
+    start_tokenization:
+      char *dynamic_token = strdup(str_token);
       process_token(words, &words_count, dynamic_token);
       free(dynamic_token);
-      str_token = strtok(NULL, IFS);
-      fprintf(stderr, "%s\n", str_token);
     }
     
-    // fprintf(stderr, "%s\n", words[1]);
-    // if (strncmp(words[words_count-1], "&", 1)) {
+
+    // if (strncmp(str_token, "\n", 1) == 0) break; // Stops tokenizing at commented words.
+    // if (strncmp(str_token, "#", 1) == 0) break; // Stops tokenizing at commented words.
+    fprintf(stderr, "%d\n", strcmp(words[words_count-1], "&"));
+
+    if (words_count > 0 && strcmp(words[words_count-1], "&")) {
+      bg_set_command = 1;
+      fprintf(stderr, "%d\n", bg_set_command);
+      *words[words_count-1] = '\0';
+      fprintf(stderr, "Found it! %s\n", words[words_count-1]);
+    }
+
+    // if (words_count > 0 && strncmp(words[words_count-1], "&", 1)) {
     //   bg_set_command = 1;
     //   fprintf(stderr, "%d\n", bg_set_command);
     //   fprintf(stderr, "%s\n", words[words_count-1]);
-    //   *words[words_count-1] = '\0';
-    //   words_count--;
-    //   fprintf(stderr, "%s\n", words[words_count-1]);
+    //   // *words[words_count-1] = '\0';
+    //   // words_count--;
+    //   // fprintf(stderr, "%s\n", words[words_count-1]);
     // }
-
-    // fd = open()
-    // dup2(fd, STDOUT_FILENO)
-    // close(fd)
-
+    // fprintf(stderr, "%d\n", bg_set_command);
+    // // fd = open()
+    // // dup2(fd, STDOUT_FILENO)
+    // // close(fd)
+    // if (bg_set_command) goto restart_prompt;
 
     /* ********* */
     /* Expansion */
