@@ -94,7 +94,7 @@ extern char *str_gsub(char *restrict *restrict words,
 //   }
 
 exit:
-  return; // *words;
+  return *words;
 }
 
 extern void process_token(char **words, size_t *restrict word_count, char *restrict token)
