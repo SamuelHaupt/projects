@@ -96,3 +96,5 @@ extern int str_to_int(char *restrict str)
     return (int) val;
   }
 }
+
+extern void handler_with_no_action(int signal) {}

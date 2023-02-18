@@ -17,3 +17,5 @@ extern void process_token(char **words, size_t *restrict word_count, char *restr
 extern void reset_token_array(char *restrict *restrict words, size_t *restrict word_count);
 
 extern int str_to_int(char *restrict str);
+
+extern void handler_with_no_action(int signal);

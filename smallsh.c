@@ -17,54 +17,92 @@
 
 #define WORD_LIMIT 512
 
-static void
-handler_with_no_action(int signal)
-{
-}
-
 int
 main(void)
 {
+  /* ******************* */
+  /* Signal Manipulation */
+  /* ******************* */
+  struct sigaction  sa_SIGINT_default = {0}, // (Ctrl-c) job control for stop
+                    sa_SIGINT_do_nothing = {0},
+                    sa_SIGTSTP_default = {0}, // (Ctrl-z) interrupt
+                    sa_ignore = {0};
+  sa_SIGINT_do_nothing.sa_handler = handler_with_no_action;
+  sa_ignore.sa_handler = SIG_IGN;
+  sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);
+  sigaction(SIGTSTP, &sa_ignore, &sa_SIGTSTP_default);
+
+
+  /* ********************* */
+  /* Environment variables */
+  /* ********************* */
+  char const *PS1 = getenv("PS1") ? getenv("PS1") : "";
+  char const *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
+  char const *home_dir = getenv("HOME") ? getenv("HOME") : "";
+
+
+  /* ************************ */
+  /* Expanded token variables */
+  /* ************************ */
+  // Variable expansion of "~/": HOME directory with "/" appended.
+  char *exp_home = malloc(sizeof *exp_home * (strlen(home_dir) + 2));
+  sprintf(exp_home, "%s%s", home_dir, "/");
+
+  // Variable expansion of "$$": process ID of smallsh process.
+  static char exp_str_pid_smallsh[6] = {0};
+  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
+
+  // Variable expansion of "$?": exit status of last foreground command.
+  static int exp_int_fg_exit_status = 0;
+
+  // Variable expansion of "$!": process ID of most recent background process.
+  static char exp_str_bg_pid[6];
+  exp_str_bg_pid[0] = '\0';
+
+
+  /* *********************** */
+  /* Miscellaneous variables */
+  /* *********************** */
+  size_t words_count = 0;
+  char **words;
+  *words = malloc(sizeof **words * (WORD_LIMIT + 1));
+  // char *words[WORD_LIMIT+1] = {0};
+  // if ( == NULL) fprintf(stderr, "No more memory"); // Maybe I don't need to this anymore.
   
-  char *PS1 = getenv("PS1") ? getenv("PS1") : "" ;
-  char *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
+  
+  // if (**words = malloc(sizeof **words * (WORD_LIMIT + 1)) == NULL) fprintf(stderr, "No more memory"); // Maybe I don't need to this anymore.
+  // *words = malloc(sizeof **words * (WORD_LIMIT + 1));
+  // for (size_t i = 0; i < WORD_LIMIT; i++) {
+  //   *(words + i) = malloc(sizeof **words);
+  // }
+  // *(words + WORD_LIMIT+1) = "\0";
+
+
+  // Getline variables
   char *line = 0;
   char *str_token = 0;
   size_t n = 0;
-  size_t read; 
-  char *words[WORD_LIMIT+1] = {0};
-  // if (words = calloc(WORD_LIMIT+1, sizeof **words) == NULL) fprintf(stderr, "No more memory");
-  size_t words_count = 0;
-  static char proc_grp_pid[10];
-  if (sprintf(proc_grp_pid, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "proc_grp_pid");
-  pid_t wait_pid = 0;
-  pid_t bg_child_pid;
-  int bg_child_process;
-  static int shell_command_previous_status = 0; // Expansion of "$?"
-  struct sigaction  sa_SIGINT_default = {0}, 
-                    sa_SIGINT_do_nothing = {0},
-                    sa_SIGTSTP_default = {0},
-                    sa_ignore = {0};
+  size_t read;
 
-  sa_SIGINT_do_nothing.sa_handler = handler_with_no_action;
-  sa_ignore.sa_handler = SIG_IGN;
-  sigaction(SIGTSTP, &sa_ignore, &sa_SIGTSTP_default);  /* Ignore job-control stop signal (Control-Z). */
-  sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);    /* Ignore terminal interrupt signal (Control-C). */
-  
+  // Fork & Wait variables
+  pid_t pid_bg_child = 0;
+  int int_bg_child_status;
+
   while (1) {
     /* Manage Background Processes */
-    while ((bg_child_pid = waitpid(0, &bg_child_process, WUNTRACED | WNOHANG)) > 0) {
-      if (WIFEXITED(bg_child_process)){
-        fprintf(stderr, "Child process %d done. Exit status %d.\n", bg_child_pid, WEXITSTATUS(bg_child_process));
-      } else if (WIFSIGNALED(bg_child_process)) {
-        fprintf(stderr, "Child process %d done. Signaled %d.\n", bg_child_pid, WTERMSIG(bg_child_process));
-      } else if (WIFSTOPPED(bg_child_process)) {
-        shell_command_previous_status = bg_child_pid;
-        if (kill(bg_child_pid, SIGCONT) == -1) err(errno, "kill");
-        fprintf(stderr, "Child process %d stopped. Continuing.\n", bg_child_pid);
+    while ((pid_bg_child = waitpid(0, &int_bg_child_status, WUNTRACED | WNOHANG)) > 0) {
+      if (WIFEXITED(int_bg_child_status)){
+        fprintf(stderr, "Child process %d done. Exit status %d.\n", pid_bg_child, WEXITSTATUS(int_bg_child_status));
+      } else if (WIFSIGNALED(int_bg_child_status)) {
+        fprintf(stderr, "Child process %d done. Signaled %d.\n", pid_bg_child, WTERMSIG(int_bg_child_status));
+      } else if (WIFSTOPPED(int_bg_child_status)) {
+        exp_int_fg_exit_status = pid_bg_child;
+        if (kill(pid_bg_child, SIGCONT) == -1) err(errno, "kill");
+        fprintf(stderr, "Child process %d stopped. Continuing.\n", pid_bg_child);
       }
     }
-    if (bg_child_pid == -1 && errno != ECHILD) err(errno, "waitpid");
+    if (pid_bg_child == -1 && errno != ECHILD) err(errno, "waitpid");
+    
     /* Prompt & Read Line of Input */
 
     fprintf(stderr, "%s", PS1);
@@ -74,7 +112,7 @@ main(void)
     if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == -1) {
       fprintf(stderr, "\n"); // Adds new line when interrupt signal is sent.
-      if (feof(stdin)) exit(shell_command_previous_status); // Implied exit if EOF.
+      if (feof(stdin)) exit(exp_int_fg_exit_status); // Implied exit if EOF.
       if (errno == EINTR) {
         clearerr(stdin);
         errno = 0;
@@ -82,22 +120,16 @@ main(void)
       }
     }
     
+    /* *************************** */
     /* Word Tokenization & Storage */
+    /* *************************** */
     str_token = strtok(line, IFS);
-    while (str_token && words_count < WORD_LIMIT) {
-      // printf("%s", str_token);
 
-      // Stored Token
-      char *dup_token = NULL;
-      if (strncmp(str_token, "#", 1) > 0) {
-        dup_token = strdup(str_token);
-      }
-      // Add to array
-      process_token(words, &words_count, dup_token);
+    while (str_token && strlen(str_token) > 1 && words_count < WORD_LIMIT+1) {
+      char *dynamic_token;
+      dynamic_token = strdup(str_token);
+      process_token(words, &words_count, dynamic_token);
       str_token = strtok(NULL, IFS);
-      if (!str_token) {
-        break;
-      } 
     }
     
     // fd = open()
@@ -105,6 +137,8 @@ main(void)
     // close(fd)
 
     /* Parse commands */
+    // char *needle = "$$";
+    // char *str = strstr(words, needle);
 
     //if (0) {
       /* Replaces $$ with smallsh pid. Uses strstr to detect if
@@ -128,8 +162,10 @@ main(void)
       //   printf("here %jd", (intmax_t) getpid());
       // }
 
-    /* Execution & Built-In Commands */
 
+    /* ************************** */
+    /* Built-in Command Execution */
+    /* ************************** */
     if (strcmp(words[0], "exit") == 0) {
       if (words_count > 2) {    
         fprintf(stderr, "Too many arguments passed with exit command.\n");
@@ -144,30 +180,32 @@ main(void)
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
-        // if (line != 0)
+        free(exp_home);
         free(line);
         exit(val); // Add implied exit if second argument is passed.
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
-        // if (line != 0)
+        free(exp_home);
         free(line);
         exit(EXIT_SUCCESS);
       }
     }
 
     if (strcmp(words[0], "cd") == 0) {
-      if (words_count == 1) chdir(getenv("HOME"));
+      if (words_count == 1) chdir(exp_home);
       if (words_count == 2) chdir(words[1]);
       if (words_count > 2) err(errno, "cd command");
-      reset_token_array(words, &words_count);
       goto restart_prompt;
     }
     
+    /* ****************************** */
+    /* Non-Built-in Command Execution */
+    /* ****************************** */
     /* Adopted from Linux Programming Interface Chapter 25. */
-    wait_pid = fork();
-    switch (wait_pid) {
+    pid_bg_child = fork();
+    switch (pid_bg_child) {
       case -1:
         /* Handle error. */
         err(errno, "fork");
@@ -179,18 +217,18 @@ main(void)
         if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1) err(errno, "SIGTSTOP not set to default");
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
-        shell_command_previous_status = 128 + WTERMSIG(bg_child_process);
+        exp_int_fg_exit_status = 128 + WTERMSIG(int_bg_child_status);
         fprintf(stderr, "Command failed to execute: %s\n", strerror(errno));
         exit(errno);
         break;
       default:
         /* Perform actions specific to parent. */
         /* Waiting & Signal Handling */
-        bg_child_pid = waitpid(wait_pid, &bg_child_process, 0);
-        if (bg_child_pid == -1) {
+        pid_bg_child = waitpid(pid_bg_child, &int_bg_child_status, 0);
+        if (pid_bg_child == -1) {
           err(errno, "waitpid");
         }
-        shell_command_previous_status = WEXITSTATUS(bg_child_process);
+        exp_int_fg_exit_status = WEXITSTATUS(int_bg_child_status);
     }
 restart_prompt:
   reset_token_array(words, &words_count);
@@ -199,8 +237,9 @@ restart_prompt:
 exit:
   reset_token_array(words, &words_count);
   // free(words);
-  // free(proc_grp_pid);
+  // free(exp_str_pid_smallsh);
   if (line != 0) free(line);
+  free(exp_home);
 
   exit(EXIT_SUCCESS);
   
