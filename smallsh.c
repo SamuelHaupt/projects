@@ -16,9 +16,13 @@
 
 #define WORD_LIMIT 512
 
+
+
+
 int
 main(void)
 {
+  
   /* ******************* */
   /* Signal Manipulation */
   /* ******************* */
@@ -31,7 +35,7 @@ main(void)
   sigaction(SIGINT, &sa_ignore, &sa_SIGINT_default);
   sigaction(SIGTSTP, &sa_ignore, &sa_SIGTSTP_default);
 
-
+  
   /* ********************* */
   /* Environment variables */
   /* ********************* */
@@ -120,7 +124,6 @@ main(void)
     /* Word Tokenization & Storage */
     /* *************************** */
     str_token = strtok(line, IFS);
-
     while (str_token && strlen(str_token) > 1 && words_count < WORD_LIMIT+1) {
       char *dynamic_token;
       dynamic_token = strdup(str_token);
@@ -136,38 +139,13 @@ main(void)
     /* ********* */
     /* Expansion */
     /* ********* */
-    int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
-    char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * length);
-    if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) err(errno=EOVERFLOW, "exp_str_exit_status");
-    str_gsub(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
-    free(exp_str_exit_status);
-
-    // char *needle = "$$";
-    // char *str = strstr(*words, needle);
-    // printf("%s\n", str);
-
-    //if (0) {
-      /* Replaces $$ with smallsh pid. Uses strstr to detect if
-       * needle exists in haystack within str_gsub. */
-      //char *sub = {0};
-      //int converted = asprintf(&sub, "%jd", (intmax_t) getpid());
-      //if (converted == -1) {
-        //free(sub);
-        //goto restart_prompt;
-      //}
-      
-      //char const *needle = "$$";
-      //char *gsub_return = str_gsub(&line, needle, sub);
-      //free(sub);
-      //if (!gsub_return) goto restart_prompt;
-      //line = gsub_return;
-    //}
-
-      // Stops tokenizing if remaining text is commented with hash symbol.
-      // if (strcmp(str_token, "~/") == 0) {
-      //   printf("here %jd", (intmax_t) getpid());
-      // }
-
+    {
+      int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
+      char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * length);
+      if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) err(errno=EOVERFLOW, "exp_str_exit_status");
+      str_gsub(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
+      free(exp_str_exit_status);
+    }
 
     /* ************************** */
     /* Built-in Command Execution */

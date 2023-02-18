@@ -218,4 +218,6 @@ extern int str_to_int(char *restrict str)
   }
 }
 
-extern void handler_with_no_action(int signal) {}
+extern void handler_with_no_action(int signal)
+{
+}
