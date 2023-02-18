@@ -131,6 +131,8 @@ main(void)
       process_token(words, &words_count, dynamic_token);
       str_token = strtok(NULL, IFS);
     }
+    char *null = "\0";
+    words[words_count] = null;
     
     // fd = open()
     // dup2(fd, STDOUT_FILENO)
