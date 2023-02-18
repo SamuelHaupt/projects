@@ -61,8 +61,7 @@ main(void)
   /* Miscellaneous variables */
   /* *********************** */
   size_t words_count = 0;
-  char **words;
-  words = malloc(sizeof **words * (WORD_LIMIT + 1));
+  char **words = malloc(sizeof **words * (WORD_LIMIT + 1));
   // char *words[WORD_LIMIT+1] = {0};
   // if ( == NULL) fprintf(stderr, "No more memory"); // Maybe I don't need to this anymore.
   
