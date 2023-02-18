@@ -66,17 +66,6 @@ main(void)
   /* *********************** */
   size_t words_count = 0;
   char **words = malloc(sizeof **words * (WORD_LIMIT + 1));
-  // char *words[WORD_LIMIT+1] = {0};
-  // if ( == NULL) fprintf(stderr, "No more memory"); // Maybe I don't need to this anymore.
-  
-  
-  // if (**words = malloc(sizeof **words * (WORD_LIMIT + 1)) == NULL) fprintf(stderr, "No more memory"); // Maybe I don't need to this anymore.
-  // *words = malloc(sizeof **words * (WORD_LIMIT + 1));
-  // for (size_t i = 0; i < WORD_LIMIT; i++) {
-  //   *(words + i) = malloc(sizeof **words);
-  // }
-  // *(words + WORD_LIMIT+1) = "\0";
-
 
   // Getline variables
   char *line = 0;
@@ -87,7 +76,12 @@ main(void)
   // Fork & Wait variables
   pid_t pid_bg_child = 0;
   int int_bg_child_status;
+  int bg_set_command = 0;
 
+
+  /* ************** */
+  /* smallsh Access */
+  /**************** */
   while (1) {
     /* Manage Background Processes */
     while ((pid_bg_child = waitpid(0, &int_bg_child_status, WUNTRACED | WNOHANG)) > 0) {
@@ -103,8 +97,10 @@ main(void)
     }
     if (pid_bg_child == -1 && errno != ECHILD) err(errno, "waitpid");
     
-    /* Prompt & Read Line of Input */
 
+    /* ************************* */
+    /* Print Prompt & Read Input */
+    /* ************************* */
     fprintf(stderr, "%s", PS1);
     if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) err(errno, "sigaction set to current");
     read = getline(&line, &n, stdin);
@@ -120,21 +116,35 @@ main(void)
       }
     }
     
+
     /* *************************** */
     /* Word Tokenization & Storage */
     /* *************************** */
     str_token = strtok(line, IFS);
-    while (str_token && strlen(str_token) > 1 && words_count < WORD_LIMIT+1) {
+    while (str_token && strlen(str_token) >= 1 && words_count < WORD_LIMIT+1) {
+      if (strncmp(str_token, "#", 1) == 0) break; // Stops tokenizing at commented words.
       char *dynamic_token;
       dynamic_token = strdup(str_token);
       process_token(words, &words_count, dynamic_token);
       free(dynamic_token);
       str_token = strtok(NULL, IFS);
+      fprintf(stderr, "%s\n", str_token);
     }
     
+    // fprintf(stderr, "%s\n", words[1]);
+    // if (strncmp(words[words_count-1], "&", 1)) {
+    //   bg_set_command = 1;
+    //   fprintf(stderr, "%d\n", bg_set_command);
+    //   fprintf(stderr, "%s\n", words[words_count-1]);
+    //   *words[words_count-1] = '\0';
+    //   words_count--;
+    //   fprintf(stderr, "%s\n", words[words_count-1]);
+    // }
+
     // fd = open()
     // dup2(fd, STDOUT_FILENO)
     // close(fd)
+
 
     /* ********* */
     /* Expansion */
@@ -146,6 +156,7 @@ main(void)
       token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
       free(exp_str_exit_status);
     }
+
 
     /* ************************** */
     /* Built-in Command Execution */
@@ -181,8 +192,7 @@ main(void)
       if (words_count > 2) err(errno, "cd command");
       goto restart_prompt;
     }
-    
-    // if (strcmp )
+
 
     /* ****************************** */
     /* Non-Built-in Command Execution */
@@ -202,7 +212,7 @@ main(void)
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
         exp_int_fg_exit_status = 128 + WTERMSIG(int_bg_child_status);
-        fprintf(stderr, "Command failed to execute: %s\n", strerror(errno));
+        fprintf(stderr, "smallsh: command not found: %s\n", words[0]);
         exit(errno);
         break;
       default:
@@ -220,8 +230,6 @@ restart_prompt:
 
 exit:
   reset_token_array(words, &words_count);
-  // free(words);
-  // free(exp_str_pid_smallsh);
   if (line != 0) free(line);
 
   exit(EXIT_SUCCESS);
