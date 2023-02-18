@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
+
 #include <err.h>
 #include <errno.h>
 #include <getopt.h>
@@ -17,36 +18,84 @@
 #define arr_len(obj) (sizeof obj / sizeof *obj)
 
 /* Function str_gsub provided by Ryan Gambord at Oregon State University Operating Systems Course */
-extern char *str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub)
+extern char *str_gsub(char *restrict *restrict words, 
+                      size_t words_count, 
+                      char *restrict exp_str_home, 
+                      char *restrict exp_str_pid_smallsh, 
+                      char *restrict exp_str_exit_status, 
+                      char *restrict exp_str_bg_pid)
 {
-  char *str = *haystack;
-  size_t haystack_len = strlen(str);
-  size_t const needle_len = strlen(needle),
-               sub_len = strlen(sub);
-  
-  for (; (str = strstr(str, needle));) {
-    ptrdiff_t offset = str - *haystack;
-    if (sub_len > needle_len) {
-      str = realloc(*haystack, sizeof **haystack * (haystack_len + sub_len - needle_len + 1));
-      if (!str) goto exit;
-      *haystack = str;
-      str = *haystack + offset;
+  char *str_ptr, *word = *words;
+  char const *HOME = "~/";
+  char const *PID_SMALLSH = "$$";
+  char const *EXIT_STATUS = "$?";
+  char const *BG_PID = "$!";
+
+  size_t exp_home_len = strlen(exp_str_home);
+  size_t pid_home_len = strlen(exp_str_pid_smallsh);
+  size_t exit_status_len = strlen(exp_str_exit_status);
+  size_t bg_pid_len = strlen(exp_str_bg_pid);
+
+  for (size_t w = 0; (word = words[w]); w++) {
+    /* Replaces "~/" with home directory. */
+    if (strncmp(word, HOME, 2) == 0) {
+      word = realloc(words[w], sizeof **words * (exp_home_len + strlen(word) + 1));
+      if (!word) goto exit;
+      words[w] = word;
+      
+      size_t size_of_move = strlen(word) + 1 - strlen(HOME) + 1; // Remove "~" and keep "/".
+      memmove(word + exp_home_len, word + strlen(HOME), size_of_move);
+      char *token = strdup(exp_str_home);
+      memcpy(word, token, exp_home_len);
     }
-    memmove(str + sub_len, str + needle_len, haystack_len + 1 - offset - needle_len);
-    memcpy(str, sub, sub_len);
-    haystack_len = haystack_len + sub_len - needle_len;
-    str += sub_len;
-  }
-  
-  str = *haystack;
-  if (sub_len < needle_len) {
-    str = realloc(*haystack, sizeof **haystack * (haystack_len + 1));
-    if (!str) goto exit;
-    *haystack = str;
+
+    /* Replaces "$$" with process ID of smallsh process. */
+    for (;(word = strstr(words[w], PID_SMALLSH));) {
+      printf("Actual size: %lu\n", strlen(words[w]));
+      char *str_ptr = word;
+      ptrdiff_t offset = word - words[w];
+      word = realloc(words[w], sizeof **words * (pid_home_len + strlen(word) + 1));
+      if (!word) goto exit;
+      words[w] = word;
+      word += offset;
+      printf("Original pointer: %lu\n", strlen(str_ptr));
+      printf("Corrected word position: %lu\n", strlen(word));
+      
+      size_t size_of_move = strlen(word) + 1 - strlen(PID_SMALLSH); // Remove "$$".
+      memmove(word + pid_home_len, word + strlen(PID_SMALLSH), size_of_move);
+      char *token = strdup(exp_str_pid_smallsh);
+      memcpy(word, token, pid_home_len);
+      printf("Original pointer: %lu\n", strlen(str_ptr));
+      printf("Shifted word position: %lu\n", strlen(word));
+      // word += pid_home_len;
+      // printf("Original pointer: %lu\n", strlen(str_ptr));
+      // printf("%lu\n", strlen(word));
+      printf("%s\n", words[w]);
+    }
+    word = words[w];
   }
 
+  //   ptrdiff_t offset = str - *haystack;
+  //   if (sub_len > needle_len) {
+  //     str = realloc(*haystack, sizeof **haystack * (haystack_len + sub_len - needle_len + 1));
+  //     if (!str) goto exit;
+  //     *haystack = str;
+  //     str = *haystack + offset;
+  //   }
+  //   memmove(str + sub_len, str + needle_len, haystack_len + 1 - offset - needle_len);
+  //   memcpy(str, sub, sub_len);
+  //   haystack_len = haystack_len + sub_len - needle_len;
+  //   str += sub_len;
+  
+  // str = *haystack;
+  // if (sub_len < needle_len) {
+  //   str = realloc(*haystack, sizeof **haystack * (haystack_len + 1));
+  //   if (!str) goto exit;
+  //   *haystack = str;
+//   }
+
 exit:
-  return str;
+  return *words;
 }
 
 extern void process_token(char **words, size_t *restrict word_count, char *restrict token)

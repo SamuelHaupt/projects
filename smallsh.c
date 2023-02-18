@@ -1,5 +1,4 @@
-//#define _POSIX_C_SOURCE 200809L
-//#define _XOPEN_SOURCE 700
+#define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
 
 #include <err.h>
@@ -38,26 +37,24 @@ main(void)
   /* ********************* */
   char const *PS1 = getenv("PS1") ? getenv("PS1") : "";
   char const *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
-  char const *home_dir = getenv("HOME") ? getenv("HOME") : "";
+  char const *HOME = getenv("HOME") ? getenv("HOME") : "";
 
 
   /* ************************ */
   /* Expanded token variables */
   /* ************************ */
   // Variable expansion of "~/": HOME directory with "/" appended.
-  char *exp_home = malloc(sizeof *exp_home * (strlen(home_dir) + 2));
-  sprintf(exp_home, "%s%s", home_dir, "/");
+  char *exp_str_home = strdup(HOME);
 
   // Variable expansion of "$$": process ID of smallsh process.
-  static char exp_str_pid_smallsh[6] = {0};
+  char exp_str_pid_smallsh[6] = {0};
   if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
 
   // Variable expansion of "$?": exit status of last foreground command.
-  static int exp_int_fg_exit_status = 0;
+  int exp_int_fg_exit_status = 0;
 
   // Variable expansion of "$!": process ID of most recent background process.
-  static char exp_str_bg_pid[6];
-  exp_str_bg_pid[0] = '\0';
+  char exp_str_bg_pid[6] = {0};
 
 
   /* *********************** */
@@ -65,7 +62,7 @@ main(void)
   /* *********************** */
   size_t words_count = 0;
   char **words;
-  *words = malloc(sizeof **words * (WORD_LIMIT + 1));
+  words = malloc(sizeof **words * (WORD_LIMIT + 1));
   // char *words[WORD_LIMIT+1] = {0};
   // if ( == NULL) fprintf(stderr, "No more memory"); // Maybe I don't need to this anymore.
   
@@ -131,16 +128,22 @@ main(void)
       process_token(words, &words_count, dynamic_token);
       str_token = strtok(NULL, IFS);
     }
-    char *null = "\0";
-    words[words_count] = null;
     
     // fd = open()
     // dup2(fd, STDOUT_FILENO)
     // close(fd)
 
-    /* Parse commands */
+    /* ********* */
+    /* Expansion */
+    /* ********* */
+    int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
+    char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * length);
+    str_gsub(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
+    free(exp_str_exit_status);
+
     // char *needle = "$$";
-    // char *str = strstr(words, needle);
+    // char *str = strstr(*words, needle);
+    // printf("%s\n", str);
 
     //if (0) {
       /* Replaces $$ with smallsh pid. Uses strstr to detect if
@@ -159,7 +162,7 @@ main(void)
       //line = gsub_return;
     //}
 
-      // // Stops tokenizing if remaining text is commented with hash symbol.
+      // Stops tokenizing if remaining text is commented with hash symbol.
       // if (strcmp(str_token, "~/") == 0) {
       //   printf("here %jd", (intmax_t) getpid());
       // }
@@ -182,26 +185,28 @@ main(void)
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
-        free(exp_home);
+        free(exp_str_home);
         free(line);
         exit(val); // Add implied exit if second argument is passed.
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
-        free(exp_home);
+        free(exp_str_home);
         free(line);
         exit(EXIT_SUCCESS);
       }
     }
 
     if (strcmp(words[0], "cd") == 0) {
-      if (words_count == 1) chdir(exp_home);
+      if (words_count == 1) chdir(exp_str_home);
       if (words_count == 2) chdir(words[1]);
       if (words_count > 2) err(errno, "cd command");
       goto restart_prompt;
     }
     
+    // if (strcmp )
+
     /* ****************************** */
     /* Non-Built-in Command Execution */
     /* ****************************** */
@@ -241,7 +246,7 @@ exit:
   // free(words);
   // free(exp_str_pid_smallsh);
   if (line != 0) free(line);
-  free(exp_home);
+  free(exp_str_home);
 
   exit(EXIT_SUCCESS);
   
