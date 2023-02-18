@@ -75,8 +75,10 @@ extern char *str_gsub(char *restrict *restrict words,
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
       
-      size_t size_of_move = word_len + 1 - offset - PID_SMALLSH_len; // Remove "$$".
-      memmove(word + exp_pid_smallsh_len, word + PID_SMALLSH_len, size_of_move);
+      if (word_len > PID_SMALLSH_len) { // Only move memory if there exists characters to move.
+        size_t size_of_move = word_len + 1 - offset - PID_SMALLSH_len; // Remove "$$".
+        memmove(word + exp_pid_smallsh_len, word + PID_SMALLSH_len, size_of_move);
+      }
       char *token = strdup(exp_str_pid_smallsh);
       memcpy(word, token, exp_pid_smallsh_len);
       free(token);
