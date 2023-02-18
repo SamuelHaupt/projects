@@ -37,18 +37,18 @@ main(void)
   /* ********************* */
   char const *PS1 = getenv("PS1") ? getenv("PS1") : "";
   char const *IFS = getenv("IFS") ? getenv("IFS") : " \t\n";
-  char const *HOME = getenv("HOME") ? getenv("HOME") : "";
+  char *HOME = getenv("HOME") ? getenv("HOME") : "";
 
 
   /* ************************ */
   /* Expanded token variables */
   /* ************************ */
   // Variable expansion of "~/": HOME directory with "/" appended.
-  char *exp_str_home = strdup(HOME);
+  char *exp_str_home = HOME;
 
   // Variable expansion of "$$": process ID of smallsh process.
   char exp_str_pid_smallsh[8] = {0};
-  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) == 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
+  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
 
   // Variable expansion of "$?": exit status of last foreground command.
   int exp_int_fg_exit_status = 0;
@@ -138,6 +138,7 @@ main(void)
     /* ********* */
     int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
     char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * length);
+    if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) err(errno=EOVERFLOW, "exp_str_exit_status");
     str_gsub(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
     free(exp_str_exit_status);
 
@@ -185,14 +186,12 @@ main(void)
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
-        free(exp_str_home);
         free(line);
         exit(val); // Add implied exit if second argument is passed.
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
-        free(exp_str_home);
         free(line);
         exit(EXIT_SUCCESS);
       }
@@ -246,7 +245,6 @@ exit:
   // free(words);
   // free(exp_str_pid_smallsh);
   if (line != 0) free(line);
-  free(exp_str_home);
 
   exit(EXIT_SUCCESS);
   

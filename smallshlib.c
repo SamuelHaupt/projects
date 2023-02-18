@@ -26,8 +26,9 @@ extern char *str_gsub(char *restrict *restrict words,
                       char *restrict exp_str_bg_pid)
 {
   char *word = *words;
+  char *str_ptr = word;
   size_t word_len = strlen(words[0]);
-  size_t original_word_len = word_len;
+  size_t const original_word_len = word_len;
   char const *HOME = "~/";
   size_t const HOME_len = strlen(HOME);
   char const *PID_SMALLSH = "$$";
@@ -47,36 +48,41 @@ extern char *str_gsub(char *restrict *restrict words,
     /* Replaces "~/" with home directory. */
     word = words[w];
     word_len = strlen(word);
-    // printf("Before any expansion: %s\n", word);
+    printf("Before any expansion: %s\n", word);
     if (strncmp(word, HOME, 2) == 0) {
-      char *str_ptr = word;
-      ptrdiff_t offset = str_ptr - words[w];
-      str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_home_len - HOME_len + 1)); // Remove "~" and keep "/".
+      ptrdiff_t offset = word - words[w];
+      str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_home_len - HOME_len + 1));
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
+      word = words[w] + offset;
       
       size_t size_of_move = word_len + 1 - offset - HOME_len + 1; // Remove "~" and keep "/".
-      memmove(word + exp_home_len, word + HOME_len - 1, size_of_move);
+      memmove(word + exp_home_len, word + HOME_len - 1, size_of_move); // will always move "/".
       char *token = strdup(exp_str_home);
       memcpy(word, token, exp_home_len);
       free(token);
       word_len = word_len + exp_home_len - HOME_len + 1;
       word += exp_home_len;
+
+      if (word_len < original_word_len) {
+        str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1));
+        if (!str_ptr) goto exit;
+        str_ptr[word_len] = '\0';
+        words[w] = str_ptr;
+      }
     }
 
     /* Replaces "$$" with process ID of smallsh process. */
     word = words[w];
     word_len = strlen(word);
-    // printf("After ~/ expansion: %s\n", word);
+    printf("After ~/ expansion: %s\n", word);
     for (;(word = strstr(word, PID_SMALLSH));) {
-      char *str_ptr = word;
-      ptrdiff_t offset = str_ptr - words[w];
+      ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_pid_smallsh_len - PID_SMALLSH_len));
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
       word = words[w] + offset;
 
-      
       if (word_len - offset > PID_SMALLSH_len) { // Only move memory if there exists characters to move.
         size_t size_of_move = word_len + 1 - offset - PID_SMALLSH_len; // Remove "$$".
         memmove(word + exp_pid_smallsh_len, word + PID_SMALLSH_len, size_of_move);
@@ -86,59 +92,78 @@ extern char *str_gsub(char *restrict *restrict words,
       free(token);
       word_len = word_len + exp_pid_smallsh_len - PID_SMALLSH_len;
       word += exp_pid_smallsh_len;
+
+      if (word_len < original_word_len) {
+        str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1));
+        if (!str_ptr) goto exit;
+        str_ptr[word_len] = '\0';
+        words[w] = str_ptr;
+      }
     }
     
     /* Replaces "$?" with exit status of last foreground command. */
     word = words[w];
     word_len = strlen(word);
-    // printf("After $$ expansion: %s\n", word);
+    printf("After $$ expansion: %s\n", word);
     for (;(word = strstr(word, EXIT_STATUS));) {
-      char *str_ptr = word;
-      ptrdiff_t offset = str_ptr - words[w];
+      ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_exit_status_len - EXIT_STATUS_len));
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
+      word = words[w] + offset;
       
-      size_t size_of_move = word_len + 1 - offset - EXIT_STATUS_len; // Remove "$?".
-      memmove(word + exp_exit_status_len, word + EXIT_STATUS_len, size_of_move);
+      if (word_len - offset > EXIT_STATUS_len) { // Only move memory if there exists characters to move.
+        size_t size_of_move = word_len + 1 - offset - EXIT_STATUS_len; // Remove "$?".
+        memmove(word + exp_exit_status_len, word + EXIT_STATUS_len, size_of_move);
+      }
       char *token = strdup(exp_str_exit_status);
       memcpy(word, token, exp_exit_status_len);
       free(token);
       word_len = word_len + exp_exit_status_len - EXIT_STATUS_len;
       word += exp_exit_status_len;
+
+      if (word_len < original_word_len) {
+        str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1));
+        if (!str_ptr) goto exit;
+        str_ptr[word_len] = '\0';
+        words[w] = str_ptr;
+      }
     }
+
+
 
     /* Replaces "$!" with process ID of most recent background process. */
     word = words[w];
     word_len = strlen(word);
-    // printf("After $? expansion: %s\n", word);
+    printf("After $? expansion: %s\n", word);
     for (;(word = strstr(word, BG_PID));) {
-      char *str_ptr = word;
-      ptrdiff_t offset = str_ptr - words[w];
+      ptrdiff_t offset = word - words[w];
       str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_bg_pid_len - BG_PID_len));
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
+      word = words[w] + offset;
       
-      size_t size_of_move = word_len + 1 - offset - BG_PID_len; // Remove "$!".
-      memmove(word + exp_bg_pid_len, word + BG_PID_len, size_of_move);
+      if (word_len - offset > BG_PID_len) { // Only move memory if there exists characters to move.
+        size_t size_of_move = word_len + 1 - offset - BG_PID_len; // Remove "$!".
+        memmove(word + exp_bg_pid_len, word + BG_PID_len, size_of_move);
+      }
       char *token = strdup(exp_str_bg_pid);
       memcpy(word, token, exp_bg_pid_len);
       free(token);
       word_len = word_len + exp_bg_pid_len - BG_PID_len;
       word += exp_bg_pid_len;
+
+      if (word_len < original_word_len) {
+        str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1));
+        if (!str_ptr) goto exit;
+        str_ptr[word_len] = '\0';
+        words[w] = str_ptr;
+      }
     }
     
     /* Decrease size of word if length has decreased since original word length. */
     word = words[w];
-    // printf("After $! expansion: %s\n", word);
-    if (word_len < original_word_len) {
-      char *str_ptr = word;
-      str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1));
-      if (!str_ptr) goto exit;
-      words[w] = str_ptr;
-    }
-    // printf("After final realloc: %s\n", word);
-
+    printf("After $! expansion: %s\n", word);
   }
 
 exit:
