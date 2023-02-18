@@ -36,8 +36,9 @@ extern char *str_gsub(char *restrict *restrict words,
   size_t exit_status_len = strlen(exp_str_exit_status);
   size_t bg_pid_len = strlen(exp_str_bg_pid);
 
-  for (size_t w = 0; (word = words[w]); w++) {
+  for (size_t w = 0; w < words_count; w++) {
     /* Replaces "~/" with home directory. */
+    word = words[w];
     if (strncmp(word, HOME, 2) == 0) {
       word = realloc(words[w], sizeof **words * (exp_home_len + strlen(word) + 1));
       if (!word) goto exit;
@@ -50,29 +51,34 @@ extern char *str_gsub(char *restrict *restrict words,
     }
 
     /* Replaces "$$" with process ID of smallsh process. */
-    for (;(word = strstr(words[w], PID_SMALLSH));) {
-      printf("Actual size: %lu\n", strlen(words[w]));
+    word = words[w];
+    ptrdiff_t diff1 = word[0] - word[strlen(word)-1];
+    printf("diff: %td\n", diff1);
+    for (;(word = strstr(word, PID_SMALLSH));) {
+      // printf("Actual size: %lu\n", strlen(words[w]));
       char *str_ptr = word;
-      ptrdiff_t offset = word - words[w];
-      word = realloc(words[w], sizeof **words * (pid_home_len + strlen(word) + 1));
-      if (!word) goto exit;
-      words[w] = word;
-      word += offset;
-      printf("Original pointer: %lu\n", strlen(str_ptr));
-      printf("Corrected word position: %lu\n", strlen(word));
+      ptrdiff_t offset = str_ptr - words[w];
+      str_ptr = realloc(words[w], sizeof **words * (strlen(words[w]) + pid_home_len - strlen(PID_SMALLSH) + 1));
+      if (!str_ptr) goto exit;
+      words[w] = str_ptr;
+      word = words[w] + offset;
+      // printf("Original pointer: %lu\n", strlen(str_ptr));
+      // printf("Corrected word position: %lu\n", strlen(word));
       
-      size_t size_of_move = strlen(word) + 1 - strlen(PID_SMALLSH); // Remove "$$".
+      size_t size_of_move = strlen(word) - strlen(PID_SMALLSH) + 1; // Remove "$$".
       memmove(word + pid_home_len, word + strlen(PID_SMALLSH), size_of_move);
       char *token = strdup(exp_str_pid_smallsh);
       memcpy(word, token, pid_home_len);
-      printf("Original pointer: %lu\n", strlen(str_ptr));
-      printf("Shifted word position: %lu\n", strlen(word));
+      // printf("Original pointer: %lu\n", strlen(str_ptr));
+      // printf("Shifted word position: %lu\n", strlen(word));
       // word += pid_home_len;
       // printf("Original pointer: %lu\n", strlen(str_ptr));
       // printf("%lu\n", strlen(word));
       printf("%s\n", words[w]);
     }
     word = words[w];
+    ptrdiff_t diff2 = word[0] - word[strlen(word)-1];
+    printf("diff: %td\n", diff2);
   }
 
   //   ptrdiff_t offset = str - *haystack;
