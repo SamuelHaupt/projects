@@ -67,6 +67,7 @@ extern char *str_gsub(char *restrict *restrict words,
       memmove(word + pid_home_len, word + strlen(PID_SMALLSH), size_of_move);
       char *token = strdup(exp_str_pid_smallsh);
       memcpy(word, token, pid_home_len);
+      free(token);
     }
     
     word = words[w];
@@ -93,7 +94,7 @@ extern char *str_gsub(char *restrict *restrict words,
 //   }
 
 exit:
-  return *words;
+  return; // *words;
 }
 
 extern void process_token(char **words, size_t *restrict word_count, char *restrict token)
