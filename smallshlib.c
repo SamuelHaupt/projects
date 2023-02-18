@@ -25,16 +25,19 @@ extern char *str_gsub(char *restrict *restrict words,
                       char *restrict exp_str_exit_status, 
                       char *restrict exp_str_bg_pid)
 {
-  char *str_ptr, *word = *words;
+  char *word = *words;
+  size_t word_len = strlen(words[0]);
   char const *HOME = "~/";
+  size_t const HOME_len = strlen(HOME);
   char const *PID_SMALLSH = "$$";
-  char const *EXIT_STATUS = "$?";
-  char const *BG_PID = "$!";
+  size_t const PID_SMALLSH_len = strlen(PID_SMALLSH);
+  // char const *EXIT_STATUS = "$?";
+  // char const *BG_PID = "$!";
 
   size_t exp_home_len = strlen(exp_str_home);
-  size_t pid_home_len = strlen(exp_str_pid_smallsh);
-  size_t exit_status_len = strlen(exp_str_exit_status);
-  size_t bg_pid_len = strlen(exp_str_bg_pid);
+  size_t exp_pid_smallsh_len = strlen(exp_str_pid_smallsh);
+  // size_t exit_status_len = strlen(exp_str_exit_status);
+  // size_t bg_pid_len = strlen(exp_str_bg_pid);
 
   for (size_t w = 0; w < words_count; w++) {
     
@@ -42,31 +45,39 @@ extern char *str_gsub(char *restrict *restrict words,
     word = words[w];
     printf("%s\n", word);
     if (strncmp(word, HOME, 2) == 0) {
-      word = realloc(words[w], sizeof **words * (exp_home_len + strlen(word) + 1));
-      if (!word) goto exit;
-      words[w] = word;
+      word_len = strlen(words[w]);
+      char *str_ptr = word;
+      ptrdiff_t offset = str_ptr - words[w];
+      str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_home_len - HOME_len + 1)); // Remove "~" and keep "/".
+      if (!str_ptr) goto exit;
+      words[w] = str_ptr;
       
-      size_t size_of_move = strlen(word) + 1 - strlen(HOME) + 1; // Remove "~" and keep "/".
-      memmove(word + exp_home_len, word + strlen(HOME), size_of_move);
+      size_t size_of_move = word_len + 1 - offset - HOME_len + 1; // Remove "~" and keep "/".
+      memmove(word + exp_home_len, word + HOME_len, size_of_move);
       char *token = strdup(exp_str_home);
       memcpy(word, token, exp_home_len);
+      word_len = word_len + exp_home_len - HOME_len + 1;
+      word += exp_home_len;
+      free(token);
     }
 
     /* Replaces "$$" with process ID of smallsh process. */
     word = words[w];
     printf("%s\n", word);
     for (;(word = strstr(word, PID_SMALLSH));) {
-
+      word_len = strlen(words[w]);
       char *str_ptr = word;
       ptrdiff_t offset = str_ptr - words[w];
-      str_ptr = realloc(words[w], sizeof **words * (strlen(words[w]) + pid_home_len - strlen(PID_SMALLSH) + 1));
+      str_ptr = realloc(words[w], sizeof *words[w] * (word_len + 1 + exp_pid_smallsh_len - PID_SMALLSH_len));
       if (!str_ptr) goto exit;
       words[w] = str_ptr;
       
-      size_t size_of_move = strlen(word) - strlen(PID_SMALLSH) + 1; // Remove "$$".
-      memmove(word + pid_home_len, word + strlen(PID_SMALLSH), size_of_move);
+      size_t size_of_move = word_len + 1 - offset - PID_SMALLSH_len; // Remove "$$".
+      memmove(word + exp_pid_smallsh_len, word + PID_SMALLSH_len, size_of_move);
       char *token = strdup(exp_str_pid_smallsh);
-      memcpy(word, token, pid_home_len);
+      memcpy(word, token, exp_pid_smallsh_len);
+      word_len = word_len + exp_pid_smallsh_len - PID_SMALLSH_len;
+      word += exp_pid_smallsh_len;
       free(token);
     }
     
