@@ -51,7 +51,7 @@ main(void)
   char *exp_str_home = home;
 
   // Variable expansion of "$$": process ID of smallsh process.
-  char exp_str_pid_smallsh[8] = {0};
+  char exp_str_pid_smallsh[11] = {0};
   if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
 
   // Variable expansion of "$?": exit status of last foreground command.
