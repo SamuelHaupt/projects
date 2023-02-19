@@ -47,9 +47,6 @@ main(void)
   /* ************************ */
   /* Expanded token variables */
   /* ************************ */
-  // Variable expansion of "~/": HOME directory with "/" appended.
-  char *exp_str_home = home;
-
   // Variable expansion of "$$": process ID of smallsh process.
   char exp_str_pid_smallsh[11] = {0};
   if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
@@ -83,6 +80,8 @@ main(void)
   /* smallsh Access */
   /**************** */
   while (1) {
+    char *home = getenv("HOME") ? getenv("HOME") : "";
+
     /* Manage Background Processes */
     while ((pid_bg_child = waitpid(0, &int_bg_child_status, WUNTRACED | WNOHANG)) > 0) {
       if (WIFEXITED(int_bg_child_status)){
@@ -173,10 +172,22 @@ main(void)
     /* ********* */
     {
       int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
-      char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * length);
+      char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * (length + 1));
       if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) err(errno=EOVERFLOW, "exp_str_exit_status");
-      token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
+
+      length = snprintf(0, 0, "%s%s", home, "/");
+      char *exp_str_home = malloc(sizeof *exp_str_home * (length + 1));
+      if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) err(errno=EOVERFLOW, "exp_str_home");
+      
+      char *result = token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
+      
       free(exp_str_exit_status);
+      free(exp_str_home);
+      
+      if (!result) {
+        fprintf(stderr, "Error with token expansion.");
+        goto restart_prompt;
+      }
     }
 
 
@@ -209,7 +220,7 @@ main(void)
     }
 
     if (strcmp(words[0], "cd") == 0) {
-      if (words_count == 1) chdir(exp_str_home);
+      if (words_count == 1) chdir(home);
       if (words_count == 2) chdir(words[1]);
       if (words_count > 2) err(errno, "cd command");
       goto restart_prompt;
