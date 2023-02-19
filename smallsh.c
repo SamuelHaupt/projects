@@ -171,34 +171,7 @@ main(void)
     /* ************** */
     /* Parse Commands */
     /* ************** */
-    if (strcmp(words[words_count - 1], "&") == 0){
-      bg_set_command = 1;
-      words[words_count-1] = NULL;
-      words_count--;
-      if (words_count == 0) {
-        fprintf(stderr, "smallsh: parse error near '&'.\n");
-        goto restart_prompt;
-      }
-    }
-
-    for(int i = 0; words_count >= 2 && i < 2; i++) {
-      if (strcmp(words[words_count - 2], ">") == 0) {
-        out_file = words[words_count - 1];
-        free(words[words_count-1]);
-        words[words_count-1] = NULL;
-        free(words[words_count-2]);
-        words[words_count-2] = NULL;
-        words_count -= 2;
-      } else if (strcmp(words[words_count - 2], "<") == 0) {
-        in_file = words[words_count - 1];
-        free(words[words_count-1]);
-        words[words_count-1] = NULL;
-        free(words[words_count-2]);
-        words[words_count-2] = NULL;
-        words_count -= 2;
-      }
-    }
-
+    if (parse_commands(words, &words_count, &bg_set_command, &in_file, &out_file) == -1) goto restart_prompt;
     if (words_count == 0) goto restart_prompt;
 
     // fd = open()

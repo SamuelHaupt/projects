@@ -24,15 +24,23 @@ extern char
 
 
 extern void
-process_token(char **words, size_t *restrict word_count, char *restrict token);
+process_token(char **words, size_t *restrict words_count, char *restrict token);
 
 
 extern void
-reset_token_array(char *restrict *restrict words, size_t *restrict word_count);
+reset_token_array(char *restrict *restrict words, size_t *restrict words_count);
 
 
 extern int
 str_to_int(char *restrict str);
+
+
+extern int
+parse_commands(char *restrict *restrict words,
+               size_t *restrict words_count,
+               int *restrict bg_set_command,
+               char *restrict *restrict in_file,
+               char *restrict *restrict out_file);
 
 
 extern void

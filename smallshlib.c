@@ -103,22 +103,22 @@ exit:
 
 
 extern void
-process_token(char **words, size_t *restrict word_count, char *restrict token)
+process_token(char **words, size_t *restrict words_count, char *restrict token)
 {
-  ++(*word_count);
-  words[(*word_count) - 1] = strdup(token);
+  (*words_count)++;
+  words[(*words_count) - 1] = strdup(token);
   return;
 }
 
 
 extern void
-reset_token_array(char *restrict *restrict words, size_t *restrict word_count)
+reset_token_array(char *restrict *restrict words, size_t *restrict words_count)
 {
-  for (size_t i = 0; i < *word_count; ++i) {
+  for (size_t i = 0; i < *words_count; ++i) {
       free(words[i]);
       words[i] = 0;
     }
-  *word_count = 0;
+  *words_count = 0;
 }
 
 
@@ -153,6 +153,43 @@ str_to_int(char *restrict str)
   } else {
     return (int) val;
   }
+}
+
+
+extern int
+parse_commands(char *restrict *restrict words,
+               size_t *restrict words_count,
+               int *restrict bg_set_command,
+               char *restrict *restrict in_file,
+               char *restrict *restrict out_file)
+{
+  if (strcmp(words[*words_count - 1], "&") == 0){
+    *bg_set_command = 1;
+    words[*words_count-1] = NULL;
+    (*words_count)--;
+    if (*words_count == 0) {
+      fprintf(stderr, "smallsh: parse error near '&'.\n");
+      goto exit_failure;
+    }
+  }
+
+  for(int i = 0; *words_count >= 2 && i < 2; i++) {
+    if (strcmp(words[*words_count - 2], ">") == 0) {
+      *out_file = words[*words_count - 1];
+      free(words[*words_count-2]);
+      words[*words_count-2] = NULL;
+      *words_count -= 2;
+    } else if (strcmp(words[*words_count - 2], "<") == 0) {
+      *in_file = words[*words_count - 1];
+      free(words[*words_count-2]);
+      words[*words_count-2] = NULL;
+      *words_count -= 2;
+    }
+  }
+  return 0;
+
+exit_failure:
+  return -1;
 }
 
 
