@@ -21,7 +21,8 @@
 /* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
 * Oregon State University Operating Systems Course: February 2023.
 */
-char *str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub)
+char 
+*str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub)
 {
   char *str = *haystack;
   size_t haystack_len = strlen(str);
@@ -54,7 +55,8 @@ exit:
 }
 
 
-extern char *token_expansion(char *restrict *restrict words, 
+extern char
+*token_expansion(char *restrict *restrict words, 
                       size_t words_count, 
                       char *restrict exp_str_home, 
                       char *restrict exp_str_pid_smallsh, 
@@ -100,7 +102,8 @@ exit:
 }
 
 
-extern void process_token(char **words, size_t *restrict word_count, char *restrict token)
+extern void
+process_token(char **words, size_t *restrict word_count, char *restrict token)
 {
   ++(*word_count);
   words[(*word_count) - 1] = strdup(token);
@@ -108,7 +111,8 @@ extern void process_token(char **words, size_t *restrict word_count, char *restr
 }
 
 
-extern void reset_token_array(char *restrict *restrict words, size_t *restrict word_count)
+extern void
+reset_token_array(char *restrict *restrict words, size_t *restrict word_count)
 {
   for (size_t i = 0; i < *word_count; ++i) {
       free(words[i]);
@@ -118,7 +122,8 @@ extern void reset_token_array(char *restrict *restrict words, size_t *restrict w
 }
 
 
-extern int str_to_int(char *restrict str)
+extern int
+str_to_int(char *restrict str)
 {
   /*
   * Used source code in STRTOL(3) and adapted for use in smallsh.
@@ -151,6 +156,7 @@ extern int str_to_int(char *restrict str)
 }
 
 
-extern void handler_with_no_action(int signal)
+extern void
+handler_with_no_action(int signal)
 {
 }

@@ -17,12 +17,9 @@
 #define WORD_LIMIT 512
 
 
-
-
 int
 main(void)
 {
-  
   /* ******************* */
   /* Signal Manipulation */
   /* ******************* */
@@ -61,16 +58,17 @@ main(void)
   /* *********************** */
   /* Miscellaneous variables */
   /* *********************** */
+  // Getline variables
   size_t words_count = 0;
   char **words = malloc(sizeof **words * (WORD_LIMIT + 1));
-
-  // Getline variables
   char *line = 0;
   char *str_token = 0;
   size_t n = 0;
   size_t read;
 
-  // Fork & Wait variables
+  // Parse, Fork, & Wait variables
+  char *in_file = NULL;
+  char *out_file = NULL;
   pid_t pid_bg_child = 0;
   int int_bg_child_status;
   int bg_set_command = 0;
@@ -80,9 +78,12 @@ main(void)
   /* smallsh Access */
   /**************** */
   while (1) {
-    char *home = getenv("HOME") ? getenv("HOME") : "";
+    home = getenv("HOME") ? getenv("HOME") : "";
 
+
+    /* *************************** */
     /* Manage Background Processes */
+    /* *************************** */
     while ((pid_bg_child = waitpid(0, &int_bg_child_status, WUNTRACED | WNOHANG)) > 0) {
       if (WIFEXITED(int_bg_child_status)){
         fprintf(stderr, "Child process %d done. Exit status %d.\n", pid_bg_child, WEXITSTATUS(int_bg_child_status));
@@ -119,57 +120,33 @@ main(void)
     /* *************************** */
     /* Word Tokenization & Storage */
     /* *************************** */
-    char *dynamic_token = NULL;
-    str_token = strtok(line, ifs);
-    if (str_token) {
-      goto start_tokenization;
-    } else {
-      goto restart_prompt;
-    }
+    {  
+      str_token = strtok(line, ifs);
+      if (str_token) {
+        goto start_tokenization;
+      } else {
+        goto restart_prompt;
+      }
 
-    while ((str_token = strtok(NULL, ifs)) != NULL && words_count < WORD_LIMIT) {
-    start_tokenization:
-      if (strncmp(str_token, "#", 1) == 0) break;
-      dynamic_token = strdup(str_token);
-      process_token(words, &words_count, dynamic_token);
-    }
-    free(dynamic_token);
-    dynamic_token = NULL;
-    
-    /* Null terminate end of list for EXECVP. */
-    if (words_count > 0) {
+      char *dynamic_token = NULL;
+      while ((str_token = strtok(NULL, ifs)) != NULL && words_count < WORD_LIMIT) {
+      start_tokenization:
+        if (strncmp(str_token, "#", 1) == 0) break;
+        dynamic_token = strdup(str_token);
+        process_token(words, &words_count, dynamic_token);
+      }
+      free(dynamic_token);
+      dynamic_token = NULL;
+      
+      /* Null terminate end of list for EXECVP. */
       free(words[words_count]);
-      words[words_count] = NULL; 
+      words[words_count] = NULL;
     }
 
-    // if (strncmp(str_token, "\n", 1) == 0) break; // Stops tokenizing at commented words.
-    // if (strncmp(str_token, "#", 1) == 0) break; // Stops tokenizing at commented words.
-    // fprintf(stderr, "%d\n", strcmp(words[words_count-1], "&"));
 
-    // if (words_count > 0 && strcmp(words[words_count-1], "&")) {
-    //   bg_set_command = 1;
-    //   fprintf(stderr, "%d\n", bg_set_command);
-    //   *words[words_count-1] = '\0';
-    //   fprintf(stderr, "Found it! %s\n", words[words_count-1]);
-    // }
-
-    // if (words_count > 0 && strncmp(words[words_count-1], "&", 1)) {
-    //   bg_set_command = 1;
-    //   fprintf(stderr, "%d\n", bg_set_command);
-    //   fprintf(stderr, "%s\n", words[words_count-1]);
-    //   // *words[words_count-1] = '\0';
-    //   // words_count--;
-    //   // fprintf(stderr, "%s\n", words[words_count-1]);
-    // }
-    // fprintf(stderr, "%d\n", bg_set_command);
-    // // fd = open()
-    // // dup2(fd, STDOUT_FILENO)
-    // // close(fd)
-
-
-    /* ********* */
-    /* Expansion */
-    /* ********* */
+    /* *************** */
+    /* Token Expansion */
+    /* *************** */
     {
       int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
       char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * (length + 1));
@@ -191,10 +168,48 @@ main(void)
     }
 
 
+    /* ************** */
+    /* Parse Commands */
+    /* ************** */
+    if (strcmp(words[words_count - 1], "&") == 0){
+      bg_set_command = 1;
+      words[words_count-1] = NULL;
+      words_count--;
+      if (words_count == 0) {
+        fprintf(stderr, "smallsh: parse error near '&'.\n");
+        goto restart_prompt;
+      }
+    }
+
+    for(int i = 0; words_count >= 2 && i < 2; i++) {
+      if (strcmp(words[words_count - 2], ">") == 0) {
+        out_file = words[words_count - 1];
+        free(words[words_count-1]);
+        words[words_count-1] = NULL;
+        free(words[words_count-2]);
+        words[words_count-2] = NULL;
+        words_count -= 2;
+      } else if (strcmp(words[words_count - 2], "<") == 0) {
+        in_file = words[words_count - 1];
+        free(words[words_count-1]);
+        words[words_count-1] = NULL;
+        free(words[words_count-2]);
+        words[words_count-2] = NULL;
+        words_count -= 2;
+      }
+    }
+
+    if (words_count == 0) goto restart_prompt;
+
+    // fd = open()
+    // dup2(fd, STDOUT_FILENO)
+    // close(fd)
+
+
     /* ************************** */
     /* Built-in Command Execution */
     /* ************************** */
-    if (strcmp(words[0], "exit") == 0) {
+    if (words_count > 0 && strcmp(words[0], "exit") == 0) {
       if (words_count > 2) {    
         fprintf(stderr, "Too many arguments passed with exit command.\n");
         goto restart_prompt;
@@ -219,14 +234,14 @@ main(void)
       }
     }
 
-    if (strcmp(words[0], "cd") == 0) {
+    if (words_count > 0 && strcmp(words[0], "cd") == 0) {
       if (words_count == 1) chdir(home);
       if (words_count == 2) chdir(words[1]);
       if (words_count > 2) err(errno, "cd command");
       goto restart_prompt;
     }
 
-
+    goto restart_prompt; //// For testing purposes only.
     /* ****************************** */
     /* Non-Built-in Command Execution */
     /* ****************************** */
