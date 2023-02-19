@@ -62,6 +62,7 @@ extern char *token_expansion(char *restrict *restrict words,
       char *token = strdup(exp_str_home);
       memcpy(word, token, exp_home_len);
       free(token);
+      token = NULL;
       word_len = word_len + exp_home_len - HOME_len + 1;
       word += exp_home_len;
 
@@ -90,6 +91,7 @@ extern char *token_expansion(char *restrict *restrict words,
       char *token = strdup(exp_str_pid_smallsh);
       memcpy(word, token, exp_pid_smallsh_len);
       free(token);
+      token = NULL;
       word_len = word_len + exp_pid_smallsh_len - PID_SMALLSH_len;
       word += exp_pid_smallsh_len;
 
@@ -118,6 +120,7 @@ extern char *token_expansion(char *restrict *restrict words,
       char *token = strdup(exp_str_exit_status);
       memcpy(word, token, exp_exit_status_len);
       free(token);
+      token = NULL;
       word_len = word_len + exp_exit_status_len - EXIT_STATUS_len;
       word += exp_exit_status_len;
 
@@ -146,6 +149,7 @@ extern char *token_expansion(char *restrict *restrict words,
       char *token = strdup(exp_str_bg_pid);
       memcpy(word, token, exp_bg_pid_len);
       free(token);
+      token = NULL;
       word_len = word_len + exp_bg_pid_len - BG_PID_len;
       word += exp_bg_pid_len;
 

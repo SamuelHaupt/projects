@@ -120,27 +120,39 @@ main(void)
     /* *************************** */
     /* Word Tokenization & Storage */
     /* *************************** */
-    
+    char *dynamic_token = NULL;
     str_token = strtok(line, ifs);
-    if (str_token) goto start_tokenization;
-    while ((str_token = strtok(NULL, ifs)) != NULL && words_count < WORD_LIMIT+1) {
-    start_tokenization:
-      char *dynamic_token = strdup(str_token);
-      process_token(words, &words_count, dynamic_token);
-      free(dynamic_token);
+    if (str_token) {
+      goto start_tokenization;
+    } else {
+      goto restart_prompt;
     }
+
+    while ((str_token = strtok(NULL, ifs)) != NULL && words_count < WORD_LIMIT) {
+    start_tokenization:
+      if (strncmp(str_token, "#", 1) == 0) break;
+      dynamic_token = strdup(str_token);
+      process_token(words, &words_count, dynamic_token);
+    }
+    free(dynamic_token);
+    dynamic_token = NULL;
     
+    /* Null terminate end of list for EXECVP. */
+    if (words_count > 0) {
+      free(words[words_count]);
+      words[words_count] = NULL; 
+    }
 
     // if (strncmp(str_token, "\n", 1) == 0) break; // Stops tokenizing at commented words.
     // if (strncmp(str_token, "#", 1) == 0) break; // Stops tokenizing at commented words.
-    fprintf(stderr, "%d\n", strcmp(words[words_count-1], "&"));
+    // fprintf(stderr, "%d\n", strcmp(words[words_count-1], "&"));
 
-    if (words_count > 0 && strcmp(words[words_count-1], "&")) {
-      bg_set_command = 1;
-      fprintf(stderr, "%d\n", bg_set_command);
-      *words[words_count-1] = '\0';
-      fprintf(stderr, "Found it! %s\n", words[words_count-1]);
-    }
+    // if (words_count > 0 && strcmp(words[words_count-1], "&")) {
+    //   bg_set_command = 1;
+    //   fprintf(stderr, "%d\n", bg_set_command);
+    //   *words[words_count-1] = '\0';
+    //   fprintf(stderr, "Found it! %s\n", words[words_count-1]);
+    // }
 
     // if (words_count > 0 && strncmp(words[words_count-1], "&", 1)) {
     //   bg_set_command = 1;
@@ -154,7 +166,7 @@ main(void)
     // // fd = open()
     // // dup2(fd, STDOUT_FILENO)
     // // close(fd)
-    // if (bg_set_command) goto restart_prompt;
+
 
     /* ********* */
     /* Expansion */
