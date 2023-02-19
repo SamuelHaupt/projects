@@ -10,6 +10,8 @@ typedef struct token_s {
 /* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
 * Oregon State University Operating Systems Course: February 2023.
 */
+extern char *replace_if_found(char *restrict haystack, char const *restrict needle, char const *restrict sub);
+
 extern char *token_expansion(char *restrict *restrict haystack,
                       size_t words_count,
                       char *restrict exp_home, 
