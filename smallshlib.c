@@ -84,6 +84,10 @@ extern char *token_expansion(char *restrict *restrict words,
       words[w] = str_ptr;
       word = words[w] + offset;
 
+      printf("%s\n", str_ptr);
+      printf("%s\n", word);
+      printf("%s\n", words[w]);
+
       if (word_len - offset > PID_SMALLSH_len) { // Only move memory if there exists characters to move.
         size_t size_of_move = word_len + 1 - offset - PID_SMALLSH_len; // Remove "$$".
         memmove(word + exp_pid_smallsh_len, word + PID_SMALLSH_len, size_of_move);
@@ -101,6 +105,9 @@ extern char *token_expansion(char *restrict *restrict words,
         str_ptr[word_len] = '\0';
         words[w] = str_ptr;
       }
+      printf("%s\n", str_ptr);
+      printf("%s\n", word);
+      printf("%s\n", words[w]);
     }
     
     /* Replaces "$?" with exit status of last foreground command. */
