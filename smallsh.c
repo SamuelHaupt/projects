@@ -235,7 +235,7 @@ main(void)
           if (fd_input == -1) {
             fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
           }
-          dup2(STDIN_FILENO, fd_input);
+          dup2(fd_input, STDIN_FILENO);
           close(fd_input);
           free(in_file_pathname);
           in_file_pathname = NULL;
@@ -246,7 +246,7 @@ main(void)
           if (fd_output == -1) {
             fprintf(stderr, "%s: %s", strerror(errno), out_file_pathname);
           }
-          dup2(STDOUT_FILENO, fd_output);
+          dup2(fd_output, STDOUT_FILENO);
           close(fd_output);
           free(out_file_pathname);
           out_file_pathname = NULL;

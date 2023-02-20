@@ -18,7 +18,7 @@
 #define arr_len(obj) (sizeof obj / sizeof *obj)
 
 
-/* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
+/* Authored by Ryan Gambord (Professor) at
 * Oregon State University Operating Systems Course: February 2023.
 */
 char 
