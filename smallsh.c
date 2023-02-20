@@ -73,6 +73,8 @@ main(void)
 
   // Parse, Fork, & Wait variables
   char *in_file_pathname = NULL;
+  int fd_input = 0;
+  int fd_output = 0;
   char *out_file_pathname = NULL;
   pid_t pid_bg_child = 0;
   int int_bg_child_status;
@@ -229,24 +231,24 @@ main(void)
         break;
       case 0:
         /* Perform actions specific to child. */
-
+        
         if (in_file_pathname) {
-          int fd_input = open(in_file_pathname, O_RDONLY);
-          if (fd_input == -1) {
-            fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
-          }
-          dup2(fd_input, STDIN_FILENO);
+          int result = -1;
+          fd_input = open(in_file_pathname, O_RDONLY);
+          if (fd_input == -1) fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
+          result = dup2(fd_input, STDIN_FILENO);
+          if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", in_file_pathname);
           close(fd_input);
           free(in_file_pathname);
           in_file_pathname = NULL;
         }
 
         if (out_file_pathname) {
-          int fd_output = creat(out_file_pathname, S_IRWXU | S_IRWXG | S_IRWXO);
-          if (fd_output == -1) {
-            fprintf(stderr, "%s: %s", strerror(errno), out_file_pathname);
-          }
-          dup2(fd_output, STDOUT_FILENO);
+          int result = -1;
+          fd_output = open(out_file_pathname, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC, S_IRWXU | S_IRWXG | S_IRWXO );
+          if (fd_output == -1) fprintf(stderr, "%s: %s", strerror(errno), out_file_pathname);
+          result = dup2(fd_output, STDOUT_FILENO);
+          if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", out_file_pathname);
           close(fd_output);
           free(out_file_pathname);
           out_file_pathname = NULL;
@@ -262,6 +264,16 @@ main(void)
       default:
         /* Perform actions specific to parent. */
         /* Waiting & Signal Handling */
+        
+        if (in_file_pathname) {
+          free(in_file_pathname);
+          in_file_pathname = NULL;
+        }
+
+        if (out_file_pathname) {
+          free(out_file_pathname);
+          out_file_pathname = NULL;
+        }
         
         if (bg_set_command == 1) {
           bg_set_command = 0;
