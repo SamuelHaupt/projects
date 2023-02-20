@@ -7,5 +7,3 @@ smallsh: $(SOURCE)
 
 debug: $(SOURCE)
 	gcc -g -std=c99 -o $(EXECUTABLE) $(SOURCE)
-
-# IFS=$' '$'\t'$'\n' PS1='$ ' ./smallsh

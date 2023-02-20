@@ -1,3 +1,30 @@
+/*
+NAME
+  smallsh - basic shell written in c
+SYNOPSIS
+  make && PS1='$ ' ./smallsh
+DESCRIPTION
+  smallsh (small shell) is a command-line interface, similar to bash. It can handle general inputs.
+AUTHOR
+  Samuel haupt
+NOTES
+  - Use makefile by running 'make' command to compile for use. Use 'make debug' if creating a debug symbol table
+  with -g flag.
+  - PS1 defaults to an empty string. It'll be important to set the environment variable (PS1='$ ')so a
+  prompt will print each time.
+  - IFS daults to " \t\n". It is possible to remove spaces from delimitors (IFS=$'\t'$'\n') and smallsh will
+  still work for <tabs><newlines>, which requires tabes for spaces.
+  - Expansion: ~/, $$, $?, and $! all expand to respectively: home directory, process ID of smallsh process,
+  exit status of last foreground command, and process ID of most recent background process.
+  - Comments: Comments denoted by "# comments" or "#comments" are deleted.
+  - Redirection: Use the input redirection operator "<" and/or output redirection operator ">" followed by 
+  filepaths (any order) to redirect standard input or output. Redirection must be the final commands, not 
+  withstanding &, which will be removed prior to processing redirection.
+  - Background Process: Use "&" as the final command in order to send an executed command to the background
+  process. smallsh prompt will continue immediately.
+*/
+
+
 #define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
 
@@ -40,18 +67,18 @@ main(void)
   /* ********************* */
   char const *ps1 = getenv("PS1") ? getenv("PS1") : "";
   char const *ifs = getenv("IFS") ? getenv("IFS") : " \t\n";
-  char *home = getenv("HOME") ? getenv("HOME") : "";
+  char const *home = getenv("HOME") ? getenv("HOME") : "";
 
 
   /* ************************ */
   /* Expanded token variables */
   /* ************************ */
   // Variable expansion of "~/": home directory.
-  // home;
+  // ~/ ---> home
   
   // Variable expansion of "$$": process ID of smallsh process.
   char exp_str_pid_smallsh[11] = {0};
-  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
+  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
 
   // Variable expansion of "$?": exit status of last foreground command.
   int exp_int_fg_exit_status = 0;
@@ -85,7 +112,6 @@ main(void)
   /* smallsh Access */
   /**************** */
   while (1) {
-    home = getenv("HOME") ? getenv("HOME") : "";
 
 
     /* *************************** */
@@ -97,23 +123,23 @@ main(void)
       } else if (WIFSIGNALED(int_bg_child_status)) {
         fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) pid_bg_child, WTERMSIG(int_bg_child_status));
       } else if (WIFSTOPPED(int_bg_child_status)) {
-        if (kill(pid_bg_child, SIGCONT) == -1) err(errno, "kill");
+        if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s", strerror(errno));
         fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid_bg_child);
       }
     }
-    if (pid_bg_child == -1 && errno != ECHILD) err(errno, "waitpid");
+    if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s", strerror(errno));
     
 
     /* ************************* */
     /* Print Prompt & Read Input */
     /* ************************* */
     fprintf(stderr, "%s", ps1);
-    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) err(errno, "sigaction set to current");
+    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
     read = getline(&line, &n, stdin);
-    if (sigaction(SIGINT, &sa_ignore, NULL) == -1) err(errno, "sigaction set to old");
+    if (sigaction(SIGINT, &sa_ignore, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
     if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == -1) {
-      fprintf(stderr, "\n"); // Adds new line when interrupt signal is sent.
+      fprintf(stderr, "\n");
       if (feof(stdin)) exit(exp_int_fg_exit_status); // Implied exit when EOF.
       if (errno == EINTR) {
         clearerr(stdin);
@@ -156,11 +182,11 @@ main(void)
     {
       int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
       char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * (length + 1));
-      if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) err(errno=EOVERFLOW, "exp_str_exit_status");
+      if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
 
       length = snprintf(0, 0, "%s%s", home, "/");
       char *exp_str_home = malloc(sizeof *exp_str_home * (length + 1));
-      if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) err(errno=EOVERFLOW, "exp_str_home");
+      if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
       
       char *result = token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
       
@@ -226,15 +252,15 @@ main(void)
     switch (pid_bg_child) {
       case -1:
         /* Handle error. */
-        err(errno, "fork");
-        exit(errno);
+        fprintf(stderr, "fork: %s", strerror(errno));
+        goto restart_prompt;
         break;
       case 0:
         /* Perform actions specific to child. */
         
         if (in_file_pathname) {
           int result = -1;
-          fd_input = open(in_file_pathname, O_RDONLY);
+          fd_input = open(in_file_pathname, O_RDONLY | O_CLOEXEC);
           if (fd_input == -1) fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
           result = dup2(fd_input, STDIN_FILENO);
           if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", in_file_pathname);
@@ -254,8 +280,8 @@ main(void)
           out_file_pathname = NULL;
         }
 
-        if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1) err(errno, "SIGTSTOP not set to default");
-        if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
+        if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1)  fprintf(stderr, "SIGTSTOP not set to default: %s", strerror(errno));
+        if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) fprintf(stderr, "SIGINT not set to default: %s", strerror(errno));
         execvp(words[0], words);
         
         fprintf(stderr, "smallsh: command not found: %s\n", words[0]);
@@ -277,34 +303,26 @@ main(void)
         
         if (bg_set_command == 1) {
           bg_set_command = 0;
-          if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) err(errno=EOVERFLOW, "Write to exp_str_exit_status.");
+          if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
           goto restart_prompt;
         }
 
         while ((pid_bg_child = waitpid(pid_bg_child, &int_bg_child_status, WUNTRACED)) > 0) {
-          if (pid_bg_child == -1) err(errno, "waitpid");
           if (WIFEXITED(int_bg_child_status)){
             exp_int_fg_exit_status = WEXITSTATUS(int_bg_child_status);
           } else if (WIFSIGNALED(int_bg_child_status)) {
             exp_int_fg_exit_status = 128 + WTERMSIG(int_bg_child_status);
           } else if (WIFSTOPPED(int_bg_child_status)) {
-            if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) err(errno=EOVERFLOW, "Write to exp_str_exit_status.");
-            if (kill(pid_bg_child, SIGCONT) == -1) err(errno, "Kill of pid_bg_child.");
+            if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
+            if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s", strerror(errno));
             fprintf(stderr, "Child process %d stopped. Continuing.\n", pid_bg_child);
             break;
           }
         }
+        if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s", strerror(errno));
 
     }
-restart_prompt:
-  reset_token_array(words, &words_count);
-  };
-
-exit:
-  reset_token_array(words, &words_count);
-  if (line != 0) free(line);
-
-  exit(EXIT_SUCCESS);
-  
+  restart_prompt:
+    reset_token_array(words, &words_count);
+  };  
 }
-
