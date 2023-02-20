@@ -123,35 +123,36 @@ reset_token_array(char *restrict *restrict words, size_t *restrict words_count)
 
 
 extern int
-str_to_int(char *restrict str)
+str_to_int(char *restrict str_ptr)
 {
   /*
   * Used source code in STRTOL(3) and adapted for use in smallsh.
-  * @brief Returns a int value in the range from 0 to 255. 
-  * If the entire value is not an int, returns -1.
-  * If value is outside the contracted range, returns -2.
+  * Returns int status in the range from 0 to 255.
+  * Otherwise: 
+  *   Returns -1, if the entire status is not an int.
+  *   Returns -2, if status is outside the contracted range.
   */
   int base = 10;
-  char *endptr;
-  long val;
+  char *end_ptr;
+  long status;
 
   errno = 0;    /* To distinguish success/failure after call */
-  val = strtol(str, &endptr, base);
+  status = strtol(str_ptr, &end_ptr, base);
 
   /* Check for various possible errors */
   if ((errno == ERANGE
-      && (val == LONG_MAX || val == LONG_MIN))
-      || (errno != 0 && val == 0)
-      || (endptr == str)
-      || (*endptr != '\0')) {
+      && (status == LONG_MAX || status == LONG_MIN))
+      || (errno != 0 && status == 0)
+      || (end_ptr == str_ptr)
+      || (*end_ptr != '\0')) {
     return -1;
   }
 
-  /* Check if val is within range. */
-  if (val < 0 || val > 255) {
+  /* Check if status is within range. */
+  if (status < 0 || status > 255) {
     return -2;
   } else {
-    return (int) val;
+    return (int) status;
   }
 }
 
@@ -160,8 +161,8 @@ extern int
 parse_commands(char *restrict *restrict words,
                size_t *restrict words_count,
                int *restrict bg_set_command,
-               char *restrict *restrict in_file,
-               char *restrict *restrict out_file)
+               char *restrict *restrict in_file_pathname,
+               char *restrict *restrict out_file_pathname)
 {
   if (strcmp(words[*words_count - 1], "&") == 0){
     *bg_set_command = 1;
@@ -175,12 +176,12 @@ parse_commands(char *restrict *restrict words,
 
   for(int i = 0; *words_count >= 2 && i < 2; i++) {
     if (strcmp(words[*words_count - 2], ">") == 0) {
-      *out_file = words[*words_count - 1];
+      *out_file_pathname = words[*words_count - 1];
       free(words[*words_count-2]);
       words[*words_count-2] = NULL;
       *words_count -= 2;
     } else if (strcmp(words[*words_count - 2], "<") == 0) {
-      *in_file = words[*words_count - 1];
+      *in_file_pathname = words[*words_count - 1];
       free(words[*words_count-2]);
       words[*words_count-2] = NULL;
       *words_count -= 2;

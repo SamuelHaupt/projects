@@ -10,8 +10,10 @@
 #include <stdint.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <signal.h>
 #include <string.h>
+#include <fcntl.h>
 #include "smallshlib.h"
 
 #define WORD_LIMIT 512
@@ -44,6 +46,9 @@ main(void)
   /* ************************ */
   /* Expanded token variables */
   /* ************************ */
+  // Variable expansion of "~/": home directory.
+  // home;
+  
   // Variable expansion of "$$": process ID of smallsh process.
   char exp_str_pid_smallsh[11] = {0};
   if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) err(errno=EOVERFLOW, "exp_str_pid_smallsh");
@@ -67,8 +72,8 @@ main(void)
   size_t read;
 
   // Parse, Fork, & Wait variables
-  char *in_file = NULL;
-  char *out_file = NULL;
+  char *in_file_pathname = NULL;
+  char *out_file_pathname = NULL;
   pid_t pid_bg_child = 0;
   int int_bg_child_status;
   int bg_set_command = 0;
@@ -84,15 +89,14 @@ main(void)
     /* *************************** */
     /* Manage Background Processes */
     /* *************************** */
-    while ((pid_bg_child = waitpid(0, &int_bg_child_status, WUNTRACED | WNOHANG)) > 0) {
+    while ((pid_bg_child = waitpid(0, &int_bg_child_status, WNOHANG | WUNTRACED)) > 0) {
       if (WIFEXITED(int_bg_child_status)){
-        fprintf(stderr, "Child process %d done. Exit status %d.\n", pid_bg_child, WEXITSTATUS(int_bg_child_status));
+        fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid_bg_child, WEXITSTATUS(int_bg_child_status));
       } else if (WIFSIGNALED(int_bg_child_status)) {
-        fprintf(stderr, "Child process %d done. Signaled %d.\n", pid_bg_child, WTERMSIG(int_bg_child_status));
+        fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) pid_bg_child, WTERMSIG(int_bg_child_status));
       } else if (WIFSTOPPED(int_bg_child_status)) {
-        exp_int_fg_exit_status = pid_bg_child;
         if (kill(pid_bg_child, SIGCONT) == -1) err(errno, "kill");
-        fprintf(stderr, "Child process %d stopped. Continuing.\n", pid_bg_child);
+        fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid_bg_child);
       }
     }
     if (pid_bg_child == -1 && errno != ECHILD) err(errno, "waitpid");
@@ -138,9 +142,9 @@ main(void)
       free(dynamic_token);
       dynamic_token = NULL;
       
-      /* Null terminate end of list for EXECVP. */
+      /* Null terminate end of list for EXECVP. See EXEC(3) for reference. */
       free(words[words_count]);
-      words[words_count] = NULL;
+      words[words_count] = (char *) NULL;
     }
 
 
@@ -171,50 +175,47 @@ main(void)
     /* ************** */
     /* Parse Commands */
     /* ************** */
-    if (parse_commands(words, &words_count, &bg_set_command, &in_file, &out_file) == -1) goto restart_prompt;
+    if (parse_commands(words, &words_count, &bg_set_command, &in_file_pathname, &out_file_pathname) == -1) goto restart_prompt;
     if (words_count == 0) goto restart_prompt;
-
-    // fd = open()
-    // dup2(fd, STDOUT_FILENO)
-    // close(fd)
 
 
     /* ************************** */
     /* Built-in Command Execution */
     /* ************************** */
-    if (words_count > 0 && strcmp(words[0], "exit") == 0) {
+    if (strcmp(words[0], "exit") == 0) {
       if (words_count > 2) {    
         fprintf(stderr, "Too many arguments passed with exit command.\n");
         goto restart_prompt;
       } else if (words_count == 2) {
-        int val = str_to_int(words[1]);
-        if ( val < 0) {
-          if (val == -1) fprintf(stderr, "Invalid argument passed with exit command.\n");
-          if (val == -2) fprintf(stderr, "Exit status out of range: 0 to 255.\n");
+        int status = str_to_int(words[1]);
+        if ( status < 0) {
+          if (status == -1) fprintf(stderr, "Invalid argument passed with exit command.\n");
+          if (status == -2) fprintf(stderr, "Exit status out of range: 0 to 255.\n");
           goto restart_prompt;
         }
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
         free(line);
-        exit(val); // Add implied exit if second argument is passed.
+        exit(status);
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
         reset_token_array(words, &words_count);
         free(line);
-        exit(EXIT_SUCCESS);
+        exit(exp_int_fg_exit_status);
       }
     }
 
-    if (words_count > 0 && strcmp(words[0], "cd") == 0) {
+    if (strcmp(words[0], "cd") == 0) {
       if (words_count == 1) chdir(home);
       if (words_count == 2) chdir(words[1]);
-      if (words_count > 2) err(errno, "cd command");
+      if (words_count > 2) fprintf(stderr, "cd: too many arguments passed: %s\n", words[1]);
       goto restart_prompt;
     }
+    
+    // goto restart_prompt; //// For testing purposes only.
 
-    goto restart_prompt; //// For testing purposes only.
     /* ****************************** */
     /* Non-Built-in Command Execution */
     /* ****************************** */
@@ -228,22 +229,60 @@ main(void)
         break;
       case 0:
         /* Perform actions specific to child. */
-        /* Execution & Non-Built-In Commands */
+
+        if (in_file_pathname) {
+          int fd_input = open(in_file_pathname, O_RDONLY);
+          if (fd_input == -1) {
+            fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
+          }
+          dup2(STDIN_FILENO, fd_input);
+          close(fd_input);
+          free(in_file_pathname);
+          in_file_pathname = NULL;
+        }
+
+        if (out_file_pathname) {
+          int fd_output = creat(out_file_pathname, S_IRWXU | S_IRWXG | S_IRWXO);
+          if (fd_output == -1) {
+            fprintf(stderr, "%s: %s", strerror(errno), out_file_pathname);
+          }
+          dup2(STDOUT_FILENO, fd_output);
+          close(fd_output);
+          free(out_file_pathname);
+          out_file_pathname = NULL;
+        }
+
         if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1) err(errno, "SIGTSTOP not set to default");
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) err(errno, "SIGINT not set to default");
         execvp(words[0], words);
-        exp_int_fg_exit_status = 128 + WTERMSIG(int_bg_child_status);
+        
         fprintf(stderr, "smallsh: command not found: %s\n", words[0]);
         exit(errno);
         break;
       default:
         /* Perform actions specific to parent. */
         /* Waiting & Signal Handling */
-        pid_bg_child = waitpid(pid_bg_child, &int_bg_child_status, 0);
-        if (pid_bg_child == -1) {
-          err(errno, "waitpid");
+        
+        if (bg_set_command == 1) {
+          bg_set_command = 0;
+          if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) err(errno=EOVERFLOW, "Write to exp_str_exit_status.");
+          goto restart_prompt;
         }
-        exp_int_fg_exit_status = WEXITSTATUS(int_bg_child_status);
+
+        while ((pid_bg_child = waitpid(pid_bg_child, &int_bg_child_status, WUNTRACED)) > 0) {
+          if (pid_bg_child == -1) err(errno, "waitpid");
+          if (WIFEXITED(int_bg_child_status)){
+            exp_int_fg_exit_status = WEXITSTATUS(int_bg_child_status);
+          } else if (WIFSIGNALED(int_bg_child_status)) {
+            exp_int_fg_exit_status = 128 + WTERMSIG(int_bg_child_status);
+          } else if (WIFSTOPPED(int_bg_child_status)) {
+            if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) err(errno=EOVERFLOW, "Write to exp_str_exit_status.");
+            if (kill(pid_bg_child, SIGCONT) == -1) err(errno, "Kill of pid_bg_child.");
+            fprintf(stderr, "Child process %d stopped. Continuing.\n", pid_bg_child);
+            break;
+          }
+        }
+
     }
 restart_prompt:
   reset_token_array(words, &words_count);

@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-typedef struct token_s {
-  char *word;
-  char *info;
-} token_s;
 
 /* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
 * Oregon State University Operating Systems Course: February 2023.
@@ -39,8 +35,8 @@ extern int
 parse_commands(char *restrict *restrict words,
                size_t *restrict words_count,
                int *restrict bg_set_command,
-               char *restrict *restrict in_file,
-               char *restrict *restrict out_file);
+               char *restrict *restrict in_file_pathname,
+               char *restrict *restrict out_file_pathname);
 
 
 extern void
