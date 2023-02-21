@@ -172,7 +172,7 @@ main(void)
       
       /* Null terminate end of list for EXECVP. See EXEC(3) for reference. */
       free(words[words_count]);
-      words[words_count] = (char *) NULL;
+      words[words_count] = NULL;
     }
 
 
@@ -188,12 +188,12 @@ main(void)
       char *exp_str_home = malloc(sizeof *exp_str_home * (length + 1));
       if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
       
-      char *result = token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
+      int result = token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
       
       free(exp_str_exit_status);
       free(exp_str_home);
       
-      if (!result) {
+      if (result == -1) {
         fprintf(stderr, "Error with token expansion.");
         goto restart_prompt;
       }
@@ -241,13 +241,13 @@ main(void)
       if (words_count > 2) fprintf(stderr, "cd: too many arguments passed: %s\n", words[1]);
       goto restart_prompt;
     }
-    
-    // goto restart_prompt; //// For testing purposes only.
+
 
     /* ****************************** */
     /* Non-Built-in Command Execution */
     /* ****************************** */
     /* Adopted from Linux Programming Interface Chapter 25. */
+    /* Creates parent and child processes. */
     pid_bg_child = fork();
     switch (pid_bg_child) {
       case -1:
@@ -260,7 +260,7 @@ main(void)
         
         if (in_file_pathname) {
           int result = -1;
-          fd_input = open(in_file_pathname, O_RDONLY | O_CLOEXEC);
+          fd_input = open(in_file_pathname, O_RDONLY);
           if (fd_input == -1) fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
           result = dup2(fd_input, STDIN_FILENO);
           if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", in_file_pathname);
@@ -271,7 +271,7 @@ main(void)
 
         if (out_file_pathname) {
           int result = -1;
-          fd_output = open(out_file_pathname, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC, S_IRWXU | S_IRWXG | S_IRWXO );
+          fd_output = open(out_file_pathname, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO );
           if (fd_output == -1) fprintf(stderr, "%s: %s", strerror(errno), out_file_pathname);
           result = dup2(fd_output, STDOUT_FILENO);
           if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", out_file_pathname);

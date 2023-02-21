@@ -3,15 +3,12 @@
 #include <sys/types.h>
 
 
-/* Adapted function from str_gsub authored by Ryan Gambord (Professor) at
-* Oregon State University Operating Systems Course: February 2023.
-*/
-char
+extern char
 *str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub);
 
 
-extern char
-*token_expansion(char *restrict *restrict haystack,
+extern int
+token_expansion(char *restrict *restrict haystack,
                       size_t words_count,
                       char *restrict exp_home, 
                       char *restrict exp_str_pid_smallsh, 

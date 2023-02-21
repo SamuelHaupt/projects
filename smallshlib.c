@@ -15,15 +15,16 @@
 #include <limits.h>
 #include "smallshlib.h"
 
-#define arr_len(obj) (sizeof obj / sizeof *obj)
 
-
-/* Authored by Ryan Gambord (Professor) at
-* Oregon State University Operating Systems Course: February 2023.
-*/
-char 
+extern char 
 *str_gsub(char *restrict *restrict haystack, char const *restrict needle, char const *restrict sub)
 {
+  /* Authored by Ryan Gambord (Professor) at
+  * Oregon State University Operating Systems Course: February 2023.
+  * Replaces needle with sub within haystack.
+  * Returns char*, if successful.
+  * Returns NULL, if failure.
+  */
   char *str = *haystack;
   size_t haystack_len = strlen(str);
   size_t const needle_len = strlen(needle),
@@ -55,14 +56,20 @@ exit:
 }
 
 
-extern char
-*token_expansion(char *restrict *restrict words, 
+extern int
+token_expansion(char *restrict *restrict words, 
                       size_t words_count, 
                       char *restrict exp_str_home, 
                       char *restrict exp_str_pid_smallsh, 
                       char *restrict exp_str_exit_status, 
                       char *restrict exp_str_bg_pid)
 {
+  /*
+  * Expands values ~/, $$, $?, and $! with associated values, similar to bash requirements,
+  * all in one pass. Uses str_gsub to replace.
+  * Returns 0, if expansion succeeded.
+  * Otherwise, returns -1.
+  */
 
   char const *HOME = "~/";
   char const *PID_SMALLSH = "$$";
@@ -97,14 +104,20 @@ extern char
     }
   }
 
+return 0;
+
 exit:
-  return result;
+  return -1;
 }
 
 
 extern void
 process_token(char **words, size_t *restrict words_count, char *restrict token)
 {
+  /*
+  * Sets a duplicated token at words_count-1 index. Increments words_count prior
+  * to assignment.
+  */
   (*words_count)++;
   words[(*words_count) - 1] = strdup(token);
   return;
@@ -114,9 +127,12 @@ process_token(char **words, size_t *restrict words_count, char *restrict token)
 extern void
 reset_token_array(char *restrict *restrict words, size_t *restrict words_count)
 {
+  /*
+  * Iterates through words, frees at each index, and nulls.
+  */
   for (size_t i = 0; i < *words_count; ++i) {
       free(words[i]);
-      words[i] = 0;
+      words[i] = NULL;
     }
   *words_count = 0;
 }
@@ -164,6 +180,12 @@ parse_commands(char *restrict *restrict words,
                char *restrict *restrict in_file_pathname,
                char *restrict *restrict out_file_pathname)
 {
+  /*
+  * Used to parse command tokens for redirection and background execution:
+  * [< file_path] [> file_path] [&] OR: [> file_path] [< file_path] [&].
+  * NULLS array indices where commands exist and sets appropriate variables.
+  * Return successfull (0) or failure (-1).
+  */
   if (strcmp(words[*words_count - 1], "&") == 0){
     *bg_set_command = 1;
     words[*words_count-1] = NULL;
