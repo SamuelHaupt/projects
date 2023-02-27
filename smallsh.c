@@ -233,14 +233,16 @@ main(void)
         }
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
-        reset_token_array(words, &words_count);
         free(line);
+        reset_token_array(words, &words_count);
+        free(words);
         exit(status);
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
-        reset_token_array(words, &words_count);
         free(line);
+        reset_token_array(words, &words_count);
+        free(words);
         exit(exp_int_fg_exit_status);
       }
     }
@@ -296,6 +298,9 @@ main(void)
         execvp(words[0], words);  // excevp returns errno only on error.
         
         fprintf(stderr, "smallsh: command not found: %s\n", words[0]);
+        free(line);
+        reset_token_array(words, &words_count);
+        free(words);
         exit(errno);
         break;
       
