@@ -77,14 +77,14 @@ main(void)
   // ~/ ---> home
   
   // Variable expansion of "$$": process ID of smallsh process.
-  char exp_str_pid_smallsh[11] = {0};
+  char exp_str_pid_smallsh[12] = {0};
   if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
 
   // Variable expansion of "$?": exit status of last foreground command.
   int exp_int_fg_exit_status = 0;
 
   // Variable expansion of "$!": process ID of most recent background process.
-  char exp_str_bg_pid[8] = {0};
+  char exp_str_bg_pid[12] = {0};
 
 
   /* *********************** */
