@@ -17,7 +17,7 @@ token_expansion(char *restrict *restrict haystack,
 
 
 extern void
-process_token(char **words, size_t *restrict words_count, char *restrict token);
+add_token(char **words, size_t *restrict words_count, char *restrict token);
 
 
 extern void
@@ -37,4 +37,4 @@ parse_commands(char *restrict *restrict words,
 
 
 extern void
-handler_with_no_action(int signal);
+handler_with_no_action();

@@ -99,10 +99,10 @@ main(void)
   size_t read;
 
   // Parse, Fork, & Wait variables
-  char *in_file_pathname = NULL;
+  char *infile_pathname = NULL;
   int fd_input = 0;
+  char *outfile_pathname = NULL;
   int fd_output = 0;
-  char *out_file_pathname = NULL;
   pid_t pid_bg_child = 0;
   int int_bg_child_status;
   int bg_set_command = 0;
@@ -117,6 +117,10 @@ main(void)
     /* *************************** */
     /* Manage Background Processes */
     /* *************************** */
+    // Loop used for unwaited for background processes in same process group ID as smallsh.
+    // See WAITPID(2) example for code structure. 
+    // WNOHANG: return immediately if no child has exited.
+    // WUNTRACED: Return if a child has stopped.
     while ((pid_bg_child = waitpid(0, &int_bg_child_status, WNOHANG | WUNTRACED)) > 0) {
       if (WIFEXITED(int_bg_child_status)){
         fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid_bg_child, WEXITSTATUS(int_bg_child_status));
@@ -134,11 +138,13 @@ main(void)
     /* Print Prompt & Read Input */
     /* ************************* */
     fprintf(stderr, "%s", ps1);
+    // Sigaction is set per assignment requirements.
     if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
     read = getline(&line, &n, stdin);
     if (sigaction(SIGINT, &sa_ignore, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
     if (read == 1) continue; // No input except newline character. Skip strtok below.
-    if (read == -1) {
+    if (read == (size_t) -1) {
+      // Error or EOF condition exists per GETLINE(3)
       fprintf(stderr, "\n");
       if (feof(stdin)) exit(exp_int_fg_exit_status); // Implied exit when EOF.
       if (errno == EINTR) {
@@ -157,18 +163,17 @@ main(void)
       if (str_token) {
         goto start_tokenization;
       } else {
-        goto restart_prompt;
+        goto restart_prompt; // No token exists, so restart prompt.
       }
 
-      char *dynamic_token = NULL;
       while ((str_token = strtok(NULL, ifs)) != NULL && words_count < WORD_LIMIT) {
       start_tokenization:
-        if (strncmp(str_token, "#", 1) == 0) break;
-        dynamic_token = strdup(str_token);
-        process_token(words, &words_count, dynamic_token);
+        if (strncmp(str_token, "#", 1) == 0) break; // Stop tokenization since only comments remain.
+        char *dynamic_token = strdup(str_token);
+        add_token(words, &words_count, dynamic_token);
+        free(dynamic_token);
+        dynamic_token = NULL;
       }
-      free(dynamic_token);
-      dynamic_token = NULL;
       
       /* Null terminate end of list for EXECVP. See EXEC(3) for reference. */
       free(words[words_count]);
@@ -180,10 +185,12 @@ main(void)
     /* Token Expansion */
     /* *************** */
     {
+      // Converts exit status to character array.
       int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
       char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * (length + 1));
       if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
 
+      // Add "/" to home before expanding tokens.
       length = snprintf(0, 0, "%s%s", home, "/");
       char *exp_str_home = malloc(sizeof *exp_str_home * (length + 1));
       if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
@@ -203,13 +210,17 @@ main(void)
     /* ************** */
     /* Parse Commands */
     /* ************** */
-    if (parse_commands(words, &words_count, &bg_set_command, &in_file_pathname, &out_file_pathname) == -1) goto restart_prompt;
-    if (words_count == 0) goto restart_prompt;
+    // Parses commands related to redirection and background process. See documentation notes.
+    if (parse_commands(words, &words_count, &bg_set_command, &infile_pathname, &outfile_pathname) == -1) goto restart_prompt;
+    if (words_count == 0) goto restart_prompt; // Only happens when no other words exist aside from redirection and background process.
 
 
     /* ************************** */
     /* Built-in Command Execution */
     /* ************************** */
+    // Only exit from smallsh.
+    // exit command with valid argument executes with argument. See str_to_int for valid argument.
+    // Otherwise, exit command executed with exit status of last foreground command.
     if (strcmp(words[0], "exit") == 0) {
       if (words_count > 2) {    
         fprintf(stderr, "Too many arguments passed with exit command.\n");
@@ -250,63 +261,67 @@ main(void)
     /* Creates parent and child processes. */
     pid_bg_child = fork();
     switch (pid_bg_child) {
+      
+      /* Handle error. */
       case -1:
-        /* Handle error. */
         fprintf(stderr, "fork: %s", strerror(errno));
         goto restart_prompt;
         break;
+      
+      /* Perform actions specific to child. */
       case 0:
-        /* Perform actions specific to child. */
-        
-        if (in_file_pathname) {
+        if (infile_pathname) {
           int result = -1;
-          fd_input = open(in_file_pathname, O_RDONLY);
-          if (fd_input == -1) fprintf(stderr, "%s: %s", strerror(errno), in_file_pathname);
+          fd_input = open(infile_pathname, O_RDONLY);
+          if (fd_input == -1) fprintf(stderr, "%s: %s", strerror(errno), infile_pathname);
           result = dup2(fd_input, STDIN_FILENO);
-          if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", in_file_pathname);
+          if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", infile_pathname);
           close(fd_input);
-          free(in_file_pathname);
-          in_file_pathname = NULL;
+          free(infile_pathname);
+          infile_pathname = NULL;
         }
 
-        if (out_file_pathname) {
+        if (outfile_pathname) {
           int result = -1;
-          fd_output = open(out_file_pathname, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO );
-          if (fd_output == -1) fprintf(stderr, "%s: %s", strerror(errno), out_file_pathname);
+          fd_output = open(outfile_pathname, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO );
+          if (fd_output == -1) fprintf(stderr, "%s: %s", strerror(errno), outfile_pathname);
           result = dup2(fd_output, STDOUT_FILENO);
-          if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", out_file_pathname);
+          if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", outfile_pathname);
           close(fd_output);
-          free(out_file_pathname);
-          out_file_pathname = NULL;
+          free(outfile_pathname);
+          outfile_pathname = NULL;
         }
 
         if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1)  fprintf(stderr, "SIGTSTOP not set to default: %s", strerror(errno));
         if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) fprintf(stderr, "SIGINT not set to default: %s", strerror(errno));
-        execvp(words[0], words);
+        execvp(words[0], words);  // excevp returns errno only on error.
         
         fprintf(stderr, "smallsh: command not found: %s\n", words[0]);
         exit(errno);
         break;
+      
+      /* Perform actions specific to parent. */
       default:
-        /* Perform actions specific to parent. */
-        /* Waiting & Signal Handling */
-        
-        if (in_file_pathname) {
-          free(in_file_pathname);
-          in_file_pathname = NULL;
+        if (infile_pathname) {
+          free(infile_pathname);
+          infile_pathname = NULL;
         }
 
-        if (out_file_pathname) {
-          free(out_file_pathname);
-          out_file_pathname = NULL;
+        if (outfile_pathname) {
+          free(outfile_pathname);
+          outfile_pathname = NULL;
         }
         
+        // Skips blocking wait if recent command was sent to background process.
         if (bg_set_command == 1) {
           bg_set_command = 0;
           if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
           goto restart_prompt;
         }
 
+        // Loop used for foreground commands: blocking wait.
+        // See WAITPID(2) example for code structure. 
+        // WUNTRACED: Return if a child has stopped.
         while ((pid_bg_child = waitpid(pid_bg_child, &int_bg_child_status, WUNTRACED)) > 0) {
           if (WIFEXITED(int_bg_child_status)){
             exp_int_fg_exit_status = WEXITSTATUS(int_bg_child_status);
@@ -316,7 +331,7 @@ main(void)
             if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
             if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s", strerror(errno));
             fprintf(stderr, "Child process %d stopped. Continuing.\n", pid_bg_child);
-            break;
+            break; // Moves signaled child process to background.
           }
         }
         if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s", strerror(errno));

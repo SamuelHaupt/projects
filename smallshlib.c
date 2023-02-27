@@ -112,7 +112,7 @@ exit:
 
 
 extern void
-process_token(char **words, size_t *restrict words_count, char *restrict token)
+add_token(char **words, size_t *restrict words_count, char *restrict token)
 {
   /*
   * Sets a duplicated token at words_count-1 index. Increments words_count prior
@@ -217,6 +217,6 @@ exit_failure:
 
 
 extern void
-handler_with_no_action(int signal)
+handler_with_no_action()
 {
 }
