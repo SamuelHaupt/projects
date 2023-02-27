@@ -188,6 +188,7 @@ parse_commands(char *restrict *restrict words,
   */
   if (strcmp(words[*words_count - 1], "&") == 0){
     *bg_set_command = 1;
+    free(words[*words_count-1]);
     words[*words_count-1] = NULL;
     (*words_count)--;
     if (*words_count == 0) {
