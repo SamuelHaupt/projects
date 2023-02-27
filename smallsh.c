@@ -93,7 +93,7 @@ main(void)
   // Getline variables
   size_t words_count = 0;
   char **words = malloc(sizeof **words * (WORD_LIMIT + 1));
-  char *line = 0;
+  char *line = NULL;
   char *str_token = 0;
   size_t n = 0;
   size_t read;
@@ -140,17 +140,18 @@ main(void)
     fprintf(stderr, "%s", ps1);
     // Sigaction is set per assignment requirements.
     if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
+    n = 0;
     read = getline(&line, &n, stdin);
     if (sigaction(SIGINT, &sa_ignore, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
     if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == (size_t) -1) {
       // Error or EOF condition exists per GETLINE(3)
       fprintf(stderr, "\n");
-      if (feof(stdin)) exit(exp_int_fg_exit_status); // Implied exit when EOF.
+      if (feof(stdin)) goto eof_exit;
       if (errno == EINTR) {
         clearerr(stdin);
         errno = 0;
-        continue;
+        goto restart_prompt;
       }
     }
     
@@ -240,6 +241,7 @@ main(void)
       } else {
         fprintf(stderr, "\nexit\n");
         if (kill(-(intmax_t) getpid(), SIGINT) == -1) fprintf(stderr, "Unable to kill with SIGINT: %s\n", strerror(errno));
+      eof_exit:
         free(line);
         reset_token_array(words, &words_count);
         free(words);
@@ -341,7 +343,9 @@ main(void)
         if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s", strerror(errno));
 
     }
-  restart_prompt:
-    reset_token_array(words, &words_count);
+restart_prompt:
+  free(line);
+  line = NULL;
+  reset_token_array(words, &words_count);
   };  
 }
