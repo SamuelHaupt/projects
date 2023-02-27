@@ -176,7 +176,6 @@ main(void)
       }
       
       /* Null terminate end of list for EXECVP. See EXEC(3) for reference. */
-      free(words[words_count]);
       words[words_count] = NULL;
     }
 
