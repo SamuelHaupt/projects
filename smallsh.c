@@ -344,8 +344,8 @@ main(void)
 
     }
 restart_prompt:
-  // free(line);
-  // line = NULL;
+  free(line);
+  line = NULL;
   reset_token_array(words, &words_count);
   };  
 }
