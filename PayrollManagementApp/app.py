@@ -12,12 +12,13 @@ import database.controller as db
 app = Flask(__name__)
 db_connection = db.connect_to_database()
 
-# Makes for secure routing using Flask. 
+# Makes for secure routing using Flask.
+# Includes secrets to show how the application would be implemented.
 app.config['SECRET_KEY'] = '4ae4cbd2e244edacacff32a231b7cc30'
 
 '''
 Make sure to add .env file with the following info:
-340DBHOST=classmysql.engr.oregonstate.edu
+340DBHOST=classmysql.edu
 340DBUSER=cs340_lastnamef
 340DBPW=maybea4digitnumber
 340DB=cs340_lastnamef
