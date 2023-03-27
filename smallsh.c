@@ -52,9 +52,9 @@ main(void)
   /* ******************* */
   /* Signal Manipulation */
   /* ******************* */
-  struct sigaction  sa_SIGINT_default = {0}, // (Ctrl-c) job control for stop
+  struct sigaction  sa_SIGINT_default = {0}, // (Ctrl-c) interrupt
                     sa_SIGINT_do_nothing = {0},
-                    sa_SIGTSTP_default = {0}, // (Ctrl-z) interrupt
+                    sa_SIGTSTP_default = {0}, // (Ctrl-z) stop
                     sa_ignore = {0};
   sa_SIGINT_do_nothing.sa_handler = handler_with_no_action;
   sa_ignore.sa_handler = SIG_IGN;
