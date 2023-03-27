@@ -7,7 +7,7 @@ I built the project with a partner and we each contributed to the overall projec
 + Technology/Frameworks: MySQL Database Management System, Flask, & Git.
 
 Resources used:
-1) [Oregon State University - Databases Course Material](https://canvas.oregonstate.edu/courses/1830239/assignments/syllabus)
-2) [Cory Shafer YouTube Channel](https://www.youtube.com/playlist?list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH)
-3) [Form Validation with WTForms](https://flask.palletsprojects.com/en/2.0.x/patterns/wtforms/)
-4) [Oregon State University - Web Dev Course Material](https://canvas.oregonstate.edu/courses/1822080/assignments/syllabus)
+1. [Oregon State University - Databases Course Material](https://canvas.oregonstate.edu/courses/1830239/assignments/syllabus)
+2. [Cory Shafer YouTube Channel](https://www.youtube.com/playlist?list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH)
+3. [Form Validation with WTForms](https://flask.palletsprojects.com/en/2.0.x/patterns/wtforms/)
+4. [Oregon State University - Web Dev Course Material](https://canvas.oregonstate.edu/courses/1822080/assignments/syllabus)
