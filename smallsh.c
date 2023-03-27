@@ -78,7 +78,7 @@ main(void)
   
   // Variable expansion of "$$": process ID of smallsh process.
   char exp_str_pid_smallsh[12] = {0};
-  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
+  if (sprintf(exp_str_pid_smallsh, "%jd", (intmax_t) getpid()) <= 0) fprintf(stderr, "sprintf: %s\n", strerror(EOVERFLOW));
 
   // Variable expansion of "$?": exit status of last foreground command.
   int exp_int_fg_exit_status = 0;
@@ -127,11 +127,11 @@ main(void)
       } else if (WIFSIGNALED(int_bg_child_status)) {
         fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) pid_bg_child, WTERMSIG(int_bg_child_status));
       } else if (WIFSTOPPED(int_bg_child_status)) {
-        if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s", strerror(errno));
+        if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s\n", strerror(errno));
         fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid_bg_child);
       }
     }
-    if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s", strerror(errno));
+    if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s\n", strerror(errno));
     
 
     /* ************************* */
@@ -139,10 +139,10 @@ main(void)
     /* ************************* */
     fprintf(stderr, "%s", ps1);
     // Sigaction is set per assignment requirements.
-    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
+    if (sigaction(SIGINT, &sa_SIGINT_do_nothing, NULL) == -1) fprintf(stderr, "SIGINT not set: %s\n", strerror(errno));
     n = 0;
     read = getline(&line, &n, stdin);
-    if (sigaction(SIGINT, &sa_ignore, NULL) == -1) fprintf(stderr, "SIGINT not set: %s", strerror(errno));
+    if (sigaction(SIGINT, &sa_ignore, NULL) == -1) fprintf(stderr, "SIGINT not set: %s\n", strerror(errno));
     if (read == 1) continue; // No input except newline character. Skip strtok below.
     if (read == (size_t) -1) {
       // Error or EOF condition exists per GETLINE(3)
@@ -188,12 +188,12 @@ main(void)
       // Converts exit status to character array.
       int length = snprintf(0, 0, "%d", exp_int_fg_exit_status);
       char *exp_str_exit_status = malloc(sizeof *exp_str_exit_status * (length + 1));
-      if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
+      if (snprintf(exp_str_exit_status, length + 1, "%d", exp_int_fg_exit_status) <= 0) fprintf(stderr, "snprintf: %s\n", strerror(EOVERFLOW));
 
       // Add "/" to home before expanding tokens.
       length = snprintf(0, 0, "%s%s", home, "/");
       char *exp_str_home = malloc(sizeof *exp_str_home * (length + 1));
-      if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) fprintf(stderr, "snprintf: %s", strerror(EOVERFLOW));
+      if (snprintf(exp_str_home, length + 1, "%s%s", home, "/") <= 0) fprintf(stderr, "snprintf: %s\n", strerror(EOVERFLOW));
       
       int result = token_expansion(words, words_count, exp_str_home, exp_str_pid_smallsh, exp_str_exit_status, exp_str_bg_pid);
       
@@ -201,7 +201,7 @@ main(void)
       free(exp_str_home);
       
       if (result == -1) {
-        fprintf(stderr, "Error with token expansion.");
+        fprintf(stderr, "Error with token expansion\n");
         goto restart_prompt;
       }
     }
@@ -223,13 +223,13 @@ main(void)
     // Otherwise, exit command executed with exit status of last foreground command.
     if (strcmp(words[0], "exit") == 0) {
       if (words_count > 2) {    
-        fprintf(stderr, "Too many arguments passed with exit command.\n");
+        fprintf(stderr, "Too many arguments passed with exit command\n");
         goto restart_prompt;
       } else if (words_count == 2) {
         int status = str_to_int(words[1]);
         if ( status < 0) {
-          if (status == -1) fprintf(stderr, "Invalid argument passed with exit command.\n");
-          if (status == -2) fprintf(stderr, "Exit status out of range: 0 to 255.\n");
+          if (status == -1) fprintf(stderr, "Invalid argument passed with exit command\n");
+          if (status == -2) fprintf(stderr, "Exit status out of range: 0 to 255\n");
           goto restart_prompt;
         }
         fprintf(stderr, "\nexit\n");
@@ -267,7 +267,7 @@ main(void)
       
       /* Handle error. */
       case -1:
-        fprintf(stderr, "fork: %s", strerror(errno));
+        fprintf(stderr, "fork: %s\n", strerror(errno));
         goto restart_prompt;
         break;
       
@@ -276,7 +276,7 @@ main(void)
         if (infile_pathname) {
           int result = -1;
           fd_input = open(infile_pathname, O_RDONLY);
-          if (fd_input == -1) fprintf(stderr, "%s: %s", strerror(errno), infile_pathname);
+          if (fd_input == -1) fprintf(stderr, "%s: %s\n", strerror(errno), infile_pathname);
           result = dup2(fd_input, STDIN_FILENO);
           if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", infile_pathname);
           close(fd_input);
@@ -287,7 +287,7 @@ main(void)
         if (outfile_pathname) {
           int result = -1;
           fd_output = open(outfile_pathname, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO );
-          if (fd_output == -1) fprintf(stderr, "%s: %s", strerror(errno), outfile_pathname);
+          if (fd_output == -1) fprintf(stderr, "%s: %s\n", strerror(errno), outfile_pathname);
           result = dup2(fd_output, STDOUT_FILENO);
           if (result == -1 ) fprintf(stderr, "file descriptor error: %s\n", outfile_pathname);
           close(fd_output);
@@ -295,8 +295,8 @@ main(void)
           outfile_pathname = NULL;
         }
 
-        if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1)  fprintf(stderr, "SIGTSTOP not set to default: %s", strerror(errno));
-        if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) fprintf(stderr, "SIGINT not set to default: %s", strerror(errno));
+        if (sigaction(SIGTSTP, &sa_SIGTSTP_default, NULL) == -1)  fprintf(stderr, "SIGTSTOP not set to default: %s\n", strerror(errno));
+        if (sigaction(SIGINT, &sa_SIGINT_default, NULL) == -1) fprintf(stderr, "SIGINT not set to default: %s\n", strerror(errno));
         execvp(words[0], words);  // excevp returns errno only on error.
         
         fprintf(stderr, "smallsh: command not found: %s\n", words[0]);
@@ -321,12 +321,15 @@ main(void)
         // Skips blocking wait if recent command was sent to background process.
         if (bg_set_command == 1) {
           bg_set_command = 0;
-          if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
+          if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s\n", strerror(EOVERFLOW));
           goto restart_prompt;
         }
 
-        // Loop used for foreground commands: blocking wait.
-        // See WAITPID(2) example for code structure. 
+
+        /* *************************** */
+        /* Manage Foreground Processes */
+        /* *************************** */
+        // Blocking wait: See WAITPID(2) example for code structure. 
         // WUNTRACED: Return if a child has stopped.
         while ((pid_bg_child = waitpid(pid_bg_child, &int_bg_child_status, WUNTRACED)) > 0) {
           if (WIFEXITED(int_bg_child_status)){
@@ -334,13 +337,13 @@ main(void)
           } else if (WIFSIGNALED(int_bg_child_status)) {
             exp_int_fg_exit_status = 128 + WTERMSIG(int_bg_child_status);
           } else if (WIFSTOPPED(int_bg_child_status)) {
-            if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s", strerror(EOVERFLOW));
-            if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s", strerror(errno));
+            if (sprintf(exp_str_bg_pid, "%jd", (intmax_t) pid_bg_child) <= 0) fprintf(stderr, "sprintf: %s\n", strerror(EOVERFLOW));
+            if (kill(pid_bg_child, SIGCONT) == -1) fprintf(stderr, "SIGCONT failed: %s\n", strerror(errno));
             fprintf(stderr, "Child process %d stopped. Continuing.\n", pid_bg_child);
             break; // Moves signaled child process to background.
           }
         }
-        if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s", strerror(errno));
+        if (pid_bg_child == -1 && errno!=ECHILD) fprintf(stderr, "waitpid: %s\n", strerror(errno));
 
     }
 restart_prompt:
