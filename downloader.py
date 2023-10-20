@@ -32,3 +32,12 @@ class YFDownloader():
         preprocessed_data = self.add_daily_returns(cleaned_data)
 
         return preprocessed_data
+
+
+if __name__ == "__main__":
+    yf_downloader = YFDownloader()
+    symbol = 'SPY'
+    start_date = '2021-01-30'
+    stop_date = '2022-01-30'
+    data_df = yf_downloader.download_data_df(symbol, start_date, stop_date)
+    preprocessed_df = yf_downloader.preprocess_data(data_df)
