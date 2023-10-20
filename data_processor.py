@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 
 
 class DataProcessor():
@@ -54,8 +55,8 @@ class DataProcessor():
         hma_intermediate = 2 * wma_half_n - wma_n
 
         # Compute HMA
-        data_df["HMA"] = self.weighted_moving_average(hma_intermediate, int(
-            period**0.5))
+        data_df["HMA"] = self.weighted_moving_average(hma_intermediate,
+                                                      int(math.sqrt(period)))
 
         return data_df.dropna()
 
