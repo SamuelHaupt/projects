@@ -90,4 +90,4 @@ if __name__ == "__main__":
     start_date = "2021-01-30"
     stop_date = "2022-01-30"
     data_df = yf_downloader.download_data_df(symbol, start_date, stop_date)
-    preprocessed_df = yf_downloader.preprocess_data(data_df)
+    preprocessed_df = yf_downloader.preprocess_data(data_df, 15)
