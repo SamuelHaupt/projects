@@ -1,6 +1,6 @@
 """
-Downloader module downloads data from Yahoo Finance using yFinance module.
-It also provides a function to clean the data.
+Preprocessor module for data downloaded. Cleans data and adds
+indicators.
 """
 
 import pandas as pd
@@ -22,7 +22,7 @@ class DataProcessor():
         start_date: str,
         end_date: str,
     ) -> pd.DataFrame:
-        """_summary_
+        """Downloads asset data from yFinance.
 
         Args:
             symbol (str): asset symbol on yfinance
@@ -65,8 +65,8 @@ class DataProcessor():
     def clean_data(self, data_df: pd.DataFrame) -> pd.DataFrame:
         """Cleans data by using SPY's Close non-Nan, rather than grabbing
         New York Stock Exchanges trading days. This is a workaround to
-        simply the amount of libraries required to clean data. ffill and bfill
-        are applied to normalize data.
+        simplify the amount of libraries required to clean data. ffill
+        and bfill are applied to normalize data.
 
         Args:
             data_df (pd.DataFrame): DataFrame to clean
