@@ -74,7 +74,10 @@ class DataProcessor():
         Returns:
             pd.DataFrame: Cleansed data with ffill and bfill applied
         """
-        spy = self.download_data_df('SPY', self.start_date, self.end_date)
+        spy = self.download_data_df_from_yf(
+            'SPY',
+            self.start_date,
+            self.end_date)
         spy.dropna(subset='Close', inplace=True)
         spy.drop(columns=['Open', 'High', 'Low', 'Close', 'Volume'],
                  inplace=True)
