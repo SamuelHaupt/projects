@@ -106,7 +106,7 @@ class DataProcessor():
 
     def weighted_moving_average(
             self,
-            series: pd.Series | np.ndarray,
+            series: pd.Series,
             period: int) -> np.ndarray:
         """Calculates the weighted moving average of a series.
 
