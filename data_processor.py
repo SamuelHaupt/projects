@@ -104,7 +104,10 @@ class DataProcessor():
         data_df["Daily Returns"] = data_df["Close"].pct_change()
         return data_df
 
-    def weighted_moving_average(series: pd.Series, period: int) -> pd.Series:
+    def weighted_moving_average(
+            self,
+            series: pd.Series | np.ndarray,
+            period: int) -> np.ndarray:
         """Calculates the weighted moving average of a series.
 
         Args:
@@ -121,7 +124,10 @@ class DataProcessor():
                                                    weights.sum(), raw=True)
 
     def add_hull_moving_average(
-            self, data_df: pd.DataFrame, period: int) -> pd.DataFrame:
+            self,
+            data_df: pd.DataFrame,
+            period: int
+            ) -> pd.DataFrame:
         """Adds the Hull Moving Average to the dataframe.
 
         Args:
@@ -165,8 +171,9 @@ class DataProcessor():
         preprocessed_data = self.add_daily_returns(cleaned_data)
 
         # Add Hull Moving Average
-        preprocessed_data = self.add_hull_moving_average
-        (preprocessed_data, hma_period)
+        preprocessed_data = self.add_hull_moving_average(
+            preprocessed_data,
+            hma_period)
 
         return preprocessed_data
 
