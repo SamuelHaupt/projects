@@ -10,7 +10,8 @@ class PPOAgentModule:
     def __init__(self, env, model_path=None):
         self.env = env
         self.model_path = model_path
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
         if model_path:
             self.model = RecurrentPPO.load(model_path)
         else:
@@ -24,15 +25,14 @@ class PPOAgentModule:
                                       clip_range=0.1,
                                       batch_size=15,
                                       device=self.device)
-    
 
     def train(self, total_timesteps):
         """
         Trains the agent for the given number of timesteps.
-        Args: 
+        Args:
             total_timesteps (int): Number of timesteps to train the agent for.
-        
-        Returns: 
+
+        Returns:
             None
         """
         print("Training.")
@@ -44,8 +44,8 @@ class PPOAgentModule:
         curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
         self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
         print("Training complete.")
-        print("Model saved at path:", f"models/{curr_datetime}_ppo_trading_agent")
-
+        print("Model saved at path:",
+              f"models/{curr_datetime}_ppo_trading_agent")
 
     def test(self, test_env, testing_df, render_dir):
         """
@@ -62,7 +62,8 @@ class PPOAgentModule:
         print("Testing model on testing data.")
         for _ in range(len(testing_df)):
             position_index, _states = self.model.predict(observation)
-            observation, reward, done, truncated, info = test_env.step(position_index)
+            observation, reward, done, truncated, info = test_env.step(
+                position_index)
             if done or truncated:
                 break
 
@@ -71,4 +72,3 @@ class PPOAgentModule:
             os.makedirs(render_dir)
         test_env.save_for_render(dir=render_dir)
         print(f"Test finished. Render saved in {render_dir}")
-
