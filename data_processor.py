@@ -81,7 +81,6 @@ class DataProcessor():
         spy.dropna(subset='Close', inplace=True)
         spy.drop(columns=['Open', 'High', 'Low', 'Close', 'Volume'],
                  inplace=True)
-
         # use trading days from SPY to clean data.
         new_df = spy.join(data_df, how='left')
 
@@ -107,7 +106,7 @@ class DataProcessor():
     def weighted_moving_average(
             self,
             series: pd.Series,
-            period: int) -> np.ndarray:
+            period: int) -> pd.Series:
         """Calculates the weighted moving average of a series.
 
         Args:
@@ -153,6 +152,71 @@ class DataProcessor():
 
         return data_df.dropna()
 
+    def add_velocity(self, data_df: pd.DataFrame) -> pd.DataFrame:
+        """Adds Velocity based on Close price.
+
+        Args:
+            data_df (pd.DataFrame): changes are applied to df
+
+        Returns:
+            pd.DataFrame: df after adding velocity
+        """
+        df = data_df["HMA"].copy()
+        data_df["Velocity"] = df.diff()
+        return data_df.dropna()
+
+    def add_velocity_time_shift(
+            self,
+            data_df: pd.DataFrame,
+            time_shift: int
+            ) -> pd.DataFrame:
+        """Shifts Velocity by number of days selected.
+
+        Args:
+            data_df (pd.DataFrame): changes are applied to df
+            time_shift (int): time shift by number of days
+
+        Returns:
+            pd.DataFrame: df after adding time shifted velocity
+        """
+        df = data_df["Velocity"].copy()
+        velocity_shift = df.shift(time_shift)
+        data_df[f"{time_shift}d Shifted Velocity"] = velocity_shift
+        return data_df.dropna()
+
+    def add_acceleration(self, data_df: pd.DataFrame) -> pd.DataFrame:
+        """Adds Acceleration based on Velocity rate.
+
+        Args:
+            data_df (pd.DataFrame): changes are applied to df
+
+        Returns:
+            pd.DataFrame: df after adding acceleration
+        """
+        df = data_df["Velocity"].copy()
+        acceleration = df.diff()
+        data_df["Acceleration"] = acceleration
+        return data_df.dropna()
+
+    def add_acceleration_time_shift(
+            self,
+            data_df: pd.DataFrame,
+            time_shift: int
+            ) -> pd.DataFrame:
+        """Shifts Acceleration by number of days selected
+
+        Args:
+            data_df (pd.DataFrame): changes are applied to df
+            time_shift (int): time shift by number of days
+
+        Returns:
+            pd.DataFrame: df after adding time shifted acceleration
+        """
+        df = data_df["Acceleration"].copy()
+        acceleration_shift = df.shift(time_shift)
+        data_df[f"{time_shift}d Shifted Acceleration"] = acceleration_shift
+        return data_df.dropna()
+
     def preprocess_data(self, data_df: pd.DataFrame,
                         hma_period: int) -> pd.DataFrame:
         """Applies various preprocessing steps to the data.
@@ -172,17 +236,22 @@ class DataProcessor():
 
         # Add Hull Moving Average
         preprocessed_data = self.add_hull_moving_average(
-            preprocessed_data,
-            hma_period)
+            preprocessed_data, hma_period)
 
+        preprocessed_data = self.add_velocity(preprocessed_data)
+        preprocessed_data = self.add_velocity_time_shift(preprocessed_data, 3)
+        preprocessed_data = self.add_acceleration(preprocessed_data)
+        preprocessed_data = self.add_acceleration_time_shift(
+            preprocessed_data, 3)
         return preprocessed_data
 
 
 if __name__ == "__main__":
     data_processor = DataProcessor()
-    symbol = "SPY"
+    symbol = "TQQQ"
     start_date = "2021-01-30"
     stop_date = "2022-01-30"
     data_df = data_processor.download_data_df_from_yf(
         symbol, start_date, stop_date)
-    preprocessed_df = data_processor.preprocess_data(data_df, 15)
+    preprocessed_df = data_processor.preprocess_data(data_df, 50)
+    print(preprocessed_df.head(60).to_string())
