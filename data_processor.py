@@ -147,8 +147,8 @@ class DataProcessor():
         hma_intermediate = 2 * wma_half_n - wma_n
 
         # Compute HMA
-        data_df["HMA"] = self.weighted_moving_average(hma_intermediate,
-                                                      int(math.sqrt(period)))
+        data_df["feature_HMA"] = self.weighted_moving_average(
+            hma_intermediate, int(math.sqrt(period)))
 
         return data_df.dropna()
 
@@ -161,8 +161,9 @@ class DataProcessor():
         Returns:
             pd.DataFrame: df after adding velocity
         """
-        df = data_df["HMA"].copy()
-        data_df["Velocity"] = df.diff()
+        series_diff = pd.Series(data_df["feature_HMA"].diff(),
+                                index=data_df.index)
+        data_df = data_df.assign(feature_Velocity=series_diff)
         return data_df.dropna()
 
     def add_velocity_time_shift(
@@ -179,9 +180,9 @@ class DataProcessor():
         Returns:
             pd.DataFrame: df after adding time shifted velocity
         """
-        df = data_df["Velocity"].copy()
-        velocity_shift = df.shift(time_shift)
-        data_df[f"{time_shift}d Shifted Velocity"] = velocity_shift
+        series_shift = pd.Series(data_df["feature_Velocity"].shift(time_shift),
+                                 index=data_df.index)
+        data_df[f"feature_{time_shift}d_Shifted_Velocity"] = series_shift
         return data_df.dropna()
 
     def add_acceleration(self, data_df: pd.DataFrame) -> pd.DataFrame:
@@ -193,9 +194,9 @@ class DataProcessor():
         Returns:
             pd.DataFrame: df after adding acceleration
         """
-        df = data_df["Velocity"].copy()
-        acceleration = df.diff()
-        data_df["Acceleration"] = acceleration
+        series_diff = pd.Series(data_df["feature_Velocity"].diff(),
+                                index=data_df.index)
+        data_df["feature_Acceleration"] = series_diff
         return data_df.dropna()
 
     def add_acceleration_time_shift(
@@ -212,9 +213,10 @@ class DataProcessor():
         Returns:
             pd.DataFrame: df after adding time shifted acceleration
         """
-        df = data_df["Acceleration"].copy()
-        acceleration_shift = df.shift(time_shift)
-        data_df[f"{time_shift}d Shifted Acceleration"] = acceleration_shift
+        series_shift = pd.Series(
+            data_df["feature_Acceleration"].shift(time_shift),
+            index=data_df.index)
+        data_df[f"feature_{time_shift}d_Shifted_Acceleration"] = series_shift
         return data_df.dropna()
 
     def preprocess_data(self, data_df: pd.DataFrame,
