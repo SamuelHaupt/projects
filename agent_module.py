@@ -60,7 +60,6 @@ class PPOAgentModule:
             None
         """
         print("Using device:", self.device)
-        print("Testing.")
         observation, info = test_env.reset()
         print("Testing model on testing data.")
         for _ in range(len(testing_df)):
