@@ -35,6 +35,7 @@ class PPOAgentModule:
         Returns:
             None
         """
+        print("Using device:", self.device)
         print("Training.")
         self.model.learn(total_timesteps=total_timesteps)
 
@@ -47,7 +48,7 @@ class PPOAgentModule:
         print("Model saved at path:",
               f"models/{curr_datetime}_ppo_trading_agent")
 
-    def test(self, test_env, testing_df, render_dir):
+    def test(self, test_env, testing_df):
         """
         Tests the agent on the given testing data.
         Args:
@@ -68,7 +69,7 @@ class PPOAgentModule:
                 break
 
         # Save render
-        if not os.path.exists(render_dir):
-            os.makedirs(render_dir)
-        test_env.save_for_render(dir=render_dir)
-        print(f"Test finished. Render saved in {render_dir}")
+        if not os.path.exists(RENDER_DIR):
+            os.makedirs(RENDER_DIR)
+        test_env.get_wrapper_attr('save_for_render')(dir=RENDER_DIR)
+        print(f"Test finished. Render saved in {RENDER_DIR}")
