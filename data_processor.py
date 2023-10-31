@@ -79,7 +79,7 @@ class DataProcessor():
         spy.drop(columns=['Open', 'High', 'Low', 'Close', 'Volume'],
                  inplace=True)
         # use trading days from SPY to clean data.
-        new_df = spy.join(data_df, how='left')
+        new_df = spy.join(self.data_df, how='left')
 
         # fill Dataframe forwards or backwards to normalize values.
         new_df.ffill(inplace=True)
@@ -165,7 +165,7 @@ class DataProcessor():
         """
         series_shift = pd.Series(
             self.data_df[f"feature_v_{period}p"].shift(time_shift),
-            index=data_df.index)
+            index=self.data_df.index)
         series_shift.dropna(inplace=True)
         self.data_df[f"feature_v_{period}p_{time_shift}s"] = series_shift
 

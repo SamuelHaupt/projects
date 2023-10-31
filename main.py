@@ -12,7 +12,7 @@ import pandas as pd
 def main():
     data_processor = DataProcessor()
     symbol = 'TQQQ'
-    start_date = '2015-01-01'
+    start_date = '2019-01-01'
     stop_date = '2023-10-01'
     tqqq = data_processor.download_data_df_from_yf(symbol,
                                                    start_date,
@@ -30,13 +30,13 @@ def main():
     df.head()
 
     # Setup training data
-    training_df = df[df["date"] <= "2022-12-31"]
-    training_df.dropna(inplace=True)
+    training_df = df[df["date"] <= "2021-12-31"]
+    training_df = training_df.dropna()
     training_df.head()
 
     # Setup testing data
-    testing_df = df[df["date"] > "2022-12-31"]
-    testing_df.dropna(inplace=True)
+    testing_df = df[df["date"] > "2021-12-31"]
+    testing_df = testing_df.dropna()
     testing_df.head()
 
 
@@ -65,7 +65,7 @@ def main():
                             reward_function=reward_function_drawdown)
     
         # Load model and agent
-        agent = PPOAgentModule(testing_env, model_path="models/20231028212840_ppo_trading_agent.zip")
+        agent = PPOAgentModule(testing_env, model_path="models/20231030231630_ppo_trading_agent")
         print(agent)
         agent.test(testing_env, testing_df)
     

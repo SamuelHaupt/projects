@@ -1,4 +1,4 @@
-from stable_baselines3 import RecurrentPPO
+from sb3_contrib import RecurrentPPO
 import torch
 from datetime import datetime
 import os
