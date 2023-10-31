@@ -122,15 +122,15 @@ class DataProcessor():
                                                    np.dot(x, weights) /
                                                    weights.sum(), raw=True)
 
-    def add_hull_moving_average(
+    def hull_moving_average(
             self,
-            data_df: pd.DataFrame,
+            data_df: pd.Series,
             period: int
             ) -> pd.Series:
-        """Adds the Hull Moving Average to the dataframe.
+        """Calculates the Hull moving average.
 
         Args:
-            data_df (pd.DataFrame): DataFrame to which the HMA will be added.
+            data_df (pd.Series): Series on which HMA is calculated.
             period (int): The period for which HMA is to be calculated.
 
         Returns:
@@ -237,8 +237,8 @@ class DataProcessor():
         preprocessed_data = self.add_daily_returns(cleaned_data)
 
         # Add Hull Moving Average
-        preprocessed_data = self.add_hull_moving_average(
-            preprocessed_data, hma_period)
+        # preprocessed_data = self.add_hull_moving_average(
+        #     preprocessed_data, hma_period)
 
         preprocessed_data = self.add_velocity(preprocessed_data)
         preprocessed_data = self.add_velocity_time_shift(preprocessed_data, 3)
