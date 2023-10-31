@@ -126,7 +126,7 @@ class DataProcessor():
             self,
             data_df: pd.DataFrame,
             period: int
-            ) -> pd.DataFrame:
+            ) -> pd.Series:
         """Adds the Hull Moving Average to the dataframe.
 
         Args:
@@ -134,7 +134,7 @@ class DataProcessor():
             period (int): The period for which HMA is to be calculated.
 
         Returns:
-            pd.DataFrame: Dataframe with the HMA column added.
+            pd.Series: HMA series to be used by velocity calculation.
         """
         # WMA with period n/2
         wma_half_n = self.weighted_moving_average(data_df["Close"], int(
@@ -147,10 +147,10 @@ class DataProcessor():
         hma_intermediate = 2 * wma_half_n - wma_n
 
         # Compute HMA
-        data_df["feature_HMA"] = self.weighted_moving_average(
-            hma_intermediate, int(math.sqrt(period)))
+        hma_series = pd.Series(self.weighted_moving_average(
+            hma_intermediate, int(math.sqrt(period))), index=data_df.index)
 
-        return data_df.dropna()
+        return hma_series.dropna()
 
     def add_velocity(self, data_df: pd.DataFrame) -> pd.DataFrame:
         """Adds Velocity based on Close price.
