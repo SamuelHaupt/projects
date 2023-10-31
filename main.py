@@ -17,7 +17,7 @@ def main():
     tqqq = data_processor.download_data_df_from_yf(symbol,
                                                    start_date,
                                                    stop_date)
-    tqqq_preprocessed = data_processor.preprocess_data(tqqq, 50)
+    tqqq_preprocessed = data_processor.preprocess_data(tqqq)
 
     # Format table date proper format and name
     tqqq_preprocessed.dropna(inplace=True)  # Clean again !

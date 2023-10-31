@@ -12,9 +12,12 @@ import math
 class DataProcessor():
 
     def __init__(self) -> None:
+        self.data_df = None
         self.symbol = None
         self.start_date = None
         self.end_date = None
+        self.periods = [16, 32, 64]
+        self.time_shifts = [2, 4, 6, 8, 10]
 
     def download_data_df_from_yf(
         self,
@@ -62,17 +65,11 @@ class DataProcessor():
 
         return data_df
 
-    def clean_data(self, data_df: pd.DataFrame) -> pd.DataFrame:
+    def clean_data(self) -> None:
         """Cleans data by using SPY's Close non-Nan, rather than grabbing
         New York Stock Exchanges trading days. This is a workaround to
         simplify the amount of libraries required to clean data. ffill
         and bfill are applied to normalize data.
-
-        Args:
-            data_df (pd.DataFrame): DataFrame to clean
-
-        Returns:
-            pd.DataFrame: Cleansed data with ffill and bfill applied
         """
         spy = self.download_data_df_from_yf(
             'SPY',
@@ -87,21 +84,12 @@ class DataProcessor():
         # fill Dataframe forwards or backwards to normalize values.
         new_df.ffill(inplace=True)
         new_df.bfill(inplace=True)
+        self.data_df = new_df
 
-        return new_df
-
-    def add_daily_returns(self, data_df: pd.DataFrame) -> pd.DataFrame:
+    def add_daily_returns(self) -> None:
         """Adds daily returns to the dataframe.
-
-        Args:
-            data_df (pd.DataFrame): DataFrame to which the daily returns will
-            be added.
-
-        Returns:
-            pd.DataFrame: Dataframe with the daily returns column added.
         """
-        data_df["Daily Returns"] = data_df["Close"].pct_change()
-        return data_df
+        self.data_df["Daily Returns"] = self.data_df["Close"].pct_change()
 
     def weighted_moving_average(
             self,
@@ -151,100 +139,91 @@ class DataProcessor():
 
         return hma_series.dropna()
 
-    def add_velocity(self, data_df: pd.DataFrame) -> pd.DataFrame:
-        """Adds Velocity based on Close price.
+    def add_velocity(self, period: int) -> None:
+        """Adds Velocity based on log Close price.
 
         Args:
-            data_df (pd.DataFrame): changes are applied to df
-
-        Returns:
-            pd.DataFrame: df after adding velocity
+            period (int): determines period for HMA
         """
-        series_diff = pd.Series(data_df["feature_HMA"].diff(),
-                                index=data_df.index)
-        data_df = data_df.assign(feature_Velocity=series_diff)
-        return data_df.dropna()
+        close_series = self.data_df['Close']
+        close_log = pd.Series(np.log(close_series), index=close_series.index)
+        hma_series = self.hull_moving_average(close_log, period)
+        velocity = hma_series.diff()
+        velocity.dropna(inplace=True)
+        self.data_df[f"feature_v_{period}p"] = velocity
 
     def add_velocity_time_shift(
             self,
-            data_df: pd.DataFrame,
+            period: int,
             time_shift: int
-            ) -> pd.DataFrame:
+            ) -> None:
         """Shifts Velocity by number of days selected.
 
         Args:
-            data_df (pd.DataFrame): changes are applied to df
+            period (int): correlated period to shift
             time_shift (int): time shift by number of days
-
-        Returns:
-            pd.DataFrame: df after adding time shifted velocity
         """
-        series_shift = pd.Series(data_df["feature_Velocity"].shift(time_shift),
-                                 index=data_df.index)
-        data_df[f"feature_{time_shift}d_Shifted_Velocity"] = series_shift
-        return data_df.dropna()
+        series_shift = pd.Series(
+            self.data_df[f"feature_v_{period}p"].shift(time_shift),
+            index=data_df.index)
+        series_shift.dropna(inplace=True)
+        self.data_df[f"feature_v_{period}p_{time_shift}s"] = series_shift
 
-    def add_acceleration(self, data_df: pd.DataFrame) -> pd.DataFrame:
+    def add_acceleration(
+            self,
+            period: int
+            ) -> None:
         """Adds Acceleration based on Velocity rate.
 
         Args:
-            data_df (pd.DataFrame): changes are applied to df
-
-        Returns:
-            pd.DataFrame: df after adding acceleration
+            period (int): correlated velocity period
         """
-        series_diff = pd.Series(data_df["feature_Velocity"].diff(),
-                                index=data_df.index)
-        data_df["feature_Acceleration"] = series_diff
-        return data_df.dropna()
+        acceleration = pd.Series(
+            self.data_df[f"feature_v_{period}p"].diff(),
+            index=self.data_df.index)
+        acceleration.dropna(inplace=True)
+        self.data_df[f"feature_a_{period}p"] = acceleration
 
     def add_acceleration_time_shift(
             self,
-            data_df: pd.DataFrame,
+            period: int,
             time_shift: int
-            ) -> pd.DataFrame:
-        """Shifts Acceleration by number of days selected
+            ) -> None:
+        """Shifts Acceleration by number of days selected.
 
         Args:
-            data_df (pd.DataFrame): changes are applied to df
+            period (int): correlated period to shift
             time_shift (int): time shift by number of days
-
-        Returns:
-            pd.DataFrame: df after adding time shifted acceleration
         """
         series_shift = pd.Series(
-            data_df["feature_Acceleration"].shift(time_shift),
-            index=data_df.index)
-        data_df[f"feature_{time_shift}d_Shifted_Acceleration"] = series_shift
-        return data_df.dropna()
+            self.data_df[f"feature_a_{period}p"].shift(time_shift),
+            index=self.data_df.index)
+        series_shift.dropna(inplace=True)
+        self.data_df[f"feature_a_{period}p_{time_shift}s"] = series_shift
 
-    def preprocess_data(self, data_df: pd.DataFrame,
-                        hma_period: int) -> pd.DataFrame:
+    def preprocess_data(self, data_df: pd.DataFrame) -> pd.DataFrame:
         """Applies various preprocessing steps to the data.
 
         Args:
             data_df (pd.DataFrame): DataFrame to preprocess.
-            hma_period (int): The period for which HMA is to be calculated.
 
         Returns:
             pd.DataFrame: Preprocessed dataframe.
         """
-        # Clean data
-        cleaned_data = self.clean_data(data_df)
+        self.data_df = data_df
+        self.clean_data()
+        self.add_daily_returns()
 
-        # Add daily returns
-        preprocessed_data = self.add_daily_returns(cleaned_data)
+        # Add velocity, acceleration, and correlated time shifts
+        for period in self.periods:
+            self.add_velocity(period)
+            for time_shift in self.time_shifts:
+                self.add_velocity_time_shift(period, time_shift)
+            self.add_acceleration(period)
+            for time_shift in self.time_shifts:
+                self.add_acceleration_time_shift(period, time_shift)
 
-        # Add Hull Moving Average
-        # preprocessed_data = self.add_hull_moving_average(
-        #     preprocessed_data, hma_period)
-
-        preprocessed_data = self.add_velocity(preprocessed_data)
-        preprocessed_data = self.add_velocity_time_shift(preprocessed_data, 3)
-        preprocessed_data = self.add_acceleration(preprocessed_data)
-        preprocessed_data = self.add_acceleration_time_shift(
-            preprocessed_data, 3)
-        return preprocessed_data
+        return self.data_df
 
 
 if __name__ == "__main__":
@@ -254,5 +233,5 @@ if __name__ == "__main__":
     stop_date = "2022-01-30"
     data_df = data_processor.download_data_df_from_yf(
         symbol, start_date, stop_date)
-    preprocessed_df = data_processor.preprocess_data(data_df, 50)
-    print(preprocessed_df.head(60).to_string())
+    preprocessed_df = data_processor.preprocess_data(data_df)
+    print(preprocessed_df.tail(60).to_string())
