@@ -124,31 +124,30 @@ class DataProcessor():
 
     def hull_moving_average(
             self,
-            data_df: pd.Series,
+            data_series: pd.Series,
             period: int
             ) -> pd.Series:
         """Calculates the Hull moving average.
 
         Args:
-            data_df (pd.Series): Series on which HMA is calculated.
+            data_series (pd.Series): Series on which HMA is calculated.
             period (int): The period for which HMA is to be calculated.
 
         Returns:
             pd.Series: HMA series to be used by velocity calculation.
         """
         # WMA with period n/2
-        wma_half_n = self.weighted_moving_average(data_df["Close"], int(
-            period / 2))
+        wma_half_n = self.weighted_moving_average(data_series, int(period / 2))
 
         # WMA with period n
-        wma_n = self.weighted_moving_average(data_df["Close"], period)
+        wma_n = self.weighted_moving_average(data_series, period)
 
         # HMA intermediate value
         hma_intermediate = 2 * wma_half_n - wma_n
 
         # Compute HMA
         hma_series = pd.Series(self.weighted_moving_average(
-            hma_intermediate, int(math.sqrt(period))), index=data_df.index)
+            hma_intermediate, int(math.sqrt(period))), index=data_series.index)
 
         return hma_series.dropna()
 
