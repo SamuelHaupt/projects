@@ -84,12 +84,8 @@ class DataProcessor():
         # fill Dataframe forwards or backwards to normalize values.
         new_df.ffill(inplace=True)
         new_df.bfill(inplace=True)
+        new_df.columns = new_df.columns.str.lower()
         self.data_df = new_df
-
-    def add_daily_returns(self) -> None:
-        """Adds daily returns to the dataframe.
-        """
-        self.data_df["Daily Returns"] = self.data_df["Close"].pct_change()
 
     def weighted_moving_average(
             self,
@@ -145,7 +141,7 @@ class DataProcessor():
         Args:
             period (int): determines period for HMA
         """
-        close_series = self.data_df['Close']
+        close_series = self.data_df['close']
         close_log = pd.Series(np.log(close_series), index=close_series.index)
         hma_series = self.hull_moving_average(close_log, period)
         velocity = hma_series.diff()
@@ -201,6 +197,38 @@ class DataProcessor():
         series_shift.dropna(inplace=True)
         self.data_df[f"feature_a_{period}p_{time_shift}s"] = series_shift
 
+    def add_avg_true_range(self, period: int) -> None:
+        """Calculates true range and adds average true range.
+
+        Args:
+            period (int): period for which ATR should be calculated.
+        """
+        data_df_index = self.data_df.index
+        high = self.data_df['high']
+        low = self.data_df['low']
+        close_previous = self.data_df['close'].shift(1)
+        true_range_components = pd.DataFrame(index=data_df_index)
+        true_range_components["h_l"] = high - low
+        true_range_components["h_c_previous"] = np.abs(high - close_previous)
+        true_range_components["l_c_previous"] = np.abs(low - close_previous)
+        true_range_series = true_range_components.max(axis=1)
+        average_true_range = true_range_series.rolling(window=period).mean()
+        self.data_df[f"feature_atr_{period}p"] = average_true_range
+
+    def add_avg_true_range_time_shift(
+            self,
+            period: int,
+            time_shift: int
+            ) -> None:
+        """Shifts ATR by number of days based on periods.
+
+        Args:
+            period (int): period to which to match time shift
+            time_shift (int): time shift by number of days
+        """
+        atr_shifted = self.data_df[f"feature_atr_{period}p"].shift(time_shift)
+        self.data_df[f"feature_atr_{period}p_{time_shift}ts"] = atr_shifted
+
     def preprocess_data(self, data_df: pd.DataFrame) -> pd.DataFrame:
         """Applies various preprocessing steps to the data.
 
@@ -212,7 +240,6 @@ class DataProcessor():
         """
         self.data_df = data_df
         self.clean_data()
-        self.add_daily_returns()
 
         # Add velocity, acceleration, and correlated time shifts
         for period in self.periods:
@@ -223,6 +250,10 @@ class DataProcessor():
             for time_shift in self.time_shifts:
                 self.add_acceleration_time_shift(period, time_shift)
 
+        period = 14
+        self.add_avg_true_range(period)
+        for time_shift in self.time_shifts:
+            self.add_avg_true_range_time_shift(period, time_shift)
         return self.data_df
 
 

@@ -26,7 +26,7 @@ def main():
     df = pd.DataFrame([], [])
     for column in tqqq_preprocessed.columns:
         df[str(column).lower()] = pd.DataFrame(tqqq_preprocessed[column].values, columns=[column])
-    df["date"] = pd.DataFrame(tqqq_preprocessed["Close"].index, columns=["Date"])
+    df["date"] = pd.DataFrame(tqqq_preprocessed["close"].index, columns=["Date"])
     df.head()
 
     # Setup training data
