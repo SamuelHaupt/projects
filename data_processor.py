@@ -198,7 +198,10 @@ class DataProcessor():
         self.data_df[f"feature_a_{period}p_{time_shift}s"] = series_shift
 
     def add_avg_true_range(self, period: int) -> None:
-        """Calculates true range and adds average true range.
+        """Calculates true range and adds average true range to data_df.
+        Uses Wilder smoothing: tr_t * 1/period + atr_t-1 * (period-1)/period.
+
+        Reference: https://www.macroption.com/atr-calculation/
 
         Args:
             period (int): period for which ATR should be calculated.
@@ -211,8 +214,17 @@ class DataProcessor():
         true_range_components["h_l"] = high - low
         true_range_components["h_c_previous"] = np.abs(high - close_previous)
         true_range_components["l_c_previous"] = np.abs(low - close_previous)
-        true_range_series = true_range_components.max(axis=1)
-        average_true_range = true_range_series.rolling(window=period).mean()
+        true_range = true_range_components.max(axis=1)
+
+        average_true_range = pd.Series(np.zeros(len(self.data_df)),
+                                       index=data_df_index)
+        average_true_range.iloc[0] = true_range.iloc[0]
+        weights = np.array([1 / period, (period - 1) / period])
+        for index in range(1, len(self.data_df)):
+            tr = true_range.iloc[index]
+            atr_previous = average_true_range.iloc[index-1]
+            atr_current = tr * weights[0] + atr_previous * weights[1]
+            average_true_range.iloc[index] = atr_current
         self.data_df[f"feature_atr_{period}p"] = average_true_range
 
     def add_avg_true_range_time_shift(
@@ -265,4 +277,4 @@ if __name__ == "__main__":
     data_df = data_processor.download_data_df_from_yf(
         symbol, start_date, stop_date)
     preprocessed_df = data_processor.preprocess_data(data_df)
-    print(preprocessed_df.tail(60).to_string())
+    print(preprocessed_df.head(5).to_string())
