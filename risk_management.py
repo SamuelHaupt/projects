@@ -49,7 +49,7 @@ class RiskData:
         return self.__buy_loss
 
     # SETTERS
-    def set_in_market(self, in_market : bool):
+    def set_in_market(self, in_market: bool):
         self.__in_market = in_market
 
     def set_days_in_market(self, days_in_market: int):
@@ -68,7 +68,7 @@ class RiskData:
         self.__current_value_percent_change = current_value_percent_change
 
     def set_high_value(self, high_value):
-        self.__high_value= high_value
+        self.__high_value = high_value
 
     def set_high_value_percent_change(self, value_high_percent_change):
         self.__high_value_percent_change = value_high_percent_change
@@ -119,7 +119,7 @@ def run_risk_analysis(info: dict, risk_data: RiskData):
     if __buy_line_loss(info, risk_data) is True:
         return True
 
-    if __temperal_loss(info, risk_data) is True:
+    if __temporal_loss(risk_data) is True:
         return True
 
     if __risk_reward(info, risk_data) is True:
@@ -127,19 +127,22 @@ def run_risk_analysis(info: dict, risk_data: RiskData):
 
     return False
 
+
 def __risk_reward(info: dict, risk_data: RiskData) -> bool:
     if risk_data.get_high_value_percent_change() < -.02 and info["position"] == 1:
         # print("LOSS > 2%, issues sell request")
         risk_data.reset_risk_values()
         return True
 
-def __temperal_loss(info: dict, risk_data: RiskData) -> bool:
-    # SELL IF TIME IN MARKET YEILDS LITTLE TO NO GAIN - Flat Market is < 1% for 3 days or more
+
+def __temporal_loss(risk_data: RiskData) -> bool:
+    # SELL IF TIME IN MARKET YIELDS LITTLE TO NO GAIN - Flat Market is < 1% for 3 days or more
     if risk_data.get_days_in_market() >= 3:
         if risk_data.get_current_value_percent_change() < 0.01:
-            # print("Temperal Stop Loss")
+            # print("Temporal Stop Loss")
             risk_data.reset_risk_values()
             return True
+
 
 def __buy_line_loss(info: dict, risk_data: RiskData) -> bool:
     # HARD SELL, HIT BUY LINE
@@ -147,6 +150,7 @@ def __buy_line_loss(info: dict, risk_data: RiskData) -> bool:
         # print("Buy Line Loss")
         risk_data.reset_risk_values()
         return True
+
 
 def __max_loss(info: dict, risk_data: RiskData) -> bool:
     # HARD SELL, HIT BOTTOM
