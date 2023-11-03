@@ -11,7 +11,6 @@ class RiskData:
         self.__initial_value_percent_change = 0.0
         self.__current_value = 1000
         self.__current_value_percent_change = 0.00
-        self.__percent_change = 0.00
         self.__high_value = 0
         self.__high_value_percent_change = 0
         self.__stop_loss = 800
