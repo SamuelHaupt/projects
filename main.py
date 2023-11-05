@@ -1,6 +1,6 @@
 import numpy as np
 from sb3_contrib import RecurrentPPO
-from reward_function import reward_function_drawdown
+from reward_function import drawdown
 from agent_module import PPOAgentModule
 from data_processor import DataProcessor
 import gymnasium as gym
@@ -48,7 +48,7 @@ def main():
                         positions=[0, 1],
                         initial_position=1,
                         portfolio_initial_value=1000,
-                        reward_function=reward_function_drawdown)
+                        reward_function=drawdown)
         # Train model
         agent = PPOAgentModule(training_env)
         agent.train(10000)
@@ -62,10 +62,10 @@ def main():
                             positions=[0, 1],
                             initial_position=1,
                             portfolio_initial_value=1000,
-                            reward_function=reward_function_drawdown)
+                            reward_function=drawdown)
     
         # Load model and agent
-        agent = PPOAgentModule(testing_env, model_path="models/20231030231630_ppo_trading_agent")
+        agent = PPOAgentModule(testing_env, model_path="models/20231103173638_ppo_trading_agent")
         print(agent)
         agent.test(testing_env, testing_df)
     
