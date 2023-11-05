@@ -26,11 +26,11 @@ def main():
     print(f"Assets: {assets}")
 
     # get action
-    trade_decision = 'buy' #get_action()
+    trade_decision = get_action()
     print(f"Trade decision: {trade_decision}")
 
-    # trade
-    trade(trade_decision)
+    # # trade
+    # trade(trade_decision)
 
 
 def get_assets():
@@ -55,7 +55,7 @@ def get_action() -> str:
     Returns:
         String: trade decision
     '''
-    model_path = "models/20231026162207_ppo_trading_agent"
+    model_path = "models/20231105132736_ppo_trading_agent"
     model = RecurrentPPO.load(model_path)
 
     data_processor = DataProcessor()
@@ -64,7 +64,7 @@ def get_action() -> str:
     stop_date = '2023-10-01'
     tqqq = data_processor.download_data_df_from_yf(
         symbol, start_date, stop_date)
-    tqqq_preprocessed = data_processor.preprocess_data(tqqq, 50)
+    tqqq_preprocessed = data_processor.preprocess_data(tqqq)
 
     tqqq_preprocessed.dropna(inplace=True)
 
@@ -78,6 +78,7 @@ def get_action() -> str:
     training_df = df[df["date"] <= "2022-12-31"]
     training_df.dropna(inplace=True)
     training_df.head()
+    
     feature_names = training_df.columns.tolist()
     print(feature_names)
     selected_features = [
@@ -85,6 +86,7 @@ def get_action() -> str:
         'feature_hma', 'feature_velocity', 'feature_3d_shifted_velocity',
         'feature_acceleration', 'feature_3d_shifted_acceleration'
     ]
+    
     observation = training_df[selected_features].iloc[-1].values
 
     testing_env = gym.make("TradingEnv",
