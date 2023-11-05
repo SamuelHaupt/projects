@@ -22,15 +22,15 @@ def main():
         None
     '''
     # get assets
-    # assets = get_assets()
-    # print(f"Assets: {assets}")
+    assets = get_assets()
+    print(f"Assets: {assets}")
 
     # get action
     trade_decision = get_action()
     print(f"Trade decision: {trade_decision}")
 
     # # trade
-    # trade(trade_decision)
+    trade(trade_decision)
 
 
 def get_assets():
@@ -55,7 +55,7 @@ def get_action() -> str:
     Returns:
         String: trade decision
     '''
-    model_path = "models/20231105132736_ppo_trading_agent"
+    model_path = "models/20231105141729_ppo_trading_agent"
     model = RecurrentPPO.load(model_path)
 
     data_processor = DataProcessor()
@@ -95,6 +95,10 @@ def get_action() -> str:
     ]
     
     observation = training_df[selected_features].iloc[-1].values
+    # print("\n\nBefore removing the timestamp, observation cant be made: ",observation)
+    # observation[-1] = 0
+    # print("\n\nAfter removing the timestamp (it works after removing it): ",observation)
+    # observation = pd.to_numeric(observation, errors='coerce')
 
 
     testing_env = gym.make("TradingEnv",
