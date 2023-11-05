@@ -29,8 +29,8 @@ def main():
     trade_decision = get_action()
     print(f"Trade decision: {trade_decision}")
 
-    # # trade
-    trade(trade_decision)
+    # # # trade
+    # trade(trade_decision)
 
 
 def get_assets():
@@ -55,7 +55,7 @@ def get_action() -> str:
     Returns:
         String: trade decision
     '''
-    model_path = "models/20231105141729_ppo_trading_agent"
+    model_path = "models/20231105145531_ppo_trading_agent"
     model = RecurrentPPO.load(model_path)
 
     data_processor = DataProcessor()
@@ -85,20 +85,20 @@ def get_action() -> str:
     feature_names = trading_df.columns.tolist()
     print(feature_names)
     selected_features = [
-'volume','feature_v_16p', 'feature_v_16p_2s', 'feature_v_16p_4s', 'feature_v_16p_6s', 'feature_v_16p_8s', 
+'close' , 'volume','feature_v_16p', 'feature_v_16p_2s', 'feature_v_16p_4s', 'feature_v_16p_6s', 'feature_v_16p_8s', 
 'feature_v_16p_10s', 'feature_a_16p', 'feature_a_16p_2s', 'feature_a_16p_4s', 'feature_a_16p_6s', 'feature_a_16p_8s', 'feature_a_16p_10s', 
 'feature_v_32p', 'feature_v_32p_2s', 'feature_v_32p_4s', 'feature_v_32p_6s', 'feature_v_32p_8s', 'feature_v_32p_10s', 'feature_a_32p', 
 'feature_a_32p_2s', 'feature_a_32p_4s', 'feature_a_32p_6s', 'feature_a_32p_8s', 'feature_a_32p_10s', 'feature_v_64p', 'feature_v_64p_2s', 
 'feature_v_64p_4s', 'feature_v_64p_6s', 'feature_v_64p_8s', 'feature_v_64p_10s', 'feature_a_64p', 'feature_a_64p_2s', 'feature_a_64p_4s', 
 'feature_a_64p_6s', 'feature_a_64p_8s', 'feature_a_64p_10s', 'feature_atr_14p', 'feature_atr_14p_2ts', 'feature_atr_14p_4ts', 'feature_atr_14p_6ts', 
-'feature_atr_14p_8ts', 'feature_atr_14p_10ts', 'date'
+'feature_atr_14p_8ts', 'feature_atr_14p_10ts'
     ]
     
     observation = trading_df[selected_features].iloc[-1].values
-    # print("\n\nBefore removing the timestamp, observation cant be made: ",observation)
+    print("\n\nBefore removing the timestamp, observation cant be made: ",observation)
     # observation[-1] = 0
     # print("\n\nAfter removing the timestamp (it works after removing it): ",observation)
-    # observation = pd.to_numeric(observation, errors='coerce')
+    observation = pd.to_numeric(observation, errors='coerce')
 
 
     testing_env = gym.make("TradingEnv",

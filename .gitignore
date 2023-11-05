@@ -3,3 +3,4 @@ __pycache__/
 team-project.code-workspace
 models/20231105132736_ppo_trading_agent.zip
 .gitignore
+models/20231105145531_ppo_trading_agent.zip
