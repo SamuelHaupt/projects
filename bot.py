@@ -22,8 +22,8 @@ def main():
         None
     '''
     # get assets
-    assets = get_assets()
-    print(f"Assets: {assets}")
+    # assets = get_assets()
+    # print(f"Assets: {assets}")
 
     # get action
     trade_decision = get_action()
@@ -60,34 +60,42 @@ def get_action() -> str:
 
     data_processor = DataProcessor()
     symbol = 'TQQQ'
-    start_date = '2015-01-01'
+    start_date = '2019-01-01'
     stop_date = '2023-10-01'
-    tqqq = data_processor.download_data_df_from_yf(
-        symbol, start_date, stop_date)
+    tqqq = data_processor.download_data_df_from_yf(symbol,
+                                                   start_date,
+                                                   stop_date)
     tqqq_preprocessed = data_processor.preprocess_data(tqqq)
 
-    tqqq_preprocessed.dropna(inplace=True)
+    # Format table date proper format and name
+    tqqq_preprocessed.dropna(inplace=True)  # Clean again !
 
+    # Format to gym-trader-env format
     df = pd.DataFrame([], [])
     for column in tqqq_preprocessed.columns:
-        df[str(column).lower()] = pd.DataFrame(
-            tqqq_preprocessed[column].values, columns=[column])
-    df["date"] = pd.DataFrame(tqqq_preprocessed["Close"].index, columns=["Date"])
+        df[str(column).lower()] = pd.DataFrame(tqqq_preprocessed[column].values, columns=[column])
+    df["date"] = pd.DataFrame(tqqq_preprocessed["close"].index, columns=["Date"])
     df.head()
 
-    training_df = df[df["date"] <= "2022-12-31"]
-    training_df.dropna(inplace=True)
+    # Setup training data
+    training_df = df[df["date"] <= "2021-12-31"]
+    training_df = training_df.dropna()
     training_df.head()
     
     feature_names = training_df.columns.tolist()
     print(feature_names)
     selected_features = [
-        'volume', 'daily returns',
-        'feature_hma', 'feature_velocity', 'feature_3d_shifted_velocity',
-        'feature_acceleration', 'feature_3d_shifted_acceleration'
+'volume','feature_v_16p', 'feature_v_16p_2s', 'feature_v_16p_4s', 'feature_v_16p_6s', 'feature_v_16p_8s', 
+'feature_v_16p_10s', 'feature_a_16p', 'feature_a_16p_2s', 'feature_a_16p_4s', 'feature_a_16p_6s', 'feature_a_16p_8s', 'feature_a_16p_10s', 
+'feature_v_32p', 'feature_v_32p_2s', 'feature_v_32p_4s', 'feature_v_32p_6s', 'feature_v_32p_8s', 'feature_v_32p_10s', 'feature_a_32p', 
+'feature_a_32p_2s', 'feature_a_32p_4s', 'feature_a_32p_6s', 'feature_a_32p_8s', 'feature_a_32p_10s', 'feature_v_64p', 'feature_v_64p_2s', 
+'feature_v_64p_4s', 'feature_v_64p_6s', 'feature_v_64p_8s', 'feature_v_64p_10s', 'feature_a_64p', 'feature_a_64p_2s', 'feature_a_64p_4s', 
+'feature_a_64p_6s', 'feature_a_64p_8s', 'feature_a_64p_10s', 'feature_atr_14p', 'feature_atr_14p_2ts', 'feature_atr_14p_4ts', 'feature_atr_14p_6ts', 
+'feature_atr_14p_8ts', 'feature_atr_14p_10ts', 'date'
     ]
     
     observation = training_df[selected_features].iloc[-1].values
+
 
     testing_env = gym.make("TradingEnv",
                         df=training_df,
