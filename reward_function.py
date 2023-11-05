@@ -148,5 +148,4 @@ def smart_reward(history: History):
 
         # need to add case where price stays flat for some amount of time and agent is buying
 
-        return reward
-
+    return reward
