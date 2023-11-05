@@ -73,7 +73,7 @@ def sortino(history: History, win_size: int = 144) -> float:
     # Calculate average loss in the window
     average_loss = np.mean(np.where(log_return < risk_free_rate, log_return^2, 0))
 
-    reward = average_profit/(average_loss)^0.5
+    reward = average_profit/(average_loss)^0.5 # Are we wanting to use exponnet here? Might be a bitwise OR
 
     return reward
 
@@ -147,5 +147,69 @@ def smart_reward(history: History):
             reward -= 1
 
         # need to add case where price stays flat for some amount of time and agent is buying
+
+    return reward
+
+
+def rsi_reward(history, window_size=14):
+    """
+    Reward function based on the RSI (Relative Strength Index)
+
+    Args:
+        history: A dictionary with 'data_close' as a key and list of prices as values
+        window_size: The window size to calculate RSI (default is 14 periods)
+
+    Returns:
+        Reward based on the RSI levels, as a floating-point number.
+    """
+
+    def calculate_rsi(prices, window=window_size):
+        deltas = np.diff(prices)
+        seed = deltas[:window+1]
+        up = seed[seed >= 0].sum()/window
+        down = -seed[seed < 0].sum()/window
+        rs = up/down
+        rsi = np.zeros_like(prices)
+        rsi[:window] = 100. - 100./(1. + rs)
+
+        for i in range(window, len(prices)):
+            delta = deltas[i - 1]  # because the diff is 1 shorter
+            if delta > 0:
+                upval = delta
+                downval = 0.
+            else:
+                upval = 0.
+                downval = -delta
+
+            up = (up*(window-1) + upval)/window
+            down = (down*(window-1) + downval)/window
+
+            rs = up/down
+            rsi[i] = 100. - 100./(1. + rs)
+
+        return rsi
+
+    # Retrieve the close price data from the history object
+    prices = np.array(history['data_close'])
+
+    # Calculate the RSI values
+    rsi_values = calculate_rsi(prices)
+
+    # Get the latest RSI value
+    current_rsi = rsi_values[-1]
+
+    # Define thresholds for RSI that indicate overbought and oversold conditions
+    overbought_threshold = 70
+    oversold_threshold = 30
+
+    # Initialize the reward as a float
+    reward = 0.0
+
+    # If the RSI is oversold, it might be a good buying opportunity (positive reward)
+    if current_rsi < oversold_threshold:
+        reward += (oversold_threshold - current_rsi) / oversold_threshold
+    # If the RSI is overbought, it might be a good selling opportunity (negative reward)
+    elif current_rsi > overbought_threshold:
+        reward -= (current_rsi - overbought_threshold) / (100 - overbought_threshold)
 
     return reward
