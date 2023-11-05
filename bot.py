@@ -78,11 +78,11 @@ def get_action() -> str:
     df.head()
 
     # Setup training data
-    training_df = df[df["date"] <= "2021-12-31"]
-    training_df = training_df.dropna()
-    training_df.head()
+    trading_df = df[df["date"] <= "2021-12-31"]
+    trading_df = trading_df.dropna()
+    trading_df.head()
     
-    feature_names = training_df.columns.tolist()
+    feature_names = trading_df.columns.tolist()
     print(feature_names)
     selected_features = [
 'volume','feature_v_16p', 'feature_v_16p_2s', 'feature_v_16p_4s', 'feature_v_16p_6s', 'feature_v_16p_8s', 
@@ -94,7 +94,7 @@ def get_action() -> str:
 'feature_atr_14p_8ts', 'feature_atr_14p_10ts', 'date'
     ]
     
-    observation = training_df[selected_features].iloc[-1].values
+    observation = trading_df[selected_features].iloc[-1].values
     # print("\n\nBefore removing the timestamp, observation cant be made: ",observation)
     # observation[-1] = 0
     # print("\n\nAfter removing the timestamp (it works after removing it): ",observation)
@@ -102,7 +102,7 @@ def get_action() -> str:
 
 
     testing_env = gym.make("TradingEnv",
-                        df=training_df,
+                        df=trading_df,
                         positions=[0, 1],
                         initial_position=1,
                         portfolio_initial_value=1000,
