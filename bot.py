@@ -7,8 +7,9 @@ from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import GetAssetsRequest
 from alpaca.trading.enums import AssetClass
 from alpaca.trading.enums import OrderSide, TimeInForce
+from alpaca.trading.requests import MarketOrderRequest
 
-trading_client = TradingClient('api-key', 'secret-key', paper=True)
+trading_client = TradingClient('PKXK8FTC7AV9GRYQJH7Z', 'lXPMm3WbyOdJvnG6azkrgqOYoiZHNh8XVNMKcDc8', paper=True)
 account = trading_client.get_account()
 
 
@@ -25,7 +26,8 @@ def main():
     print(f"Assets: {assets}")
 
     # get action
-    trade_decision = get_action()
+    trade_decision = 'buy' #get_action()
+    print(f"Trade decision: {trade_decision}")
 
     # trade
     trade(trade_decision)
@@ -53,7 +55,7 @@ def get_action() -> str:
     Returns:
         String: trade decision
     '''
-    model_path = "models/20231103132728_ppo_trading_agent"
+    model_path = "models/20231026162207_ppo_trading_agent"
     model = RecurrentPPO.load(model_path)
 
     data_processor = DataProcessor()
@@ -115,20 +117,27 @@ def trade(trade_decision: str) -> None:
         None
     '''
     if trade_decision == 'buy':
-        trading_client.submit_order(
+        market_order_data = MarketOrderRequest(
             symbol='TQQQ',
             qty=0.5,
             side=OrderSide.BUY,
             type='market',
-            time_in_force=TimeInForce.DAY
-        )
+            time_in_force=TimeInForce.DAY)
+
+        trading_client.submit_order(market_order_data)
+
     elif trade_decision == 'sell':
-        trading_client.submit_order(
+        market_order_data = MarketOrderRequest(
             symbol='TQQQ',
             qty=0.5,
             side=OrderSide.SELL,
             type='market',
-            time_in_force=TimeInForce.DAY
-        )
+            time_in_force=TimeInForce.DAY)
+        
+        trading_client.submit_order(market_order_data)
+
     else:
         print('Holding position')
+
+if __name__ == '__main__':
+    main()
