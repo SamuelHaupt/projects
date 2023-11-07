@@ -9,7 +9,7 @@ from alpaca.trading.enums import AssetClass
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
 
-trading_client = TradingClient('PKXK8FTC7AV9GRYQJH7Z', 'lXPMm3WbyOdJvnG6azkrgqOYoiZHNh8XVNMKcDc8', paper=True)
+trading_client = TradingClient('placeholder', 'placeholder', paper=True)
 account = trading_client.get_account()
 
 
