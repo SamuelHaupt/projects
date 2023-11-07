@@ -1,6 +1,9 @@
 from sb3_contrib import RecurrentPPO
 import torch
 from datetime import datetime
+
+import risk_management
+from risk_management import RiskData
 import os
 
 RENDER_DIR = 'render_logs'
@@ -60,12 +63,21 @@ class PPOAgentModule:
             None
         """
         print("Using device:", self.device)
+        risk_data = RiskData()
         observation, info = test_env.reset()
         print("Testing model on testing data.")
         for _ in range(len(testing_df)):
             position_index, _states = self.model.predict(observation)
-            observation, reward, done, truncated, info = test_env.step(
-                position_index)
+
+            # If in buy state, run risk analysis
+            if position_index == 1:
+                risk_data.update_risk_data(info)
+
+                # If analysis returns too much risk, change position to sell
+                if risk_management.run_risk_analysis(info, risk_data):
+                    position_index = 0
+
+            observation, reward, done, truncated, info = test_env.step(position_index)
             if done or truncated:
                 break
 

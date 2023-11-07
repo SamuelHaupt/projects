@@ -65,7 +65,7 @@ def main():
                             reward_function=drawdown)
     
         # Load model and agent
-        agent = PPOAgentModule(testing_env, model_path="models/20231030231630_ppo_trading_agent")
+        agent = PPOAgentModule(testing_env, model_path="models/20231103173638_ppo_trading_agent")
         print(agent)
         agent.test(testing_env, testing_df)
     
