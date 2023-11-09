@@ -231,5 +231,4 @@ def risk_management_reward(history: History, win_size: int = 30) -> float:
         # Risk Triggered
         return -1
 
-    else:
-        return 0
+    return 0
