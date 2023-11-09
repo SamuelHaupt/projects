@@ -231,7 +231,7 @@ def risk_management_reward(history: History, win_size: int = 30) -> float:
         # Risk Triggered
         return -1
 
-    # Positive Return
+    # Positive Return (Broke prior high within the last win_size days)
     elif np.log(history["data_close", -1]/history["data_close", -win_size:].max()) == 0:
         return .50
 
