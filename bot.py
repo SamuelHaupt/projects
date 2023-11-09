@@ -9,7 +9,7 @@ from alpaca.trading.enums import AssetClass
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
 
-trading_client = TradingClient('placeholder', 'placeholder', paper=True)
+trading_client = TradingClient('PK81K3G1O76EG5ITK9AQ', 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel', paper=True)
 account = trading_client.get_account()
 
 
@@ -21,9 +21,12 @@ def main():
     Returns:
         None
     '''
-    # get assets
-    assets = get_assets()
-    print(f"Assets: {assets}")
+    all_assets = get_assets()
+    tqqq_asset = get_specified_asset('TQQQ', all_assets)
+    print(f"TQQQ Balance: {tqqq_asset.qty}")
+
+    usd_balance = get_usd_balance()
+    print(f"USD Balance: {usd_balance }")
 
     # get action
     trade_decision = get_action()
@@ -152,6 +155,45 @@ def trade(trade_decision: str) -> None:
 
     else:
         print('Holding position')
+
+
+def get_usd_balance():
+    '''
+    Retrieves the USD balance from the Alpaca trading account.
+    Args:
+        None
+    Returns:
+        usd_balance (float): The amount of USD available in the account
+    '''
+    usd_balance = account.cash
+    return usd_balance
+
+
+def get_assets():
+    '''
+    Retrives the assets from the Alpaca trading account.
+    Args:
+        None
+    Returns:
+        bitcoin_balance (dict): A dictionary with details of Bitcoin-related assets
+    '''
+    return trading_client.get_all_positions()
+
+def get_specified_asset(asset_symbol, assets):
+    '''
+    Retrieves the specified asset from the Alpaca trading account.
+    Args:
+        asset_symbol (str): The symbol of the asset to retrieve
+    Returns:
+        asset (dict): A dictionary with details of the specified asset
+    '''
+    for asset in assets:
+        if asset.symbol == asset_symbol:
+            return asset
+    print(f"Asset {asset_symbol} not found")
+    return None
+
+
 
 if __name__ == '__main__':
     main()
