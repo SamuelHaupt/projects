@@ -4,6 +4,7 @@ from agent_module import PPOAgentModule
 from data_processor import DataProcessor
 import gymnasium as gym
 import pandas as pd
+from charts.candlesticks import candlesticks
 
 
 def main():
@@ -43,7 +44,7 @@ def main():
                                 positions=[-1, 0, 1],
                                 initial_position=1,
                                 portfolio_initial_value=1000,
-                                reward_function=risk_management_reward)
+                                reward_function=drawdown)
         # Train model
         agent = PPOAgentModule(training_env)
         agent.train(10000)
@@ -55,7 +56,7 @@ def main():
                                positions=[-1, 0, 1],
                                initial_position=1,
                                portfolio_initial_value=1000,
-                               reward_function=risk_management_reward)
+                               reward_function=drawdown)
     
         # Load model and agent
         agent = PPOAgentModule(testing_env, model_path="models/20231109093003_ppo_trading_agent")

@@ -45,6 +45,7 @@ def drawdown(history: History, win_size: int = 144) -> float:
     # Combine drawdown and positive profit in the reward
     reward = (profit_reward_weight * positive_profit) - ((1 - profit_reward_weight) * mean_drawdown)
 
+    print(reward)
     return reward
 
 
