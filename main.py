@@ -1,11 +1,8 @@
-import numpy as np
-from sb3_contrib import RecurrentPPO
 from reward_function import drawdown
+from reward_function import risk_management_reward
 from agent_module import PPOAgentModule
 from data_processor import DataProcessor
 import gymnasium as gym
-import gym_trading_env
-from stable_baselines3.common.vec_env import DummyVecEnv
 import pandas as pd
 
 
@@ -39,33 +36,29 @@ def main():
     testing_df = testing_df.dropna()
     testing_df.head()
 
-
-
     def trainer():
         #  load training environment
         training_env = gym.make("TradingEnv",
-                        df=training_df,
-                        positions=[0, 1],
-                        initial_position=1,
-                        portfolio_initial_value=1000,
-                        reward_function=drawdown)
+                                df=training_df,
+                                positions=[-1, 0, 1],
+                                initial_position=1,
+                                portfolio_initial_value=1000,
+                                reward_function=risk_management_reward)
         # Train model
         agent = PPOAgentModule(training_env)
         agent.train(10000)
 
-
-
     def tester():
         # Load testing environment
         testing_env = gym.make("TradingEnv",
-                            df=testing_df,
-                            positions=[0, 1],
-                            initial_position=1,
-                            portfolio_initial_value=1000,
-                            reward_function=drawdown)
+                               df=testing_df,
+                               positions=[-1, 0, 1],
+                               initial_position=1,
+                               portfolio_initial_value=1000,
+                               reward_function=risk_management_reward)
     
         # Load model and agent
-        agent = PPOAgentModule(testing_env, model_path="models/20231103173638_ppo_trading_agent")
+        agent = PPOAgentModule(testing_env, model_path="models/20231109093003_ppo_trading_agent")
         print(agent)
         agent.test(testing_env, testing_df)
     
@@ -89,5 +82,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

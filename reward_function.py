@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from gym_trading_env.utils.history import History
 
+import risk_management
+from risk_management import RiskData
+
 
 # class Rewards():
 # causes gym env to fail when imported to main as a class
@@ -213,3 +216,25 @@ def rsi_reward(history, window_size=14):
         reward -= (current_rsi - overbought_threshold) / (100 - overbought_threshold)
 
     return reward
+
+
+def risk_management_reward(history: History, win_size: int = 30) -> float:
+    # Reward function -1 to 1
+    risk_data = RiskData()
+
+    # Use history run risk analysis
+    for i in range(len(history)):
+        risk_data.update_risk_data(history[i])
+
+    # Run risk analysis
+    if risk_management.run_risk_analysis(history[-1], risk_data):
+        # Risk Triggered
+        return -1
+
+    # Positive Return
+    elif np.log(history["data_close", -1]/history["data_close", -win_size:].max()) == 0:
+        return .50
+
+    else:
+        # Negative Return
+        return np.log(history["data_close", -1] / history["data_close", -win_size:].max())
