@@ -1,6 +1,6 @@
 # Author: James Mejia
 # Date: 9/21/2020
-# Description: code from https://www.geeksforgeeks.org/how-to-create-a-candlestick-chart-in-matplotlib/
+# Description: Code from https://www.geeksforgeeks.org/how-to-create-a-candlestick-chart-in-matplotlib/
 
 
 import pandas as pd
@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 
 def candlesticks(df: pd.DataFrame):
+	# Shows a candlestick chart from the parameter 'df' DataFrame
+
 	plt.figure()
 
 	# "up" dataframe will store the stock_prices
