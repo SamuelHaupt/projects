@@ -25,18 +25,9 @@ class AssetTradingEnv(gym.Env):
         self.per_trade_weight = per_trade_weight
         self.render_mode = render_mode
 
-        num_features = 3
-        num_periods = 3
-        num_time_shifts = 5
-        self.observation_space =\
-            spaces.Box(low=0, high=1,
-                       shape=(num_periods * num_time_shifts * num_features,))
-        self.action_space = spaces.Discrete(len(self.positions))
-
         self.data_df['date'] = self.data_df.index
         self._features_cols = [col for col in self.data_df.columns
-                               if 'features' in col]
-
+                               if 'feature' in col]
         info_cols = set(self.data_df.columns) - set(self._features_cols)
         extras_cols = {key: index for index, key in enumerate(info_cols)}
         extras_array = np.array(self.data_df[extras_cols.keys()])
@@ -48,6 +39,12 @@ class AssetTradingEnv(gym.Env):
         self._obs_array = np.array(self.data_df[self._features_cols],
                                    dtype=np.float32)
         self._asset_price_array = np.array(self.data_df['close'])
+
+        shape = len(self._features_cols)
+        self.observation_space =\
+            spaces.Box(low=0, high=1,
+                       shape=(shape,))
+        self.action_space = spaces.Discrete(len(self.positions))
 
     def reset(self, seed=None, options=None):
         # super().reset(seed=seed, options=options)
