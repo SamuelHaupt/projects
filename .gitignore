@@ -1,3 +1,5 @@
 .python-version
 __pycache__/
 team-project.code-workspace
+.DS_Store
+out.txt
