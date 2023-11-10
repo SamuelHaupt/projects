@@ -71,6 +71,12 @@ class AssetTradingEnv(gym.Env):
         self._step += 1
         portfolio_balance, available_funds, unrealized_trade, position, \
             purchase_close_price = self._update_portfolio(action)
+
+        total_reward = self.history_info_obj.get_step_and_col(
+            self._step, 'total_reward')
+        step_reward = 0 ##### Calculate step_reward and put it in this variable.
+        total_reward += step_reward
+
         self.history_info_obj.add_info(
             step=self._step,
             portfolio_balance=portfolio_balance,
@@ -78,10 +84,8 @@ class AssetTradingEnv(gym.Env):
             unrealized_trade=unrealized_trade,
             position=position,
             purchase_close_price=purchase_close_price,
-            step_reward=0.,
-            total_reward=0.)
-
-        # reward function here
+            step_reward=step_reward,
+            total_reward=total_reward)
 
         observation = self._get_obs()
         reward = self._get_reward()
@@ -144,7 +148,8 @@ class AssetTradingEnv(gym.Env):
         return info
 
     def _get_reward(self):
-        return None
+        return self.history_info_obj.get_step_and_col(self._step,
+                                                      'step_reward')
 
 
 class HistoryInfo():
