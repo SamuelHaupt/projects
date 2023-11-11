@@ -1,7 +1,7 @@
 from agent_module import PPOAgentModule
 from data_processor import DataProcessor
 # from gymnasium import gym
-from env import AssetTradingEnv
+from asset_trading_env import AssetTradingEnv
 
 
 def main():
