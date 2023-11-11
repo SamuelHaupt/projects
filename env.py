@@ -3,6 +3,7 @@ import pandas as pd
 import gymnasium as gym
 from gymnasium import spaces
 from typing import Any
+import random
 
 
 class AssetTradingEnv(gym.Env):
@@ -12,7 +13,6 @@ class AssetTradingEnv(gym.Env):
             self,
             data_df: pd.DataFrame,
             initial_balance: float = 100_000.00,
-            per_trade_weight: float = 0.5,
             render_mode: str = 'human'
             ) -> None:
         super(AssetTradingEnv, self).__init__()
@@ -22,7 +22,6 @@ class AssetTradingEnv(gym.Env):
         self.hold = self.positions[1]
         self.buy = self.positions[2]
         self.initial_balance = initial_balance
-        self.per_trade_weight = per_trade_weight
         self.render_mode = render_mode
 
         self.data_df['date'] = self.data_df.index
@@ -34,6 +33,7 @@ class AssetTradingEnv(gym.Env):
         self.history_info_obj = HistoryInfo(extras_cols, extras_array)
 
         self._step = 0
+        self._initial_step = self._step
         self._termination_balance = self.initial_balance * 0.05
         self._max_episode_steps = len(self.data_df) - 1
         self._obs_array = np.array(self.data_df[self._features_cols],
@@ -55,37 +55,44 @@ class AssetTradingEnv(gym.Env):
         self._step = 0
         self.history_info_obj.add_info(
             step=self._step,
+            signal=0,
             portfolio_balance=self.initial_balance,
             available_funds=self.initial_balance,
             unrealized_trade=0.,
             position=0.,
             purchase_close_price=0.,
             step_reward=0.,
-            total_reward=0.)
+            total_reward=0.,
+            risk_value=0.)
 
         observation = self._get_obs()
         info = self._get_info()
         return observation, info
 
     def step(self, action):
+        signal = self.positions[action]
         self._step += 1
-        portfolio_balance, available_funds, unrealized_trade, position, \
-            purchase_close_price = self._update_portfolio(action)
 
+        portfolio_balance, available_funds, unrealized_trade, position, \
+            purchase_close_price = self._update_portfolio(signal)
+
+        risk_value = 0.
         total_reward = self.history_info_obj.get_step_and_col(
-            self._step, 'total_reward')
-        step_reward = 0 ##### Calculate step_reward and put it in this variable.
+            self._step-1, 'total_reward')
+        step_reward = self.calc_reward(portfolio_balance)
         total_reward += step_reward
 
         self.history_info_obj.add_info(
             step=self._step,
+            signal=signal,
             portfolio_balance=portfolio_balance,
             available_funds=available_funds,
             unrealized_trade=unrealized_trade,
             position=position,
             purchase_close_price=purchase_close_price,
             step_reward=step_reward,
-            total_reward=total_reward)
+            total_reward=total_reward,
+            risk_value=risk_value)
 
         observation = self._get_obs()
         reward = self._get_reward()
@@ -93,10 +100,35 @@ class AssetTradingEnv(gym.Env):
             else True
         truncated = False if self._step < self._max_episode_steps else True
         info = self._get_info()
+
+        if terminated or truncated:
+            self.render()
+
+        # Use for troubleshooting reward and risk values.
+        # print()
+        # print(f"Signal: {signal}")
+        # for key, value in info.items():
+        #     print(key, ": ", value)
+        # if self._step == 10:
+        #     return observation, reward, True, True, info
+
         return observation, reward, terminated, truncated, info
 
     def render(self):
-        pass
+        m_final = self.history_info_obj.get_step_and_col(
+            self._step, 'close')
+        m_initial = self.history_info_obj.get_step_and_col(
+            self._initial_step, 'close')
+        m_return = (m_final - m_initial) / m_initial * 100
+
+        p_final = self.history_info_obj.get_step_and_col(
+            self._step, 'portfolio_balance')
+        p_initial = self.history_info_obj.get_step_and_col(
+            self._initial_step, 'portfolio_balance')
+        p_return = (p_final - p_initial) / p_initial * 100
+
+        print(f"|  Market Return: {m_return:.2f}%  |",
+              f"  Portfolio Return: {p_return:.2f}%  |")
 
     def close(self):
         pass
@@ -117,24 +149,23 @@ class AssetTradingEnv(gym.Env):
 
         if position >= 1:
             if action == self.hold:
-                unrealized_trade = round(_close_price * position, 2)
+                unrealized_trade = round(_close_price * position, 3)
                 portfolio_balance = round(available_funds
-                                          + unrealized_trade, 2)
+                                          + unrealized_trade, 3)
             if action == self.sell:
-                unrealized_trade = round(_close_price * position, 2)
+                unrealized_trade = round(_close_price * position, 3)
                 portfolio_balance = round(available_funds
-                                          + unrealized_trade, 2)
-                available_funds = round(available_funds + unrealized_trade, 2)
+                                          + unrealized_trade, 3)
+                available_funds = round(available_funds + unrealized_trade, 3)
                 unrealized_trade = 0.
                 position = 0.
                 purchase_close_price = 0.
         elif action == self.buy:
-            unrealized_trade = round(self.per_trade_weight
-                                     * available_funds, 2)
-            purchase_close_price = round(_close_price, 2)
-            position = round(unrealized_trade / purchase_close_price, 2)
-            available_funds = round(available_funds - unrealized_trade, 2)
-            portfolio_balance = round(available_funds + unrealized_trade, 2)
+            unrealized_trade = round(available_funds, 3)
+            purchase_close_price = round(_close_price, 3)
+            position = round(unrealized_trade / purchase_close_price, 3)
+            available_funds = round(available_funds - unrealized_trade, 3)
+            portfolio_balance = round(available_funds + unrealized_trade, 3)
 
         return portfolio_balance, available_funds, unrealized_trade, \
             position, purchase_close_price
@@ -151,6 +182,29 @@ class AssetTradingEnv(gym.Env):
         return self.history_info_obj.get_step_and_col(self._step,
                                                       'step_reward')
 
+    def calc_reward(self, p_current: float) -> float:
+        """
+        Function for calculating drawdown
+
+        Args:
+            History 
+            Window Size
+
+        Returns:
+            risk weighted positive profit - risk weighted drawdown
+        """
+        # pull data from history
+        previous_step = self._step - 1
+        p_previous = self.history_info_obj.get_step_and_col(
+            previous_step, 'portfolio_balance')
+        reward = (p_current - p_previous) / p_previous
+        # print(reward)
+        # position = self.history_info_obj.get_step_and_col(
+        #     previous_step, 'position')
+        # random.seed(42)
+        # reward = random.randrange(-100, 100)/100
+        return reward
+
 
 class HistoryInfo():
     def __init__(self, extras_cols: dict, extras_array: np.array) -> None:
@@ -165,13 +219,15 @@ class HistoryInfo():
     def add_info(
             self,
             step: int,
+            signal: int,
             portfolio_balance: float,
             available_funds: float,
             unrealized_trade: float,
             position: float,
             purchase_close_price: float,
             step_reward: float,
-            total_reward: float
+            total_reward: float,
+            risk_value: float
             ) -> None:
 
         date = self.get_extras_data_col(step, 'date')
@@ -183,6 +239,7 @@ class HistoryInfo():
 
         step_info = {'step': step,
                      'date': date,
+                     'signal': signal,
                      'portfolio_balance': portfolio_balance,
                      'available_funds': available_funds,
                      'unrealized_trade': unrealized_trade,
@@ -190,12 +247,15 @@ class HistoryInfo():
                      'purchase_close_price': purchase_close_price,
                      'step_reward': step_reward,
                      'total_reward': total_reward,
+                     'risk_value': risk_value,
                      'close': close,
                      'open': open,
                      'low': low,
                      'high': high,
                      'volume': volume}
 
+        # Add: risk_value, atr (non-norm), add all features, avg market return. Portfolio balance / initial balance | -1 step / step 0 close
+        # add Render!
         self._history_info_dict[step] = step_info
 
     def get_step(self, step: int) -> dict:
@@ -217,12 +277,11 @@ if __name__ == '__main__':
     preprocessed_df = dp.preprocess_data(tqqq)
     env = AssetTradingEnv(preprocessed_df)
     obs, info = env.reset()
-    print(info)
     random.seed(1)
     for index in range(15):
-        choice = random.choice([-1, 0, 1])
+        action = random.action([-1, 0, 1])
         print()
-        print(f"Choice: {choice}")
-        observation, reward, terminated, truncated, info = env.step(choice)
+        print(f"Action: {action}")
+        observation, reward, terminated, truncated, info = env.step(action)
         for key, value in info.items():
             print(key, ": ", value)
