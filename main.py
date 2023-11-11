@@ -50,8 +50,7 @@ def main():
         for test in range(20):
             agent = PPOAgentModule(
                 testing_env,
-                model_path="models/20231110171345_ppo_trading_agent.zip")
-            print(agent)
+                model_path="models/20231110173959_ppo_trading_agent.zip")
             agent.test(testing_env, testing_df)
 
     while True:
