@@ -47,11 +47,10 @@ class AssetTradingEnv(gym.Env):
         self.action_space = spaces.Discrete(len(self.positions))
 
     def reset(self, seed=None, options=None):
-        # super().reset(seed=seed, options=options)
-        # self.current_trade_position = self.np_random.choice(self.positions)
-        # If randomized, ensure purchase price is updated correctly.
+        super().reset(seed=seed, options=options)
 
-        self.current_trade_position = 0.
+        # If randomized, ensure purchase price is updated correctly.
+        position = self.np_random.choice(self.positions) if False else 0
         self._step = 0
         self.history_info_obj.add_info(
             step=self._step,
@@ -59,7 +58,7 @@ class AssetTradingEnv(gym.Env):
             portfolio_balance=self.initial_balance,
             available_funds=self.initial_balance,
             unrealized_trade=0.,
-            position=0.,
+            position=position,
             trade_duration=0,
             purchase_close_price=0.,
             step_reward=0.,
