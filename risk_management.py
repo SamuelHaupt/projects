@@ -121,13 +121,13 @@ def run_risk_analysis(info: dict, risk_data: RiskData):
     if __temporal_loss(risk_data) is True:
         return True
 
-    if __risk_reward(info, risk_data) is True:
+    if __risk_percent(info, risk_data) is True:
         return True
 
     return False
 
 
-def __risk_reward(info: dict, risk_data: RiskData) -> bool:
+def __risk_percent(info: dict, risk_data: RiskData) -> bool:
     if risk_data.get_high_value_percent_change() < -.02 and info["position"] == 1:
         # print("LOSS > 2%, issues sell request")
         risk_data.reset_risk_values()
