@@ -11,32 +11,9 @@ key = 'PK81K3G1O76EG5ITK9AQ'
 secret_key = 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel'
 trading_client = TradingClient(key, secret_key, paper=True)
 account = trading_client.get_account()
-account_balance = float(account.cash)
 
 
-def main():
-    '''
-    main function of the bot.
-    Args:
-        None
-    Returns:
-        None
-    '''
-    all_assets = get_assets()
-    tqqq_asset = get_specified_asset('TQQQ', all_assets)
-    print(f"TQQQ Balance: {tqqq_asset.qty}")
-
-    print(f"Account balance: {account_balance}")
-
-    # get action
-    trade_decision = get_action()
-    print(f"Trade decision: {trade_decision}")
-
-    # trade
-    trade(trade_decision)
-
-
-def get_action() -> str:
+def get_action(account_balance) -> str:
     '''
     This function gets the action from the model and returns a trade decision.
 
@@ -78,7 +55,7 @@ def get_action() -> str:
     return trade_decision
 
 
-def trade(trade_decision: str) -> None:
+def trade(trade_decision: str, account_balance, tqqq_balance) -> None:
     '''
     Function to perform the crypto trade
     Args:
@@ -87,23 +64,27 @@ def trade(trade_decision: str) -> None:
         None
     '''
     if trade_decision == 'buy':
+        usd_trade_amount = account_balance / 2
         market_order_data = MarketOrderRequest(
             symbol='TQQQ',
-            qty=0.5,
+            qty=usd_trade_amount,
             side=OrderSide.BUY,
             type='market',
             time_in_force=TimeInForce.DAY)
 
+        print(f"Bought {usd_trade_amount} in TQQQ")
         trading_client.submit_order(market_order_data)
 
     elif trade_decision == 'sell':
+        tqqq_trade_amount = tqqq_balance / 2
         market_order_data = MarketOrderRequest(
             symbol='TQQQ',
-            qty=0.5,
+            qty=tqqq_trade_amount,
             side=OrderSide.SELL,
             type='market',
             time_in_force=TimeInForce.DAY)
 
+        print(f"Sold {tqqq_trade_amount} in TQQQ")
         trading_client.submit_order(market_order_data)
 
     else:
@@ -147,6 +128,28 @@ def get_specified_asset(asset_symbol, assets):
             return asset
     print(f"Asset {asset_symbol} not found")
     return None
+
+
+def main():
+    '''
+    main function of the bot.
+    Args:
+        None
+    Returns:
+        None
+    '''
+    account_balance = float(account.cash)
+    all_assets = get_assets()
+    tqqq_asset = get_specified_asset('TQQQ', all_assets)
+    print(f"TQQQ Balance: {tqqq_asset.qty}")
+    print(f"Account balance: {account_balance}")
+
+    # get action
+    trade_decision = get_action(account_balance)
+    print(f"Trade decision: {trade_decision}")
+
+    # trade
+    trade(trade_decision, account_balance, float(tqqq_asset.qty))
 
 
 if __name__ == '__main__':
