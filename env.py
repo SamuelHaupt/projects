@@ -195,7 +195,7 @@ class AssetTradingEnv(gym.Env):
         Function for calculating drawdown
 
         Args:
-            History 
+            History
             Window Size
 
         Returns:
@@ -291,7 +291,6 @@ class HistoryInfo():
 
 if __name__ == '__main__':
     from data_processor import DataProcessor
-    import random
     dp = DataProcessor()
     symbol = 'TQQQ'
     start_date = '2010-02-11'
