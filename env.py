@@ -131,8 +131,8 @@ class AssetTradingEnv(gym.Env):
             self._initial_step, 'portfolio_balance')
         p_return = (p_final - p_initial) / p_initial * 100
 
-        print(f"|  Market Return: {m_return:.2f}%  |",
-              f"  Portfolio Return: {p_return:.2f}%  |")
+        print(f"|  Market Return:{m_return:9.2f}% |",
+              f"  Portfolio Return:{p_return:9.2f}% |")
 
     def close(self):
         pass
