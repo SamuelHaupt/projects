@@ -42,7 +42,7 @@ class AssetTradingEnv(gym.Env):
 
         shape = len(self._features_cols)
         self.observation_space =\
-            spaces.Box(low=0, high=1,
+            spaces.Box(low=-1, high=1,
                        shape=(shape,))
         self.action_space = spaces.Discrete(len(self.positions))
 
