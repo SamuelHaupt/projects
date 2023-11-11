@@ -57,7 +57,9 @@ def get_action(account_balance) -> str:
     return trade_decision
 
 
-def trade(trade_decision: str, account_balance, tqqq_balance, tqqq_price) -> None:
+def trade(
+        trade_decision: str, account_balance,
+        tqqq_balance, tqqq_price) -> None:
     '''
     Function to perform the crypto trade
     Args:
