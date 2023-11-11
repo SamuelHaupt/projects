@@ -7,3 +7,5 @@ models/20231105145531_ppo_trading_agent.zip
 .DS_Store
 out.txt
 
+models/20231110194307_ppo_trading_agent.zip
+.gitignore
