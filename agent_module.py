@@ -62,27 +62,26 @@ class PPOAgentModule:
         Returns:
             None
         """
-        print("Using device:", self.device)
-        risk_data = RiskData()
+        # risk_data = RiskData()
+        lstm_states = None
         observation, info = test_env.reset()
-        print("Testing model on testing data.")
         for _ in range(len(testing_df)):
-            position_index, _states = self.model.predict(observation)
-
+            action, lstm_states = self.model.predict(observation, state=lstm_states)
+            # print(position_index)
             # If in buy state, run risk analysis
-            if position_index == 1:
-                risk_data.update_risk_data(info)
+            # if position_index == 1:
+            #     risk_data.update_risk_data(info)
 
-                # If analysis returns too much risk, change position to sell
-                if risk_management.run_risk_analysis(info, risk_data):
-                    position_index = 0
+            #     # If analysis returns too much risk, change position to sell
+            #     if risk_management.run_risk_analysis(info, risk_data):
+            #         position_index = 0
 
-            observation, reward, done, truncated, info = test_env.step(position_index)
-            if done or truncated:
+            observation, reward, terminated, truncated, info = test_env.step(action)
+            if terminated or truncated:
                 break
 
         # Save render
-        if not os.path.exists(RENDER_DIR):
-            os.makedirs(RENDER_DIR)
-        test_env.get_wrapper_attr('save_for_render')(dir=RENDER_DIR)
-        print(f"Test finished. Render saved in {RENDER_DIR}")
+        # if not os.path.exists(RENDER_DIR):
+        #     os.makedirs(RENDER_DIR)
+        # test_env.get_wrapper_attr('save_for_render')(dir=RENDER_DIR)
+        # print(f"Test finished. Render saved in {RENDER_DIR}")
