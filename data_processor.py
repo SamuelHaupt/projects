@@ -225,7 +225,8 @@ class DataProcessor():
             atr_previous = average_true_range.iloc[index-1]
             atr_current = tr * weights[0] + atr_previous * weights[1]
             average_true_range.iloc[index] = atr_current
-        self.data_df[f"feature_atr_{period}p"] = average_true_range
+        self.data_df[f"feature_atr_{period}p"] = np.log(average_true_range)
+        self.data_df[f"atr_{period}p"] = average_true_range
 
     def add_avg_true_range_time_shift(
             self,
@@ -261,11 +262,9 @@ class DataProcessor():
             self.add_acceleration(period)
             for time_shift in self.time_shifts:
                 self.add_acceleration_time_shift(period, time_shift)
-
-        period = 14
-        self.add_avg_true_range(period)
-        for time_shift in self.time_shifts:
-            self.add_avg_true_range_time_shift(period, time_shift)
+            self.add_avg_true_range(period)
+            for time_shift in self.time_shifts:
+                self.add_avg_true_range_time_shift(period, time_shift)
         return self.data_df
 
 
