@@ -3,3 +3,5 @@ __pycache__/
 team-project.code-workspace
 .DS_Store
 out.txt
+render_logs/
+models/
