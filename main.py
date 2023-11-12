@@ -1,68 +1,58 @@
-from reward_function import drawdown
-from reward_function import risk_management_reward
 from agent_module import PPOAgentModule
 from data_processor import DataProcessor
-import gymnasium as gym
-import pandas as pd
-from charts.candlesticks import candlesticks
+# from gymnasium import gym
+from asset_trading_env import AssetTradingEnv
 
 
 def main():
-    data_processor = DataProcessor()
+    dp = DataProcessor()
     symbol = 'TQQQ'
-    start_date = '2019-01-01'
-    stop_date = '2023-10-01'
-    tqqq = data_processor.download_data_df_from_yf(symbol,
-                                                   start_date,
-                                                   stop_date)
-    tqqq_preprocessed = data_processor.preprocess_data(tqqq)
-
-    # Format table date proper format and name
-    tqqq_preprocessed.dropna(inplace=True)  # Clean again !
-
-    # Format to gym-trader-env format
-    df = pd.DataFrame([], [])
-    for column in tqqq_preprocessed.columns:
-        df[str(column).lower()] = pd.DataFrame(tqqq_preprocessed[column].values, columns=[column])
-    df["date"] = pd.DataFrame(tqqq_preprocessed["close"].index, columns=["Date"])
-    df.head()
-
-    # Setup training data
-    training_df = df[df["date"] <= "2021-12-31"]
-    training_df = training_df.dropna()
-    training_df.head()
-
-    # Setup testing data
-    testing_df = df[df["date"] > "2021-12-31"]
-    testing_df = testing_df.dropna()
-    testing_df.head()
 
     def trainer():
+        start_date = '2010-01-01'
+        stop_date = '2020-01-01'
+        tqqq = dp.download_data_df_from_yf(
+            symbol, start_date, stop_date)
+        training_df = dp.preprocess_data(tqqq)
+        training_df.dropna(inplace=True)
+
         #  load training environment
-        training_env = gym.make("TradingEnv",
-                                df=training_df,
-                                positions=[-1, 0, 1],
-                                initial_position=1,
-                                portfolio_initial_value=1000,
-                                reward_function=drawdown)
+        training_env = AssetTradingEnv(data_df=training_df)
+        # training_env = gym.make("TradingEnv",
+        #                         df=training_df,
+        #                         positions=[-1, 0, 1],
+        #                         initial_position=1,
+        #                         portfolio_initial_value=100000,
+        #                         reward_function=drawdown)
         # Train model
         agent = PPOAgentModule(training_env)
-        agent.train(10000)
+        agent.train(100000)
 
     def tester():
+
+        start_date = '2020-01-02'
+        stop_date = '2023-11-30'
+        tqqq = dp.download_data_df_from_yf(symbol, start_date, stop_date)
+        testing_df = dp.preprocess_data(tqqq)
+        testing_df.dropna(inplace=True)
+
         # Load testing environment
-        testing_env = gym.make("TradingEnv",
-                               df=testing_df,
-                               positions=[-1, 0, 1],
-                               initial_position=1,
-                               portfolio_initial_value=1000,
-                               reward_function=drawdown)
-    
+        testing_env = AssetTradingEnv(data_df=testing_df)
+        # testing_env = gym.make("TradingEnv",
+        #                        df=testing_df,
+        #                        positions=[-1, 0, 1],
+        #                        initial_position=1,
+        #                        portfolio_initial_value=100000,
+        #                        reward_function=drawdown)
+
         # Load model and agent
-        agent = PPOAgentModule(testing_env, model_path="models/20231109093003_ppo_trading_agent")
-        print(agent)
-        agent.test(testing_env, testing_df)
-    
+        print("Testing model on testing data.")
+        for test in range(20):
+            agent = PPOAgentModule(
+                testing_env,
+                model_path="models/20231110173959_ppo_trading_agent.zip")
+            agent.test(testing_env, testing_df)
+
     while True:
         print("1. Train")
         print("2. Test")
@@ -71,14 +61,14 @@ def main():
         except ValueError:
             print("Please enter a valid choice.")
             continue
-        print("\n\n")
+        print("\n")
         if choice == 1:
             trainer()
             break
         elif choice == 2:
             tester()
             break
-        print("\n\n")
+        print("\n")
 
 
 if __name__ == '__main__':
