@@ -42,16 +42,15 @@ class AssetTradingEnv(gym.Env):
 
         shape = len(self._features_cols)
         self.observation_space =\
-            spaces.Box(low=0, high=1,
+            spaces.Box(low=-1, high=1,
                        shape=(shape,))
         self.action_space = spaces.Discrete(len(self.positions))
 
     def reset(self, seed=None, options=None):
-        # super().reset(seed=seed, options=options)
-        # self.current_trade_position = self.np_random.choice(self.positions)
-        # If randomized, ensure purchase price is updated correctly.
+        super().reset(seed=seed, options=options)
 
-        self.current_trade_position = 0.
+        # If randomized, ensure purchase price is updated correctly.
+        position = self.np_random.choice(self.positions) if False else 0
         self._step = 0
         self.history_info_obj.add_info(
             step=self._step,
@@ -59,7 +58,7 @@ class AssetTradingEnv(gym.Env):
             portfolio_balance=self.initial_balance,
             available_funds=self.initial_balance,
             unrealized_trade=0.,
-            position=0.,
+            position=position,
             trade_duration=0,
             purchase_close_price=0.,
             step_reward=0.,
@@ -131,8 +130,8 @@ class AssetTradingEnv(gym.Env):
             self._initial_step, 'portfolio_balance')
         p_return = (p_final - p_initial) / p_initial * 100
 
-        print(f"|  Market Return: {m_return:.2f}%  |",
-              f"  Portfolio Return: {p_return:.2f}%  |")
+        print(f"|  Market Return:{m_return:9.2f}% |",
+              f"  Portfolio Return:{p_return:9.2f}% |")
 
     def close(self):
         pass
@@ -195,7 +194,7 @@ class AssetTradingEnv(gym.Env):
         Function for calculating drawdown
 
         Args:
-            History 
+            History
             Window Size
 
         Returns:
@@ -291,7 +290,6 @@ class HistoryInfo():
 
 if __name__ == '__main__':
     from data_processor import DataProcessor
-    import random
     dp = DataProcessor()
     symbol = 'TQQQ'
     start_date = '2010-02-11'
