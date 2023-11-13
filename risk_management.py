@@ -75,27 +75,27 @@ class RiskData:
     def update_risk_data(self, info: dict):
         # Set Percent Change if just got in market
         if self.__in_market is False:
-            self.__initial_value = info["portfolio_valuation"]
+            self.__initial_value = info["portfolio_balance"]
             self.__initial_value_percent_change = 0.0
-            self.__current_value = info["portfolio_valuation"]
+            self.__current_value = info["portfolio_balance"]
             self.__current_value_percent_change = 0
-            self.__high_value = info["portfolio_valuation"]
+            self.__high_value = info["portfolio_balance"]
             self.__high_value_percent_change = 0
             self.__in_market = True
             self.__days_in_market = 1
 
         else:
             # Set Percent Changes and set new current value and high value (Increase in value)
-            if self.__current_value < info["portfolio_valuation"]:
-                self.__current_value_percent_change = (info["portfolio_valuation"] / self.__initial_value) * 0.01
-                self.__current_value = info["portfolio_valuation"]
-                self.__high_value = info["portfolio_valuation"]
+            if self.__current_value < info["portfolio_balance"]:
+                self.__current_value_percent_change = (info["portfolio_balance"] / self.__initial_value) * 0.01
+                self.__current_value = info["portfolio_balance"]
+                self.__high_value = info["portfolio_balance"]
                 self.__high_value_percent_change = 0.0
             else:
                 # Set Percent Changes (Decrease in value)
-                self.__current_value_percent_change = -1 * (1 - (info["portfolio_valuation"] / self.__initial_value))
-                self.__current_value = info["portfolio_valuation"]
-                self.__high_value_percent_change = -1 * (1 - (info["portfolio_valuation"] / self.__high_value))
+                self.__current_value_percent_change = -1 * (1 - (info["portfolio_balance"] / self.__initial_value))
+                self.__current_value = info["portfolio_balance"]
+                self.__high_value_percent_change = -1 * (1 - (info["portfolio_balance"] / self.__high_value))
                 # print("Percent Change: ", self.__current_value_percent_change,
                 #       " High Value % Change: ", self.__high_value_percent_change)
 
@@ -128,7 +128,7 @@ def run_risk_analysis(info: dict, risk_data: RiskData):
 
 
 def __risk_percent(info: dict, risk_data: RiskData) -> bool:
-    if risk_data.get_high_value_percent_change() < -.02 and info["position"] == 1:
+    if risk_data.get_high_value_percent_change() < -.02 and info["signal"] == 1:
         # print("LOSS > 2%, issues sell request")
         risk_data.reset_risk_values()
         return True
@@ -145,7 +145,7 @@ def __temporal_loss(risk_data: RiskData) -> bool:
 
 def __buy_line_loss(info: dict, risk_data: RiskData) -> bool:
     # HARD SELL, HIT BUY LINE
-    if info["portfolio_valuation"] < risk_data.get_buy_loss() and info["position"] == 1:
+    if info["portfolio_balance"] < risk_data.get_buy_loss() and info["signal"] == 1:
         # print("Buy Line Loss")
         risk_data.reset_risk_values()
         return True
@@ -153,7 +153,7 @@ def __buy_line_loss(info: dict, risk_data: RiskData) -> bool:
 
 def __max_loss(info: dict, risk_data: RiskData) -> bool:
     # HARD SELL, HIT BOTTOM
-    if info["portfolio_valuation"] < risk_data.get_stop_loss() and info["position"] == 1:
+    if info["portfolio_balance"] < risk_data.get_stop_loss() and info["signal"] == 1:
         # print("Max Loss Triggered")
         risk_data.reset_risk_values()
         return True
