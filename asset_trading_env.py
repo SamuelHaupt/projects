@@ -212,8 +212,37 @@ class AssetTradingEnv(gym.Env):
         # reward = random.randrange(-100, 100)/100
 
         # need to update when other reward functions get added
-        return self.standard_deviation_reward(p_current)
+        return 0.8*self.standard_deviation_reward(p_current) + 0.2*self.atr_reward_reward(p_current)
 
+
+    def atr_reward_reward(self, p_current: float) -> float:
+        """
+        Function for calculating a reward based on ATR
+
+        Args:
+            p_current
+
+        Returns:
+            Reward based on standard deviation
+        """
+
+        prev_step = self._step - 1
+        reward = 0
+
+        atr_16 = self.history_info_obj.get_step_and_col(prev_step, 'atr_16p')
+        atr_32 = self.history_info_obj.get_step_and_col(prev_step, 'atr_32p')
+        atr_64 = self.history_info_obj.get_step_and_col(prev_step, 'atr_64p')
+
+        # print(atr_16)
+        # print(atr_32)
+        # print(atr_64)
+
+        if atr_32 > 0.5:
+            reward += 10
+        elif atr_32 < 0.05:
+            reward -= 10
+
+        return reward
 
     def standard_deviation_reward(self, p_current: float) -> float:
         """
@@ -222,14 +251,14 @@ class AssetTradingEnv(gym.Env):
         swings outside the trailing price standard deviation
 
         Args:
-            None
+            p_current
 
         Returns:
             Reward based on standard deviation
         """
-
         prev_step = self._step - 1
         trailing_close = []
+        trailing_signals = []
         reward = 0
 
         # adjust trailing n days to collect data on
@@ -243,23 +272,38 @@ class AssetTradingEnv(gym.Env):
         # loads an array with previous n days close price and calculate trailing mean and standard deviation
         for i in range(n_days):
             trailing_close.append(self.history_info_obj.get_step_and_col(prev_step-i, 'close'))
+            trailing_signals.append(self.history_info_obj.get_step_and_col(prev_step-i, 'signal'))
         trailing_avg = np.mean(trailing_close)
         trailing_std = np.std(trailing_close)
 
+        # punish if agent is buying/holding for extended period price doesn't move
+        # if -1 not in trailing_signals \
+        #     and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg+trailing_std \
+        #     and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg-trailing_std:
+        #     reward -= 50
+        #     print(reward)
+        #     return reward
+
         # reward if bought previously and price swings up
-        if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+trailing_std:
+        if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
+            and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+trailing_std:
             reward += 1
-            if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(2*trailing_std):
+            if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
+                and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(2*trailing_std):
                 reward += 10
-                if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(3*trailing_std): 
+                if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
+                    and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(3*trailing_std): 
                     reward += 100
 
         # punish if bought previously and price swings down
-        if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-trailing_std:
+        if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
+            and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-trailing_std:
             reward -= 1
-            if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(2*trailing_std):
+            if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
+                and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(2*trailing_std):
                 reward -= 10
-                if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std): 
+                if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
+                    and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std): 
                     reward -= 100
 
         #print(reward)
