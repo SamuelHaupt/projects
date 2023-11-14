@@ -5,6 +5,8 @@ from datetime import datetime
 import risk_management
 from risk_management import RiskData
 import os
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
+
 
 RENDER_DIR = 'render_logs'
 
@@ -40,13 +42,29 @@ class PPOAgentModule:
         """
         print("Using device:", self.device)
         print("Training.")
-        self.model.learn(total_timesteps=total_timesteps,)
-
         # Save model
         model_dir = './models/'
         os.makedirs(model_dir, exist_ok=True)
         curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
-        self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
+
+        # Setup Callback
+        stop_callback = StopTrainingOnRewardThreshold(reward_threshold=4.8,
+                                                      verbose=1)
+
+        eval_callback = EvalCallback(self.env,
+                                     callback_on_new_best=stop_callback,
+                                     eval_freq=10000,
+                                     best_model_save_path=self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
+                                     )
+
+        self.model.learn(total_timesteps=total_timesteps,
+                         callback=eval_callback)
+
+        # Save model
+        # model_dir = './models/'
+        # os.makedirs(model_dir, exist_ok=True)
+        # curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
+        # self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
         print("Training complete.")
         print("Model saved at path:",
               f"models/{curr_datetime}_ppo_trading_agent")
@@ -68,7 +86,7 @@ class PPOAgentModule:
         for _ in range(len(testing_df)):
             action, lstm_states = self.model.predict(observation=observation,
                                                      state=lstm_states,
-                                                     deterministic=True)
+                                                     deterministic=False)
 
             # If in buy state or hold state with assets held, run risk analysis
             if action == 1 or info["trade_duration"] > 0:

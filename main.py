@@ -37,7 +37,7 @@ def main():
         testing_df.dropna(inplace=True)
 
         # Load testing environment
-        testing_env = AssetTradingEnv(data_df=testing_df)
+        testing_env = AssetTradingEnv(data_df=testing_df,)
         # testing_env = gym.make("TradingEnv",
         #                        df=testing_df,
         #                        positions=[-1, 0, 1],
