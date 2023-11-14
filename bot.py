@@ -1,6 +1,6 @@
 from sb3_contrib import RecurrentPPO
 from data_processor import DataProcessor
-from env import AssetTradingEnv
+from asset_trading_env import AssetTradingEnv
 import pandas as pd
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
@@ -155,7 +155,7 @@ def main():
     print(f"Trade decision: {trade_decision}")
 
     # trade
-    trade('buy', account_balance, float(tqqq_asset.qty), tqqq_price)
+    trade(trade_decision, account_balance, float(tqqq_asset.qty), tqqq_price)
 
 
 if __name__ == '__main__':
