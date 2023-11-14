@@ -40,7 +40,7 @@ class PPOAgentModule:
         """
         print("Using device:", self.device)
         print("Training.")
-        self.model.learn(total_timesteps=total_timesteps)
+        self.model.learn(total_timesteps=total_timesteps,)
 
         # Save model
         model_dir = './models/'
@@ -62,19 +62,21 @@ class PPOAgentModule:
         Returns:
             None
         """
-        # risk_data = RiskData()
+        risk_data = RiskData()
         lstm_states = None
         observation, info = test_env.reset()
         for _ in range(len(testing_df)):
-            action, lstm_states = self.model.predict(observation, state=lstm_states)
-            # print(position_index)
-            # If in buy state, run risk analysis
-            # if position_index == 1:
-            #     risk_data.update_risk_data(info)
+            action, lstm_states = self.model.predict(observation=observation,
+                                                     state=lstm_states,
+                                                     deterministic=True)
 
-            #     # If analysis returns too much risk, change position to sell
-            #     if risk_management.run_risk_analysis(info, risk_data):
-            #         position_index = 0
+            # If in buy state or hold state with assets held, run risk analysis
+            if action == 1 or info["trade_duration"] > 0:
+                risk_data.update_risk_data(info)
+
+                # If analysis returns too much risk, change position to sell
+                if risk_management.run_risk_analysis(info, risk_data):
+                    action = -1
 
             observation, reward, terminated, truncated, info = test_env.step(action)
             if terminated or truncated:
