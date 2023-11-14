@@ -6,6 +6,7 @@ from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
 from datetime import date
+from time import sleep
 
 key = 'PK81K3G1O76EG5ITK9AQ'
 secret_key = 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel'
@@ -134,15 +135,12 @@ def get_specified_asset(asset_symbol, assets):
     print(f"Asset {asset_symbol} not found")
     return None
 
+def continous_trading(days_between_trades):
+    while True:
+        sleep(86400 * days_between_trades)
+        trader()
 
-def main():
-    '''
-    main function of the bot.
-    Args:
-        None
-    Returns:
-        None
-    '''
+def trader():
     account_balance = float(account.cash)
     all_assets = get_assets()
     tqqq_asset = get_specified_asset('TQQQ', all_assets)
@@ -156,6 +154,37 @@ def main():
 
     # trade
     trade(trade_decision, account_balance, float(tqqq_asset.qty), tqqq_price)
+
+
+def main():
+    '''
+    main function of the bot.
+    Args:
+        None
+    Returns:
+        None
+    '''
+    print("Starting bot.")
+    print("1. Single trade")
+    print("2. Continuous trading")
+    print("3. Exit")
+    choice = input("Enter your choice: ")
+    try:
+        choice = int(choice)
+        if choice == 1:
+            trader()
+        elif choice == 2:
+            days_between_trades = int(input("Enter days between trades: "))
+            continous_trading(days_between_trades)
+        elif choice == 3:
+            print("Exiting bot.")
+            return
+        else:
+            print("Invalid choice")
+            return
+    except ValueError:
+        print("Invalid choice")
+        return
 
 
 if __name__ == '__main__':
