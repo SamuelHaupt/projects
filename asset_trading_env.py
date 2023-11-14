@@ -212,7 +212,7 @@ class AssetTradingEnv(gym.Env):
         # reward = random.randrange(-100, 100)/100
 
         # need to update when other reward functions get added
-        return 0.8*self.standard_deviation_reward(p_current) + 0.2*self.atr_reward_reward(p_current)
+        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current)
 
 
     def atr_reward_reward(self, p_current: float) -> float:
