@@ -210,23 +210,36 @@ class DataProcessor():
         high = self.data_df['high']
         low = self.data_df['low']
         close_previous = self.data_df['close'].shift(1)
-        true_range_components = pd.DataFrame(index=data_df_index)
-        true_range_components["h_l"] = high - low
-        true_range_components["h_c_previous"] = np.abs(high - close_previous)
-        true_range_components["l_c_previous"] = np.abs(low - close_previous)
-        true_range = true_range_components.max(axis=1)
 
-        average_true_range = pd.Series(np.zeros(len(self.data_df)),
-                                       index=data_df_index)
-        average_true_range.iloc[0] = true_range.iloc[0]
-        weights = np.array([1 / period, (period - 1) / period])
-        for index in range(1, len(self.data_df)):
-            tr = true_range.iloc[index]
-            atr_previous = average_true_range.iloc[index-1]
-            atr_current = tr * weights[0] + atr_previous * weights[1]
-            average_true_range.iloc[index] = atr_current
-        self.data_df[f"feature_atr_{period}p"] = np.log(average_true_range)
-        self.data_df[f"atr_{period}p"] = average_true_range
+        # non-normalized for use in AssetTradingEnv
+        tr_components = pd.DataFrame(index=data_df_index)
+        tr_components["h_l"] = high - low
+        tr_components["h_c_previous"] = high - close_previous
+        tr_components["l_c_previous"] = low - close_previous
+        true_range = tr_components.max(axis=1)
+
+        # normalized for use in agent
+        tr_log_components = pd.DataFrame(index=data_df_index)
+        tr_log_components["h_l"] = np.log(high) - np.log(low)
+        tr_log_components["h_c_previous"] = np.log(high) \
+            - np.log(close_previous)
+        tr_log_components["l_c_previous"] = np.log(low) \
+            - np.log(close_previous)
+        true_range_log = tr_log_components.max(axis=1)
+
+        # non-normalized for use in AssetTradingEnv
+        hma_tr_series = pd.Series(
+            self.hull_moving_average(true_range, period),
+            name=f"atr_{period}p",
+            index=data_df_index)
+        self.data_df[f"atr_{period}p"] = hma_tr_series
+
+        # normalized for use in agent
+        hma_tr_log_series = pd.Series(
+            self.hull_moving_average(true_range_log, period),
+            name=f"feature_atr_{period}p",
+            index=data_df_index)
+        self.data_df[f"feature_atr_{period}p"] = hma_tr_log_series
 
     def add_avg_true_range_time_shift(
             self,
