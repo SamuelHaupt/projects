@@ -26,7 +26,7 @@ def main():
         #                         reward_function=drawdown)
         # Train model
         agent = PPOAgentModule(training_env)
-        agent.train(10000)
+        agent.train(100000)
 
     def tester():
 
@@ -50,7 +50,7 @@ def main():
         for test in range(20):
             agent = PPOAgentModule(
                 testing_env,
-                model_path="models/20231113121730_ppo_trading_agent.zip")
+                model_path="models/20231115144514_ppo_trading_agent.zip")
             agent.test(testing_env, testing_df)
 
     while True:

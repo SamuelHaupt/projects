@@ -48,23 +48,23 @@ class PPOAgentModule:
         curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
 
         # Setup Callback
-        stop_callback = StopTrainingOnRewardThreshold(reward_threshold=4.8,
-                                                      verbose=1)
+        # stop_callback = StopTrainingOnRewardThreshold(reward_threshold=10000,
+        #                                               verbose=1)
+        #
+        # eval_callback = EvalCallback(self.env,
+        #                              callback_on_new_best=stop_callback,
+        #                              eval_freq=10000,
+        #                              best_model_save_path=self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
+        #                              )
 
-        eval_callback = EvalCallback(self.env,
-                                     callback_on_new_best=stop_callback,
-                                     eval_freq=10000,
-                                     best_model_save_path=self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
-                                     )
-
-        self.model.learn(total_timesteps=total_timesteps,
-                         callback=eval_callback)
+        self.model.learn(total_timesteps=total_timesteps,)
+                         # callback=eval_callback)
 
         # Save model
-        # model_dir = './models/'
-        # os.makedirs(model_dir, exist_ok=True)
-        # curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
-        # self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
+        model_dir = './models/'
+        os.makedirs(model_dir, exist_ok=True)
+        curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
+        self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
         print("Training complete.")
         print("Model saved at path:",
               f"models/{curr_datetime}_ppo_trading_agent")
@@ -80,22 +80,12 @@ class PPOAgentModule:
         Returns:
             None
         """
-        risk_data = RiskData()
         lstm_states = None
         observation, info = test_env.reset()
         for _ in range(len(testing_df)):
             action, lstm_states = self.model.predict(observation=observation,
                                                      state=lstm_states,
                                                      deterministic=False)
-
-            # If in buy state or hold state with assets held, run risk analysis
-            if action == 1 or info["trade_duration"] > 0:
-                risk_data.update_risk_data(info)
-
-                # If analysis returns too much risk, change position to sell
-                if risk_management.run_risk_analysis(info, risk_data)["too_much_risk"]:
-                    print(risk_management.run_risk_analysis(info, risk_data)["risk_reward"])
-                    action = -1
 
             observation, reward, terminated, truncated, info = test_env.step(action)
             if terminated or truncated:

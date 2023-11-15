@@ -3,6 +3,7 @@ import pandas as pd
 import gymnasium as gym
 from gymnasium import spaces
 from typing import Any
+from risk_management import RiskData
 import random
 from reward_function import smart_reward
 
@@ -47,6 +48,9 @@ class AssetTradingEnv(gym.Env):
                        shape=(shape,))
         self.action_space = spaces.Discrete(len(self.positions))
 
+        # Setup RiskData Class
+        self.risk_data = RiskData(self.initial_balance)
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed, options=options)
 
@@ -78,11 +82,28 @@ class AssetTradingEnv(gym.Env):
             trade_duration, purchase_close_price = \
             self._update_portfolio(signal)
 
-        risk_value = 0.
+        if signal == 0 or signal == 1:
+
+            # Run Risk Analysis
+            self.risk_data.update_risk_data(portfolio_balance)
+            risk_analysis = self.risk_data.run_risk_analysis(portfolio_balance)
+
+            # If too much risk is True, change signal to SELL (-1)
+            if risk_analysis["too_much_risk"]:
+                signal = -1
+                risk_value = risk_analysis["risk_reward"]
+                self.risk_data.reset_risk_values()
+            else:
+                risk_value = risk_analysis["risk_reward"]
+
+        else:
+            self.risk_data.reset_risk_values()
+            risk_value = 0
+
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
         step_reward = self.calc_reward(portfolio_balance)
-        total_reward += step_reward
+        total_reward += step_reward + risk_value
 
         self.history_info_obj.add_info(
             step=self._step,
@@ -130,9 +151,12 @@ class AssetTradingEnv(gym.Env):
         p_initial = self.history_info_obj.get_step_and_col(
             self._initial_step, 'portfolio_balance')
         p_return = (p_final - p_initial) / p_initial * 100
+        p_reward = self.history_info_obj.get_step_and_col(
+            self._step, 'total_reward')
 
         print(f"|  Market Return:{m_return:9.2f}% |",
-              f"  Portfolio Return:{p_return:9.2f}% |")
+              f"  Portfolio Return:{p_return:9.2f}% |"
+              f"  Reward:", p_reward)
 
     def close(self):
         pass
