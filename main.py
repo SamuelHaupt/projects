@@ -14,7 +14,7 @@ def main():
         tqqq = dp.download_data_df_from_yf(
             symbol, start_date, stop_date)
         training_df = dp.preprocess_data(tqqq)
-        training_df.fillna(0, inplace=True)
+        training_df.dropna(inplace=True)
 
         #  load training environment
         training_env = AssetTradingEnv(data_df=training_df)

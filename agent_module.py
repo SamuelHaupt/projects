@@ -93,7 +93,8 @@ class PPOAgentModule:
                 risk_data.update_risk_data(info)
 
                 # If analysis returns too much risk, change position to sell
-                if risk_management.run_risk_analysis(info, risk_data):
+                if risk_management.run_risk_analysis(info, risk_data)["too_much_risk"]:
+                    print(risk_management.run_risk_analysis(info, risk_data)["risk_reward"])
                     action = -1
 
             observation, reward, terminated, truncated, info = test_env.step(action)
