@@ -212,6 +212,8 @@ class AssetTradingEnv(gym.Env):
         # reward = random.randrange(-100, 100)/100
         return reward
 
+    def calc_risk(self):
+        pass
 
 class HistoryInfo():
     def __init__(self, extras_cols: dict, extras_array: np.array) -> None:
