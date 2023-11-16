@@ -2,6 +2,7 @@ from agent_module import PPOAgentModule
 from data_processor import DataProcessor
 # from gymnasium import gym
 from asset_trading_env import AssetTradingEnv
+import datetime
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
 
         # Train model
         agent = PPOAgentModule(training_env)
-        agent.train(100000)
+        agent.train(1_000_000)
 
     def tester():
 

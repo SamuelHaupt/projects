@@ -93,6 +93,7 @@ class AssetTradingEnv(gym.Env):
         #       "Total Reward:", total_reward,
         #       "Portfolio", portfolio_balance)
 
+
         self.history_info_obj.add_info(
             step=self._step,
             signal=signal,
@@ -195,6 +196,7 @@ class AssetTradingEnv(gym.Env):
                 position = 0.
                 trade_duration = 0
                 purchase_close_price = 0.
+                self.risk_data.reset_risk_values()
 
         else:
             # Risk Analysis
@@ -218,6 +220,7 @@ class AssetTradingEnv(gym.Env):
                 position = round(unrealized_trade / purchase_close_price, 3)
                 available_funds = round(available_funds - unrealized_trade, 3)
                 portfolio_balance = round(available_funds + unrealized_trade, 3)
+                self.risk_data.set_initial_value(portfolio_balance)
 
         return portfolio_balance, available_funds, unrealized_trade, \
             position, trade_duration, purchase_close_price, risk_value, action

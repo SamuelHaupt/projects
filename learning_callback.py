@@ -58,11 +58,8 @@ class LearningCallback(BaseCallback):
         """
         previous_step = self._env._step
         portfolio_balance = self._env.history_info_obj.get_step_and_col(previous_step, 'portfolio_balance')
-        # print(self._env.risk_data.get_stop_loss())
-        # print(portfolio_balance)
 
         if self._env.risk_data.get_stop_loss() > portfolio_balance:
-            print("Max Loss, resetting Environment")
             self._env.reset()
         #     return False
         return True

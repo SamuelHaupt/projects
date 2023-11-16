@@ -44,10 +44,8 @@ class PPOAgentModule:
         """
         print("Using device:", self.device)
         print("Training.")
-        # Save model
-        model_dir = './models/'
-        os.makedirs(model_dir, exist_ok=True)
-        curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
+        st = datetime.now()
+        print("Start Time:", st)
 
         # # Setup Callback
         # stop_callback = StopTrainingOnRewardThreshold(reward_threshold=100000,
@@ -63,6 +61,8 @@ class PPOAgentModule:
         self.model.learn(total_timesteps=total_timesteps,
                          callback=step_callback)
 
+        et = datetime.now()
+        print("End Time:", et)
         # Save model
         model_dir = './models/'
         os.makedirs(model_dir, exist_ok=True)
