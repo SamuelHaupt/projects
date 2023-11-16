@@ -6,6 +6,8 @@ import risk_management
 from risk_management import RiskData
 import os
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
+from stable_baselines3.common.evaluation import evaluate_policy
+from learning_callback import LearningCallback
 
 
 RENDER_DIR = 'render_logs'
@@ -47,18 +49,19 @@ class PPOAgentModule:
         os.makedirs(model_dir, exist_ok=True)
         curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
 
-        # Setup Callback
-        # stop_callback = StopTrainingOnRewardThreshold(reward_threshold=10000,
+        # # Setup Callback
+        # stop_callback = StopTrainingOnRewardThreshold(reward_threshold=100000,
         #                                               verbose=1)
         #
+
+        step_callback = LearningCallback(self.env)
         # eval_callback = EvalCallback(self.env,
-        #                              callback_on_new_best=stop_callback,
-        #                              eval_freq=10000,
-        #                              best_model_save_path=self.model.save(f"models/{curr_datetime}_ppo_trading_agent")
+        #                              callback_after_eval=step_callback,
+        #                              eval_freq=10,
         #                              )
 
-        self.model.learn(total_timesteps=total_timesteps,)
-                         # callback=eval_callback)
+        self.model.learn(total_timesteps=total_timesteps,
+                         callback=step_callback)
 
         # Save model
         model_dir = './models/'
@@ -68,6 +71,10 @@ class PPOAgentModule:
         print("Training complete.")
         print("Model saved at path:",
               f"models/{curr_datetime}_ppo_trading_agent")
+
+        # Evaluate Policy
+        # mean_reward, std_reward = evaluate_policy(self.model, self.env, n_eval_episodes=10)
+        # print(f"mean_reward:{mean_reward:.2f} +/- {std_reward:.2f}")
 
     def test(self, test_env, testing_df):
         """
@@ -85,7 +92,7 @@ class PPOAgentModule:
         for _ in range(len(testing_df)):
             action, lstm_states = self.model.predict(observation=observation,
                                                      state=lstm_states,
-                                                     deterministic=False)
+                                                     deterministic=True)
 
             observation, reward, terminated, truncated, info = test_env.step(action)
             if terminated or truncated:

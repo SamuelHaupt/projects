@@ -18,12 +18,7 @@ def main():
 
         #  load training environment
         training_env = AssetTradingEnv(data_df=training_df)
-        # training_env = gym.make("TradingEnv",
-        #                         df=training_df,
-        #                         positions=[-1, 0, 1],
-        #                         initial_position=1,
-        #                         portfolio_initial_value=100000,
-        #                         reward_function=drawdown)
+
         # Train model
         agent = PPOAgentModule(training_env)
         agent.train(100000)
@@ -38,19 +33,13 @@ def main():
 
         # Load testing environment
         testing_env = AssetTradingEnv(data_df=testing_df,)
-        # testing_env = gym.make("TradingEnv",
-        #                        df=testing_df,
-        #                        positions=[-1, 0, 1],
-        #                        initial_position=1,
-        #                        portfolio_initial_value=100000,
-        #                        reward_function=drawdown)
 
         # Load model and agent
         print("Testing model on testing data.")
         for test in range(20):
             agent = PPOAgentModule(
                 testing_env,
-                model_path="models/20231115144514_ppo_trading_agent.zip")
+                model_path="models/20231115162135_ppo_trading_agent.zip")
             agent.test(testing_env, testing_df)
 
     while True:

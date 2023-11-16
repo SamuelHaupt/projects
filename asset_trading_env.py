@@ -53,6 +53,7 @@ class AssetTradingEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed, options=options)
+        self.risk_data.reset_risk_values()
 
         # If randomized, ensure purchase price is updated correctly.
         position = self.np_random.choice(self.positions) if False else 0
@@ -79,31 +80,18 @@ class AssetTradingEnv(gym.Env):
         self._step += 1
 
         portfolio_balance, available_funds, unrealized_trade, position, \
-            trade_duration, purchase_close_price = \
+            trade_duration, purchase_close_price, risk_value, signal = \
             self._update_portfolio(signal)
-
-        if signal == 0 or signal == 1:
-
-            # Run Risk Analysis
-            self.risk_data.update_risk_data(portfolio_balance)
-            risk_analysis = self.risk_data.run_risk_analysis(portfolio_balance)
-
-            # If too much risk is True, change signal to SELL (-1)
-            if risk_analysis["too_much_risk"]:
-                signal = -1
-                risk_value = risk_analysis["risk_reward"]
-                self.risk_data.reset_risk_values()
-            else:
-                risk_value = risk_analysis["risk_reward"]
-
-        else:
-            self.risk_data.reset_risk_values()
-            risk_value = 0
 
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
         step_reward = self.calc_reward(portfolio_balance)
         total_reward += step_reward + risk_value
+        # print("Signal", signal,
+        #       "Risk:", risk_value,
+        #       "Step Reward:", step_reward,
+        #       "Total Reward:", total_reward,
+        #       "Portfolio", portfolio_balance)
 
         self.history_info_obj.add_info(
             step=self._step,
@@ -176,31 +164,63 @@ class AssetTradingEnv(gym.Env):
         trade_duration = self.history_info_obj.get_step_and_col(
             previous_step, 'trade_duration')
         _close_price = self._asset_price_array[self._step]
+        risk_value = 0
 
         if position >= 1:
+            unrealized_trade = round(_close_price * position, 3)
+            portfolio_balance = round(available_funds
+                                      + unrealized_trade, 3)
+
+            # Risk Analysis
             if action == self.hold or action == self.buy:
-                unrealized_trade = round(_close_price * position, 3)
-                portfolio_balance = round(available_funds
-                                          + unrealized_trade, 3)
+                self.risk_data.update_risk_data(portfolio_balance)
+                risk_analysis = self.risk_data.run_risk_analysis(portfolio_balance)
+
+                # If too much risk is True, change signal to SELL (-1)
+                if risk_analysis["too_much_risk"]:
+                    action = self.sell
+                    risk_value = risk_analysis["risk_reward"]
+                    self.risk_data.reset_risk_values()
+                else:
+                    risk_value = risk_analysis["risk_reward"]
+            else:
+                self.risk_data.reset_risk_values()
+
+            if action == self.hold or action == self.buy:
                 trade_duration += 1
+
             if action == self.sell:
-                unrealized_trade = round(_close_price * position, 3)
-                portfolio_balance = round(available_funds
-                                          + unrealized_trade, 3)
                 available_funds = round(available_funds + unrealized_trade, 3)
                 unrealized_trade = 0.
                 position = 0.
                 trade_duration = 0
                 purchase_close_price = 0.
-        elif action == self.buy and position == 0:
-            unrealized_trade = round(available_funds, 3)
-            purchase_close_price = round(_close_price, 3)
-            position = round(unrealized_trade / purchase_close_price, 3)
-            available_funds = round(available_funds - unrealized_trade, 3)
-            portfolio_balance = round(available_funds + unrealized_trade, 3)
+
+        else:
+            # Risk Analysis
+            if action == self.hold or action == self.buy:
+                self.risk_data.update_risk_data(portfolio_balance)
+                risk_analysis = self.risk_data.run_risk_analysis(portfolio_balance)
+
+                # If too much risk is True, change signal to SELL (-1)
+                if risk_analysis["too_much_risk"]:
+                    action = self.sell
+                    risk_value = risk_analysis["risk_reward"]
+                    self.risk_data.reset_risk_values()
+                else:
+                    risk_value = risk_analysis["risk_reward"]
+            else:
+                self.risk_data.reset_risk_values()
+
+            if action == self.buy and position == 0:
+                unrealized_trade = round(available_funds, 3)
+                purchase_close_price = round(_close_price, 3)
+                position = round(unrealized_trade / purchase_close_price, 3)
+                available_funds = round(available_funds - unrealized_trade, 3)
+                portfolio_balance = round(available_funds + unrealized_trade, 3)
 
         return portfolio_balance, available_funds, unrealized_trade, \
-            position, trade_duration, purchase_close_price
+            position, trade_duration, purchase_close_price, risk_value, action
 
     def _get_obs(self):
         obs = self._obs_array[self._step]
@@ -316,7 +336,7 @@ class AssetTradingEnv(gym.Env):
                 and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(2*trailing_std):
                 reward += 10
                 if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
-                    and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(3*trailing_std): 
+                    and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(3*trailing_std):
                     reward += 100
 
         # punish if bought previously and price swings down
@@ -327,7 +347,7 @@ class AssetTradingEnv(gym.Env):
                 and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(2*trailing_std):
                 reward -= 10
                 if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
-                    and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std): 
+                    and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std):
                     reward -= 100
 
         #print(reward)

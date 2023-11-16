@@ -81,6 +81,7 @@ class RiskData:
             self.__current_value_percent_change = 0
             self.__high_value = portfolio_balance
             self.__high_value_percent_change = 0
+            self.__buy_line = portfolio_balance
             self.__in_market = True
 
         else:
@@ -105,6 +106,7 @@ class RiskData:
         self.__in_market = False
         self.__current_value = 0
         self.__flat_market_days = 0
+        self.__buy_line = 0
 
     def run_risk_analysis(self, portfolio_balance: int) -> dict:
 
@@ -150,7 +152,7 @@ class RiskData:
                     "risk_reward": risk_value}
 
         return {"too_much_risk": False,
-                "risk_reward": 10}
+                "risk_reward": 1}
 
 
 def __max_loss(info: dict, risk_data: RiskData) -> dict:
