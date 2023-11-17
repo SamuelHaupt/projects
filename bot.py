@@ -65,7 +65,7 @@ class Bot:
         '''
         return float(self.target_asset.qty)
 
-    def set_tqqq_price(self) -> float:
+    def set_asset_price(self) -> float:
         '''
         This function gets the current price of TQQQ.
         Args:
@@ -90,7 +90,7 @@ class Bot:
         self.set_all_assets()
         self.set_target_asset()
         self.set_asset_balance()
-        self.set_tqqq_price()
+        self.set_asset_price()
         self.set_account_balance()
 
     ########################################################
@@ -125,7 +125,7 @@ class Bot:
         '''
         return self.tqqq_balance
 
-    def get_tqqq_price(self) -> float:
+    def get_asset_price(self) -> float:
         '''
         This function gets the current price of TQQQ.
         '''
