@@ -5,8 +5,9 @@ from gymnasium import spaces
 from typing import Any
 from risk_management import RiskData
 import random
-from reward_function import smart_reward
-
+import csv
+import os
+from datetime import datetime
 
 class AssetTradingEnv(gym.Env):
     metadata = {'render_modes': ['human']}
@@ -25,6 +26,9 @@ class AssetTradingEnv(gym.Env):
         self.buy = self.positions[2]
         self.initial_balance = initial_balance
         self.render_mode = render_mode
+        curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
+        self.results_path = "results_"+curr_datetime
+        self.create_csv(self.results_path, ["Market Return", "Agent Return"])
 
         self.data_df['date'] = self.data_df.index
         self._features_cols = [col for col in self.data_df.columns
@@ -146,6 +150,7 @@ class AssetTradingEnv(gym.Env):
         print(f"|  Market Return:{m_return:9.2f}% |",
               f"  Portfolio Return:{p_return:9.2f}% |"
               f"  Reward:", p_reward)
+        self.append_to_csv(self.results_path, [m_return, p_return])
 
     def close(self):
         pass
@@ -284,9 +289,9 @@ class AssetTradingEnv(gym.Env):
         # print(atr_32)
         # print(atr_64)
 
-        if atr_32 > 0.5:
+        if atr_32 > 0.4:
             reward += 10
-        elif atr_32 < 0.05:
+        elif atr_32 < 0.08:
             reward -= 10
 
         return reward
@@ -358,6 +363,19 @@ class AssetTradingEnv(gym.Env):
 
     def calc_risk(self):
         pass
+    
+    def create_csv(self, file_path, headers):
+        model_dir = './results/'
+        os.makedirs(model_dir, exist_ok=True)
+        file = open(model_dir + file_path, 'w')
+        writer = csv.writer(file)
+        writer.writerow(headers)
+        file.close()
+
+    def append_to_csv(self, file_path, data):
+        with open('./results/'+file_path, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
 
 class HistoryInfo():
     def __init__(self, extras_cols: dict, extras_array: np.array) -> None:
