@@ -6,13 +6,14 @@ from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
 from datetime import date
-from time import sleep
 
 key = 'PK81K3G1O76EG5ITK9AQ'
 secret_key = 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel'
 
+
 class Bot:
-    def __init__(self, secret_key, key, paper_trade=True, model_path="models/20231110194307_ppo_trading_agent"):
+    def __init__(self, secret_key, key, paper_trade=True,
+                 model_path="models/20231110194307_ppo_trading_agent"):
         # Bot variables
         self.symbol = 'TQQQ'
         self.model_path = model_path
@@ -30,7 +31,6 @@ class Bot:
 
         self.trade_decision = None
 
-
     ########################################################
     # SETTERS
     def set_account(self) -> None:
@@ -38,13 +38,13 @@ class Bot:
         Function sets the account.
         '''
         self.account = self.trading_client.get_account()
-    
+
     def set_buying_power(self) -> float:
         '''
         Function sets the buying power.
         '''
         self.buying_power = float(self.account.buying_power)
-    
+
     def set_all_assets(self) -> list:
         '''
         Function gets all assets from portfolio.
@@ -93,7 +93,6 @@ class Bot:
         self.set_tqqq_price()
         self.set_account_balance()
 
-
     ########################################################
     # GETTERS
     def get_account_balance(self) -> float:
@@ -101,48 +100,48 @@ class Bot:
         Function gets the account balance.
         '''
         return self.account_balance
-    
+
     def get_buying_power(self) -> float:
         '''
         Function gets the buying power.
         '''
         return self.buying_power
-    
+
     def get_all_assets(self) -> list:
         '''
         Function gets all assets from portfolio.
         '''
         return self.all_assets
-    
+
     def get_target_asset(self) -> None:
         '''
         Function gets the target asset.
         '''
         return self.target_asset
-    
+
     def get_asset_balance(self) -> float:
         '''
         Function gets the balance of a specific asset.
         '''
         return self.tqqq_balance
-    
+
     def get_tqqq_price(self) -> float:
         '''
         This function gets the current price of TQQQ.
         '''
         return self.asset_price
-    
+
     def get_trade_decision(self) -> str:
         '''
         Function gets the trade decision.
         '''
         return self.trade_decision
-    
 
     ########################################################
     def set_trade_decision(self) -> str:
         '''
-        This function gets the action from the model and returns a trade decision.
+        This function gets the action from the model and returns a trade
+        decision.
         Args:
             None
         Returns:
@@ -186,17 +185,20 @@ class Bot:
         self.get_trade_decision()
         self.trade()
 
-    def trade(self, asset_buy_quantity=None, asset_sell_quantity=None, trade_dec=None) -> None:
+    def trade(self, asset_buy_quantity=None, asset_sell_quantity=None,
+              trade_dec=None) -> None:
         '''
         Function to perform the trade
         '''
         if trade_dec is None:
             trade_dec = self.get_trade_decision()
-            
+
         if trade_dec == 'buy':
             if asset_buy_quantity is None:
-                asset_buy_quantity = (self.account_balance / 2) / self.asset_price
-            elif asset_buy_quantity > (self.account_balance) / self.asset_price:
+                asset_buy_quantity = (
+                    self.account_balance / 2) / self.asset_price
+            elif asset_buy_quantity > (
+                    self.account_balance) / self.asset_price:
                 print("Not enough money to buy that much")
                 return
             market_order_data = MarketOrderRequest(
@@ -229,9 +231,6 @@ class Bot:
             print('Holding position')
 
 
-
-
-
 def main():
     '''
     main function of the bot.
@@ -242,7 +241,7 @@ def main():
     '''
     bot = Bot(secret_key, key)
     bot.trader()
-    
+
 
 if __name__ == '__main__':
     main()
