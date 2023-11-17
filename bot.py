@@ -6,6 +6,7 @@ from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
 from datetime import date
+from time import sleep
 
 key = 'PK81K3G1O76EG5ITK9AQ'
 secret_key = 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel'
@@ -177,14 +178,6 @@ class Bot:
             self.trade_decision = 'hold'
         print(f"Trade decision: {self.trade_decision}")
 
-    def trader(self) -> None:
-        '''
-        Function that sets up a single trade.
-        '''
-        self.set_all()
-        self.get_trade_decision()
-        self.trade()
-
     def trade(self, asset_buy_quantity=None, asset_sell_quantity=None,
               trade_dec=None) -> None:
         '''
@@ -229,6 +222,22 @@ class Bot:
 
         else:
             print('Holding position')
+
+    def trader(self) -> None:
+        '''
+        Function that sets up a single trade.
+        '''
+        self.set_all()
+        self.get_trade_decision()
+        self.trade()
+
+    def trader_loop(self, days=7) -> None:
+        '''
+        Function to perform multiple trades
+        '''
+        while True:
+            self.trader()
+            sleep(days * 24 * 60 * 60)
 
 
 def main():
