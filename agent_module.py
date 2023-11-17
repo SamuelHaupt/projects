@@ -5,6 +5,10 @@ from datetime import datetime
 import risk_management
 from risk_management import RiskData
 import os
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
+from stable_baselines3.common.evaluation import evaluate_policy
+from learning_callback import LearningCallback
+
 
 RENDER_DIR = 'render_logs'
 
@@ -40,8 +44,25 @@ class PPOAgentModule:
         """
         print("Using device:", self.device)
         print("Training.")
-        self.model.learn(total_timesteps=total_timesteps,)
+        st = datetime.now()
+        print("Start Time:", st)
 
+        # # Setup Callback
+        # stop_callback = StopTrainingOnRewardThreshold(reward_threshold=100000,
+        #                                               verbose=1)
+        #
+
+        step_callback = LearningCallback(self.env)
+        # eval_callback = EvalCallback(self.env,
+        #                              callback_after_eval=step_callback,
+        #                              eval_freq=10,
+        #                              )
+
+        self.model.learn(total_timesteps=total_timesteps,
+                         callback=step_callback)
+
+        et = datetime.now()
+        print("End Time:", et)
         # Save model
         model_dir = './models/'
         os.makedirs(model_dir, exist_ok=True)
@@ -50,6 +71,10 @@ class PPOAgentModule:
         print("Training complete.")
         print("Model saved at path:",
               f"models/{curr_datetime}_ppo_trading_agent")
+
+        # Evaluate Policy
+        # mean_reward, std_reward = evaluate_policy(self.model, self.env, n_eval_episodes=10)
+        # print(f"mean_reward:{mean_reward:.2f} +/- {std_reward:.2f}")
 
     def test(self, test_env, testing_df):
         """
@@ -62,21 +87,12 @@ class PPOAgentModule:
         Returns:
             None
         """
-        risk_data = RiskData()
         lstm_states = None
         observation, info = test_env.reset()
         for _ in range(len(testing_df)):
             action, lstm_states = self.model.predict(observation=observation,
                                                      state=lstm_states,
                                                      deterministic=True)
-
-            # If in buy state or hold state with assets held, run risk analysis
-            if action == 1 or info["trade_duration"] > 0:
-                risk_data.update_risk_data(info)
-
-                # If analysis returns too much risk, change position to sell
-                if risk_management.run_risk_analysis(info, risk_data):
-                    action = -1
 
             observation, reward, terminated, truncated, info = test_env.step(action)
             if terminated or truncated:
