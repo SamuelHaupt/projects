@@ -161,7 +161,7 @@ body, html {
     padding-left: 40px;
     padding-right: 40px;
     min-height: 130px;
-    min-width: 550px;
+    min-width: 730px;
 }
 
 .manualtrade > div {
@@ -238,13 +238,13 @@ body, html {
 button {
     background-color: rgb(0, 0, 0);
     color: white;
-    font-size: max(0.6vw, 10px);
+    font-size: max(0.6vw, 12px);
     border: none;
     font-weight: bold;
     padding: 1vh;
     border-radius: 10px;
-    width: 6vw;
-    min-width: 67px;
+    width: 5.5vw;
+    min-width: 80px;
 }
 
 button:hover {
@@ -278,10 +278,10 @@ button:active {
     background-color: #f5d100;
 }
 
-#days-input {
+#days-input, #sell-input, #buy-input{
     width: 50px;
     height: 10px;
-    font-size: 20px;
+    font-size: max(0.6vw, 14px);
     text-align: center;
     border: #000000 2px solid;
     border-radius: 10px;
