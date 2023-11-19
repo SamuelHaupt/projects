@@ -90,7 +90,7 @@ class AssetTradingEnv(gym.Env):
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
         step_reward = self.calc_reward(portfolio_balance)
-        total_reward += risk_value #+ step_reward 
+        total_reward += risk_value + step_reward 
         # print("Signal", signal,
         #       "Risk:", risk_value,
         #       "Step Reward:", step_reward,
