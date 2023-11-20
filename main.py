@@ -1,21 +1,21 @@
 from agent_module import PPOAgentModule
 from data_processor import DataProcessor
-# from gymnasium import gym
 from asset_trading_env import AssetTradingEnv
-import datetime
+import pandas as pd
+from datetime import date
 
 
 def main():
     dp = DataProcessor()
     symbol = 'TQQQ'
 
-    def trainer():
-        start_date = '2010-01-01'
-        stop_date = '2020-01-01'
-        tqqq = dp.download_data_df_from_yf(
-            symbol, start_date, stop_date)
-        training_df = dp.preprocess_data(tqqq)
-        training_df.dropna(inplace=True)
+    def trainer(df: pd.DataFrame):
+        start = '2011-06-01'
+        stop = '2020-01-01'
+
+        # Reset Index to reference Date and select data from date range
+        df.reset_index(inplace=True)
+        training_df = df[(df['Date'] > start) & (df['Date'] <= stop)]
 
         #  load training environment
         training_env = AssetTradingEnv(data_df=training_df)
@@ -24,16 +24,16 @@ def main():
         agent = PPOAgentModule(training_env)
         agent.train(1_000_000)
 
-    def tester():
+    def tester(df: pd.DataFrame):
+        start = '2020-01-02'
+        stop = '2023-11-30'
 
-        start_date = '2020-01-02'
-        stop_date = '2023-11-30'
-        tqqq = dp.download_data_df_from_yf(symbol, start_date, stop_date)
-        testing_df = dp.preprocess_data(tqqq)
-        testing_df.fillna(0, inplace=True)
+        # Reset Index to reference Date and select data from date range
+        df.reset_index(inplace=True)
+        testing_df = df[(df['Date'] > start) & (df['Date'] <= stop)]
 
         # Load testing environment
-        testing_env = AssetTradingEnv(data_df=testing_df,)
+        testing_env = AssetTradingEnv(data_df=testing_df)
 
         # Load model and agent
         print("Testing model on testing data.")
@@ -44,6 +44,13 @@ def main():
             agent.test(testing_env, testing_df)
 
     while True:
+        start_date = '2011-01-01'
+        today = str(date.today())
+        stop_date = today
+        tqqq = dp.download_data_df_from_yf(
+            symbol, start_date, stop_date)
+        downloaded_df = dp.preprocess_data(tqqq)
+
         print("1. Train")
         print("2. Test")
         try:
@@ -53,10 +60,10 @@ def main():
             continue
         print("\n")
         if choice == 1:
-            trainer()
+            trainer(downloaded_df)
             break
         elif choice == 2:
-            tester()
+            tester(downloaded_df)
             break
         print("\n")
 
