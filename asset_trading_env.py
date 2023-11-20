@@ -28,7 +28,7 @@ class AssetTradingEnv(gym.Env):
         self.render_mode = render_mode
         curr_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
         self.results_path = "results_"+curr_datetime
-        self.create_csv(self.results_path, ["Market Return", "Agent Return"])
+        self.create_csv(self.results_path, ["Market Return", "Agent Return", "Reward"])
 
         self.data_df['date'] = self.data_df.index
         self._features_cols = [col for col in self.data_df.columns
@@ -90,7 +90,7 @@ class AssetTradingEnv(gym.Env):
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
         step_reward = self.calc_reward(portfolio_balance)
-        total_reward += step_reward + risk_value
+        total_reward += risk_value + step_reward 
         # print("Signal", signal,
         #       "Risk:", risk_value,
         #       "Step Reward:", step_reward,
@@ -150,7 +150,7 @@ class AssetTradingEnv(gym.Env):
         print(f"|  Market Return:{m_return:9.2f}% |",
               f"  Portfolio Return:{p_return:9.2f}% |"
               f"  Reward:", p_reward)
-        self.append_to_csv(self.results_path, [m_return, p_return])
+        self.append_to_csv(self.results_path, [round(m_return,2), round(p_return,2), round(p_reward,2)])
 
     def close(self):
         pass
