@@ -1,138 +1,243 @@
 from sb3_contrib import RecurrentPPO
 from data_processor import DataProcessor
-from env import AssetTradingEnv
+from asset_trading_env import AssetTradingEnv
 import pandas as pd
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
 from datetime import date
+from time import sleep
 
 key = 'PK81K3G1O76EG5ITK9AQ'
 secret_key = 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel'
-trading_client = TradingClient(key, secret_key, paper=True)
-account = trading_client.get_account()
-buying_power = account.buying_power
-print(f"Buying power: {buying_power}")
 
 
-def get_action(account_balance) -> str:
-    '''
-    This function gets the action from the model and returns a trade decision.
+class Bot:
+    def __init__(self, secret_key, key, paper_trade=True,
+                 model_path="models/20231110194307_ppo_trading_agent"):
+        # Bot variables
+        self.symbol = 'TQQQ'
+        self.model_path = model_path
 
-    Args:
-        None
-    Returns:
-        String: trade decision
-    '''
-    model_path = "models/20231110194307_ppo_trading_agent"
-    model = RecurrentPPO.load(model_path)
-    data_processor = DataProcessor()
-    symbol = 'TQQQ'
+        # Account variables
+        self.paper_trade = paper_trade
+        self.trading_client = TradingClient(key, secret_key, paper=paper_trade)
+        self.account = None
+        self.target_asset = None
+        self.tqqq_balance = None
+        self.account_balance = 0
+        self.buying_power = 0
+        self.all_assets = None
+        self.asset_price = None
 
-    start_date = '2010-01-01'
-    stop_date = date.today() - pd.Timedelta(days=1)
-    # stop_date = '2020-01-01'
-    tqqq = data_processor.download_data_df_from_yf(
-        symbol, start_date, stop_date)
-    trading_df = data_processor.preprocess_data(tqqq)
-    trading_df.dropna(inplace=True)
-    trading_env = AssetTradingEnv(
-        data_df=trading_df,
-        initial_balance=account_balance)
+        self.trade_decision = None
 
-    observation = trading_env._get_obs()
-    # print(observation)
+    ########################################################
+    # SETTERS
+    def set_account(self) -> None:
+        '''
+        Function sets the account.
+        '''
+        self.account = self.trading_client.get_account()
 
-    # get action from the model
-    action, lstm_states = model.predict(observation)
+    def set_buying_power(self) -> float:
+        '''
+        Function sets the buying power.
+        '''
+        self.buying_power = float(self.account.buying_power)
 
-    print(f"Action: {action}")
-    if action == 1:
-        trade_decision = 'buy'
-    elif action == 0:
-        trade_decision = 'sell'
-    else:
-        trade_decision = 'hold'
-    print(f"Trade decision: {trade_decision}")
-    return trade_decision
+    def set_all_assets(self) -> list:
+        '''
+        Function gets all assets from portfolio.
+        '''
+        self.all_assets = self.trading_client.get_all_positions()
 
+    def set_target_asset(self) -> None:
+        '''
+        Function sets the target asset.
+        '''
+        for asset in self.all_assets:
+            if asset.symbol == self.symbol:
+                self.target_asset = asset
 
-def trade(
-        trade_decision: str, account_balance,
-        tqqq_balance, tqqq_price) -> None:
-    '''
-    Function to perform the crypto trade
-    Args:
-        trade_decision (str): buy, sell, or hold
-    Returns:
-        None
-    '''
-    if trade_decision == 'buy':
-        usd_trade_amount = account_balance / 2
-        tqqq_buy_quantity = usd_trade_amount / tqqq_price
-        market_order_data = MarketOrderRequest(
-            symbol='TQQQ',
-            qty=tqqq_buy_quantity,
-            side=OrderSide.BUY,
-            type='market',
-            time_in_force=TimeInForce.DAY)
+    def set_asset_balance(self) -> float:
+        '''
+        Function gets the balance of a specific asset.
+        '''
+        return float(self.target_asset.qty)
 
-        print(f"Bought {usd_trade_amount} in TQQQ")
-        trading_client.submit_order(market_order_data)
+    def set_asset_price(self) -> float:
+        '''
+        This function gets the current price of TQQQ.
+        Args:
+            None
+        Returns:
+            Float: current price of TQQQ
+        '''
+        self.asset_price = float(self.target_asset.current_price)
 
-    elif trade_decision == 'sell':
-        tqqq_trade_amount = tqqq_balance / 2
-        market_order_data = MarketOrderRequest(
-            symbol='TQQQ',
-            qty=tqqq_trade_amount,
-            side=OrderSide.SELL,
-            type='market',
-            time_in_force=TimeInForce.DAY)
+    def set_account_balance(self) -> float:
+        '''
+        Function gets the account balance.
+        '''
+        self.account_balance = float(self.account.cash)
 
-        print(f"Sold {tqqq_trade_amount} in TQQQ")
-        trading_client.submit_order(market_order_data)
+    def set_all(self) -> None:
+        '''
+        Function sets all account variables.
+        '''
+        self.set_account()
+        self.set_buying_power()
+        self.set_all_assets()
+        self.set_target_asset()
+        self.set_asset_balance()
+        self.set_asset_price()
+        self.set_account_balance()
 
-    else:
-        print('Holding position')
+    ########################################################
+    # GETTERS
+    def get_account_balance(self) -> float:
+        '''
+        Function gets the account balance.
+        '''
+        return self.account_balance
 
+    def get_buying_power(self) -> float:
+        '''
+        Function gets the buying power.
+        '''
+        return self.buying_power
 
-def get_usd_balance():
-    '''
-    Retrieves the USD balance from the Alpaca trading account.
-    Args:
-        None
-    Returns:
-        usd_balance (float): The amount of USD available in the account
-    '''
-    usd_balance = account.cash
-    return float(usd_balance)
+    def get_all_assets(self) -> list:
+        '''
+        Function gets all assets from portfolio.
+        '''
+        return self.all_assets
 
+    def get_target_asset(self) -> None:
+        '''
+        Function gets the target asset.
+        '''
+        return self.target_asset
 
-def get_assets():
-    '''
-    Retrives the assets from the Alpaca trading account.
-    Args:
-        None
-    Returns:
-        bitcoin_balance (dict): A dictionary with details of Bitcoin-related
-        assets
-    '''
-    return trading_client.get_all_positions()
+    def get_asset_balance(self) -> float:
+        '''
+        Function gets the balance of a specific asset.
+        '''
+        return self.tqqq_balance
 
+    def get_asset_price(self) -> float:
+        '''
+        This function gets the current price of TQQQ.
+        '''
+        return self.asset_price
 
-def get_specified_asset(asset_symbol, assets):
-    '''
-    Retrieves the specified asset from the Alpaca trading account.
-    Args:
-        asset_symbol (str): The symbol of the asset to retrieve
-    Returns:
-        asset (dict): A dictionary with details of the specified asset
-    '''
-    for asset in assets:
-        if asset.symbol == asset_symbol:
-            return asset
-    print(f"Asset {asset_symbol} not found")
-    return None
+    def get_trade_decision(self) -> str:
+        '''
+        Function gets the trade decision.
+        '''
+        return self.trade_decision
+
+    ########################################################
+    def set_trade_decision(self) -> str:
+        '''
+        This function gets the action from the model and returns a trade
+        decision.
+        Args:
+            None
+        Returns:
+            String: trade decision
+        '''
+        model = RecurrentPPO.load(self.model_path)
+        data_processor = DataProcessor()
+
+        start_date = '2010-01-01'
+        stop_date = date.today() - pd.Timedelta(days=1)
+        # stop_date = '2020-01-01'
+
+        tqqq = data_processor.download_data_df_from_yf(
+            self.symbol, start_date, stop_date)
+        trading_df = data_processor.preprocess_data(tqqq)
+        trading_df.dropna(inplace=True)
+        trading_env = AssetTradingEnv(
+            data_df=trading_df,
+            initial_balance=self.account_balance)
+
+        observation = trading_env._get_obs()
+        # print(observation)
+
+        # get action from the model
+        action, lstm_states = model.predict(observation)
+
+        print(f"Action: {action}")
+        if action == 1:
+            self.trade_decision = 'buy'
+        elif action == 0:
+            self.trade_decision = 'sell'
+        else:
+            self.trade_decision = 'hold'
+        print(f"Trade decision: {self.trade_decision}")
+
+    def trade(self, asset_buy_quantity=None, asset_sell_quantity=None,
+              trade_dec=None) -> None:
+        '''
+        Function to perform the trade
+        '''
+        if trade_dec is None:
+            trade_dec = self.get_trade_decision()
+
+        if trade_dec == 'buy':
+            if asset_buy_quantity is None:
+                asset_buy_quantity = (
+                    self.account_balance / 2) / self.asset_price
+            elif asset_buy_quantity > (
+                    self.account_balance) / self.asset_price:
+                print("Not enough money to buy that much")
+                return
+            market_order_data = MarketOrderRequest(
+                symbol=self.symbol,
+                qty=asset_buy_quantity,
+                side=OrderSide.BUY,
+                type='market',
+                time_in_force=TimeInForce.DAY
+            )
+            self.trading_client.submit_order(market_order_data)
+            print(f"Bought {asset_buy_quantity} in {self.symbol}")
+
+        elif trade_dec == 'sell':
+            if asset_sell_quantity is None:
+                asset_sell_quantity = self.tqqq_balance / 2
+            elif asset_sell_quantity > self.tqqq_balance:
+                print("Not enough assets to sell that much")
+                return
+            market_order_data = MarketOrderRequest(
+                symbol=self.symbol,
+                qty=asset_sell_quantity,
+                side=OrderSide.SELL,
+                type='market',
+                time_in_force=TimeInForce.DAY
+            )
+            self.trading_client.submit_order(market_order_data)
+            print(f"Sold {asset_sell_quantity} in {self.symbol}")
+
+        else:
+            print('Holding position')
+
+    def trader(self) -> None:
+        '''
+        Function that sets up a single trade.
+        '''
+        self.set_all()
+        self.get_trade_decision()
+        self.trade()
+
+    def trader_loop(self, days=7) -> None:
+        '''
+        Function to perform multiple trades
+        '''
+        while True:
+            self.trader()
+            sleep(days * 24 * 60 * 60)
 
 
 def main():
@@ -143,19 +248,8 @@ def main():
     Returns:
         None
     '''
-    account_balance = float(account.cash)
-    all_assets = get_assets()
-    tqqq_asset = get_specified_asset('TQQQ', all_assets)
-    tqqq_price = float(tqqq_asset.current_price)
-    print(f"TQQQ Balance: {tqqq_asset.qty}")
-    print(f"Account balance: {account_balance}")
-
-    # get action
-    trade_decision = get_action(account_balance)
-    print(f"Trade decision: {trade_decision}")
-
-    # trade
-    trade('buy', account_balance, float(tqqq_asset.qty), tqqq_price)
+    bot = Bot(secret_key, key)
+    bot.trader()
 
 
 if __name__ == '__main__':
