@@ -1,0 +1,299 @@
+body, html {
+    overflow: auto;
+    height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+}
+
+.container {
+    height: 100%;
+    display: grid;
+    grid-template-rows: repeat(9, 1fr) 0.5fr;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    row-gap: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    /* grid-template-rows: repeat(10, minmax(100px, 1fr));
+    grid-template-columns: repeat(10, minmax(100px, 1fr)); */
+
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.header {
+    color: black;
+    grid-column: 1 / 11;
+    grid-row: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    grid-row: 2 / 10;
+    min-width: 150px;
+    overflow-y: auto;
+}
+
+.sidebar > div {
+    color: black;
+}
+
+.header, .sidebar {
+    background-color: #f5d100;
+}
+
+
+.content {
+    grid-row: 2 / 10;
+    grid-column: 2 / 11;
+    display: grid;
+    grid-template-rows: repeat(10, 1fr);
+    grid-template-columns: repeat(10, 1fr);
+    padding: 10px;
+    overflow: auto;
+}
+
+.footer {
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    grid-row: 10;
+    gap: calc(10% - 0.005vh);
+    grid-column: 1 / 11;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    padding: 13px;
+}
+
+.footer > a {
+    text-decoration: none;
+    color: white;
+    padding: 0;
+}
+
+
+.footer p {
+    margin: 0;
+    padding: 0;
+    color: rgb(165, 165, 165);
+}
+
+.graphs-info {
+    grid-row: 1 / 7;
+    grid-column: 1 / 11;
+    display: grid;
+    grid-template-rows: 1fr 0.4fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    text-align: center;
+    align-items: center;
+}
+
+
+#graph1 {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+#graph2 {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+.graphs {
+    margin: 30px;
+    box-shadow: 0px 5px 5px 0px #000000, 0px -5px 5px 0px #000000;
+    width: 60%;
+    height: 80%;
+    align-self: center;
+    justify-self: center;
+    min-height: 100px;
+    min-width: 330px;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+    gap: 1vh;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 60%;
+    align-self: center;
+    justify-self: center;
+    min-height: 100px;
+    overflow-y: hidden;
+}
+
+.info > p {
+    margin: 0;
+    padding: 0;
+    font-size: max(1vw, 14px);
+    font-weight: bold;
+}
+
+
+.manualtrade {
+    grid-row: 8 / 11;
+    grid-column: 1 / 11;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color:  #f5d100;
+    border-radius: 10px;
+    padding-left: 40px;
+    padding-right: 40px;
+    min-height: 130px;
+    min-width: 730px;
+}
+
+.manualtrade > div {
+    width: calc(100% / 3);
+    padding: 10px;
+    text-align: center;
+    height: 80%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#manuallable{
+    font-size: max(1.5vw, 20px);
+    font-weight: bolder;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#suggestedaction-container { 
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    align-items: center;
+}
+
+#suggestedaction-container > p { 
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: max(1.5vw, 15px);
+    text-align: center;
+}
+
+
+
+#manualbuttons {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+}
+
+#buyamounts, #sellamounts, #buy-button-div, #sell-button-div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    gap: 10px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+#buyamounts {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+#sellamounts {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+#buy-button-div {
+    grid-row: 2;
+    grid-column: 1;
+}
+
+#sell-button-div {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+button {
+    background-color: rgb(0, 0, 0);
+    color: white;
+    font-size: max(0.6vw, 12px);
+    border: none;
+    font-weight: bold;
+    padding: 1vh;
+    border-radius: 10px;
+    width: 5.5vw;
+    min-width: 80px;
+}
+
+button:hover {
+    background-color: rgba(26, 26, 26, 0.938);
+    cursor: pointer;
+}
+
+button:active {
+    background-color: rgb(122, 124, 0);
+    cursor: pointer;
+}
+
+.sidebar {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+
+}
+
+
+.sidebar > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.2vh;
+    padding: 10px;
+    margin: 10px;
+    font-weight: bold;
+    font-size: max(1vw, 14px);
+    background-color: #f5d100;
+}
+
+#days-input, #sell-input, #buy-input{
+    width: 50px;
+    height: 10px;
+    font-size: max(0.6vw, 14px);
+    text-align: center;
+    border: #000000 2px solid;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: bold;
+    background-color: #f5d100;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+    
+#days-input::-webkit-inner-spin-button,
+#days-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
