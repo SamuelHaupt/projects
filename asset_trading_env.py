@@ -89,14 +89,13 @@ class AssetTradingEnv(gym.Env):
 
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
-        step_reward = self.calc_reward(portfolio_balance, trade_duration)
+        step_reward = self.calc_reward(portfolio_balance)
         total_reward += risk_value + step_reward 
         # print("Signal", signal,
         #       "Risk:", risk_value,
         #       "Step Reward:", step_reward,
         #       "Total Reward:", total_reward,
         #       "Portfolio", portfolio_balance)
-
 
         self.history_info_obj.add_info(
             step=self._step,
@@ -177,21 +176,6 @@ class AssetTradingEnv(gym.Env):
             portfolio_balance = round(available_funds
                                       + unrealized_trade, 3)
 
-            # Risk Analysis
-            if action == self.hold or action == self.buy:
-                self.risk_data.update_risk_data(portfolio_balance)
-                risk_analysis = self.risk_data.run_risk_analysis(portfolio_balance)
-
-                # If too much risk is True, change signal to SELL (-1)
-                if risk_analysis["too_much_risk"]:
-                    action = self.sell
-                    risk_value = risk_analysis["risk_reward"]
-                    self.risk_data.reset_risk_values()
-                else:
-                    risk_value = risk_analysis["risk_reward"]
-            else:
-                self.risk_data.reset_risk_values()
-
             if action == self.hold or action == self.buy:
                 trade_duration += 1
 
@@ -204,21 +188,6 @@ class AssetTradingEnv(gym.Env):
                 self.risk_data.reset_risk_values()
 
         else:
-            # Risk Analysis
-            if action == self.hold or action == self.buy:
-                self.risk_data.update_risk_data(portfolio_balance)
-                risk_analysis = self.risk_data.run_risk_analysis(portfolio_balance)
-
-                # If too much risk is True, change signal to SELL (-1)
-                if risk_analysis["too_much_risk"]:
-                    action = self.sell
-                    risk_value = risk_analysis["risk_reward"]
-                    self.risk_data.reset_risk_values()
-                else:
-                    risk_value = risk_analysis["risk_reward"]
-            else:
-                self.risk_data.reset_risk_values()
-
             if action == self.buy and position == 0:
                 unrealized_trade = round(available_funds, 3)
                 purchase_close_price = round(_close_price, 3)
@@ -242,13 +211,13 @@ class AssetTradingEnv(gym.Env):
         return self.history_info_obj.get_step_and_col(self._step,
                                                       'step_reward')
 
-    def calc_reward(self, p_current: float, trade_duration: int) -> float:
+    def calc_reward(self, p_current: float) -> float:
         """
         Function for calculating reward
 
         Args:
-            p_current: Current Portfolio Value
-            trade_duration: Days In Market
+            p_current: current step
+
         Returns:
             Reward for given step
         """
@@ -262,10 +231,14 @@ class AssetTradingEnv(gym.Env):
         #     previous_step, 'position')
         # random.seed(42)
         # reward = random.randrange(-100, 100)/100
-        trade_reward = self.trade_reward(p_current, trade_duration)
+
+        # Risk Analysis
+        self.risk_data.update_risk_data(p_current)
+        risk_analysis = self.risk_data.run_risk_analysis(p_current)
+        risk_value = risk_analysis["risk_reward"]
 
         # need to update when other reward functions get added
-        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current) + trade_reward
+        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current) + round(risk_value)
 
     def atr_reward_reward(self, p_current: float) -> float:
         """
@@ -358,24 +331,11 @@ class AssetTradingEnv(gym.Env):
                     and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std):
                     reward -= 100
 
+        #print(reward)
         return reward
 
-    def trade_reward(self, portfolio_value: float, trade_duration: int) -> float:
-        """
-        reward = percent ^ (2/trade_duration)
-        :param portfolio_value:
-        :param trade_duration:
-        :return:
-        """
-        # Calculate
-        prior_portfolio_value = self.history_info_obj.get_step_and_col(self._step - 1, 'portfolio_balance')
-        percent = ((portfolio_value/prior_portfolio_value) - 1) * 100
-
-        trade_reward = (abs(percent) ** (2/(trade_duration + 1))) * 10
-        if percent < 0:
-            return -trade_reward
-
-        return trade_duration
+    def calc_risk(self):
+        pass
     
     def create_csv(self, file_path, headers):
         model_dir = './results/'
