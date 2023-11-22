@@ -89,7 +89,7 @@ class AssetTradingEnv(gym.Env):
 
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
-        step_reward = self.calc_reward(portfolio_balance)
+        step_reward = self.calc_reward(portfolio_balance, trade_duration)
         total_reward += risk_value + step_reward 
         # print("Signal", signal,
         #       "Risk:", risk_value,
@@ -242,13 +242,13 @@ class AssetTradingEnv(gym.Env):
         return self.history_info_obj.get_step_and_col(self._step,
                                                       'step_reward')
 
-    def calc_reward(self, p_current: float) -> float:
+    def calc_reward(self, p_current: float, trade_duration: int) -> float:
         """
         Function for calculating reward
 
         Args:
-            p_current: current step
-
+            p_current: Current Portfolio Value
+            trade_duration: Days In Market
         Returns:
             Reward for given step
         """
@@ -262,10 +262,10 @@ class AssetTradingEnv(gym.Env):
         #     previous_step, 'position')
         # random.seed(42)
         # reward = random.randrange(-100, 100)/100
+        trade_reward = self.trade_reward(p_current, trade_duration)
 
         # need to update when other reward functions get added
-        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current)
-
+        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current) + trade_reward
 
     def atr_reward_reward(self, p_current: float) -> float:
         """
@@ -358,11 +358,24 @@ class AssetTradingEnv(gym.Env):
                     and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std):
                     reward -= 100
 
-        #print(reward)
         return reward
 
-    def calc_risk(self):
-        pass
+    def trade_reward(self, portfolio_value: float, trade_duration: int) -> float:
+        """
+        reward = percent ^ (2/trade_duration)
+        :param portfolio_value:
+        :param trade_duration:
+        :return:
+        """
+        # Calculate
+        prior_portfolio_value = self.history_info_obj.get_step_and_col(self._step - 1, 'portfolio_balance')
+        percent = ((portfolio_value/prior_portfolio_value) - 1) * 100
+
+        trade_reward = (abs(percent) ** (2/(trade_duration + 1))) * 10
+        if percent < 0:
+            return -trade_reward
+
+        return trade_duration
     
     def create_csv(self, file_path, headers):
         model_dir = './results/'
