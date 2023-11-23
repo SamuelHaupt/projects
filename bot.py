@@ -8,8 +8,8 @@ from alpaca.trading.requests import MarketOrderRequest
 from datetime import date
 from time import sleep
 
-key = 'PK81K3G1O76EG5ITK9AQ'
-secret_key = 'E9k93RSv1x8ojGmgqd43KmPKAlm44DtEVrCDikel'
+key = 'PKIS1O7AVH1BVIXTP2Z0'
+secret_key = 'KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE'
 
 
 class Bot:
@@ -22,7 +22,7 @@ class Bot:
         # Account variables
         self.paper_trade = paper_trade
         self.trading_client = TradingClient(key, secret_key, paper=paper_trade)
-        self.account = None
+        self.account = self.trading_client.get_account()
         self.target_asset = None
         self.tqqq_balance = None
         self.account_balance = 0
@@ -64,6 +64,8 @@ class Bot:
         '''
         Function gets the balance of a specific asset.
         '''
+        if self.target_asset is None:
+            return 0
         return float(self.target_asset.qty)
 
     def set_asset_price(self) -> float:
@@ -86,7 +88,7 @@ class Bot:
         '''
         Function sets all account variables.
         '''
-        self.set_account()
+        # self.set_account()
         self.set_buying_power()
         self.set_all_assets()
         self.set_target_asset()
@@ -124,6 +126,8 @@ class Bot:
         '''
         Function gets the balance of a specific asset.
         '''
+        if self.target_asset is None:
+            self.set_target_asset()
         return self.tqqq_balance
 
     def get_asset_price(self) -> float:
