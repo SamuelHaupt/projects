@@ -2,6 +2,7 @@ from sb3_contrib import RecurrentPPO
 from data_processor import DataProcessor
 from asset_trading_env import AssetTradingEnv
 import pandas as pd
+import alpaca_trade_api as tradeapi
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
@@ -22,6 +23,8 @@ class Bot:
         # Account variables
         self.paper_trade = paper_trade
         self.trading_client = TradingClient(key, secret_key, paper=paper_trade)
+        self.rest_client = tradeapi.REST(key, secret_key, 
+                                         base_url='https://paper-api.alpaca.markets')
         self.account = self.trading_client.get_account()
         self.target_asset = None
         self.tqqq_balance = None
@@ -76,7 +79,8 @@ class Bot:
         Returns:
             Float: current price of TQQQ
         '''
-        self.asset_price = float(self.target_asset.current_price)
+        last_trade = self.rest_client.get_latest_trade(self.symbol)
+        self.asset_price = float(last_trade.price)
 
     def set_account_balance(self) -> float:
         '''
@@ -88,12 +92,15 @@ class Bot:
         '''
         Function sets all account variables.
         '''
-        # self.set_account()
         self.set_buying_power()
         self.set_all_assets()
-        self.set_target_asset()
-        self.set_asset_balance()
         self.set_asset_price()
+        if len(self.all_assets) == 0:
+            self.target_asset = None
+            self.tqqq_balance = 0
+        else:
+            self.set_target_asset()
+            self.set_asset_balance()
         self.set_account_balance()
 
     ########################################################
@@ -209,6 +216,8 @@ class Bot:
             print(f"Bought {asset_buy_quantity} in {self.symbol}")
 
         elif trade_dec == 'sell':
+            if self.tqqq_balance is None:
+                return
             if asset_sell_quantity is None:
                 asset_sell_quantity = self.tqqq_balance / 2
             elif asset_sell_quantity > self.tqqq_balance:
@@ -233,7 +242,7 @@ class Bot:
         '''
         self.set_all()
         self.get_trade_decision()
-        self.trade()
+        self.trade(trade_dec='buy')
 
     def trader_loop(self, days=7) -> None:
         '''

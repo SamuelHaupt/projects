@@ -1,7 +1,4 @@
-import flask
 from bot import Bot
-
-
 from flask import Flask
 
 class AiTraderApp:
