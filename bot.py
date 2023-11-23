@@ -9,8 +9,8 @@ from alpaca.trading.requests import MarketOrderRequest
 from datetime import date
 from time import sleep
 
-key = 'PKIS1O7AVH1BVIXTP2Z0'
-secret_key = 'KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE'
+key = ''
+secret_key = ''
 
 
 class Bot:
