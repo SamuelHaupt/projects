@@ -6,8 +6,12 @@ import alpaca_trade_api as tradeapi
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
-from datetime import date
+from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.requests import StockBarsRequest
+from alpaca.data.timeframe import TimeFrame
+from datetime import date, datetime
 from time import sleep
+from pytz import timezone
 
 key = ''
 secret_key = ''
@@ -25,6 +29,8 @@ class Bot:
         self.trading_client = TradingClient(key, secret_key, paper=paper_trade)
         self.rest_client = tradeapi.REST(key, secret_key, 
                                          base_url='https://paper-api.alpaca.markets')
+        self.stock_historical_data_client = StockHistoricalDataClient(
+            key, secret_key)
         self.account = self.trading_client.get_account()
         self.target_asset = None
         self.tqqq_balance = None
@@ -34,6 +40,11 @@ class Bot:
         self.asset_price = None
 
         self.trade_decision = None
+        self.trade_history = {}
+        self.asset_monthly_history = []
+        self.asset_quarter_history = []
+        self.cont_trade = False
+
 
     ########################################################
     # SETTERS
@@ -88,6 +99,40 @@ class Bot:
         '''
         self.account_balance = float(self.account.cash)
 
+    def set_asset_monthly_history(self) -> None:
+        '''
+        Function gets the monthly history of the asset.
+        '''
+        self.asset_monthly_history = []
+        end_date = datetime.now(timezone('UTC')) - pd.Timedelta(days=1)
+        start_date = end_date - pd.Timedelta(days=30)
+        request_params = StockBarsRequest(
+            symbol_or_symbols=self.symbol,
+            timeframe=TimeFrame.Day,
+            start=start_date,
+            end=end_date
+        )
+        bars = self.stock_historical_data_client.get_stock_bars(request_params)
+        for bar in bars:
+            self.asset_monthly_history.append(bar.close)
+
+    def set_asset_quarter_history(self) -> None:
+        '''
+        Function gets the monthly history of the asset.
+        '''
+        self.asset_monthly_history = []
+        end_date = datetime.now(timezone('UTC')) - pd.Timedelta(days=1)
+        start_date = end_date - pd.Timedelta(days=90)
+        request_params = StockBarsRequest(
+            symbol_or_symbols=self.symbol,
+            timeframe=TimeFrame.Day,
+            start=start_date,
+            end=end_date
+        )
+        bars = self.stock_historical_data_client.get_stock_bars(request_params)
+        for bar in bars:
+            self.asset_quarter_history.append(bar.close)
+
     def set_all(self) -> None:
         '''
         Function sets all account variables.
@@ -102,6 +147,9 @@ class Bot:
             self.set_target_asset()
             self.set_asset_balance()
         self.set_account_balance()
+        self.set_asset_monthly_history()
+        self.set_asset_quarter_history()
+    
 
     ########################################################
     # GETTERS
@@ -134,7 +182,7 @@ class Bot:
         Function gets the balance of a specific asset.
         '''
         if self.target_asset is None:
-            self.set_target_asset()
+            return 0
         return self.tqqq_balance
 
     def get_asset_price(self) -> float:
@@ -148,6 +196,26 @@ class Bot:
         Function gets the trade decision.
         '''
         return self.trade_decision
+    
+    def get_monthly_history(self) -> list:
+        '''
+        Function gets the monthly history of the asset.
+        '''
+        return self.asset_monthly_history
+    
+    def get_quarter_history(self) -> list:
+        '''
+        Function gets the monthly history of the asset.
+        '''
+        return self.asset_quarter_history
+    
+    def get_trade_history(self) -> dict:
+        '''
+        Function gets the trade history.
+        '''
+        return self.trade_history
+    
+    
 
     ########################################################
     def set_trade_decision(self) -> str:
@@ -162,9 +230,8 @@ class Bot:
         model = RecurrentPPO.load(self.model_path)
         data_processor = DataProcessor()
 
-        start_date = '2010-01-01'
+        start_date = date.today() - pd.Timedelta(days=1000)
         stop_date = date.today() - pd.Timedelta(days=1)
-        # stop_date = '2020-01-01'
 
         tqqq = data_processor.download_data_df_from_yf(
             self.symbol, start_date, stop_date)
@@ -175,7 +242,6 @@ class Bot:
             initial_balance=self.account_balance)
 
         observation = trading_env._get_obs()
-        # print(observation)
 
         # get action from the model
         action, lstm_states = model.predict(observation)
@@ -214,6 +280,7 @@ class Bot:
             )
             self.trading_client.submit_order(market_order_data)
             print(f"Bought {asset_buy_quantity} in {self.symbol}")
+            self.trade_history[str(date.today())+'buy'] = asset_buy_quantity
 
         elif trade_dec == 'sell':
             if self.tqqq_balance is None:
@@ -232,9 +299,11 @@ class Bot:
             )
             self.trading_client.submit_order(market_order_data)
             print(f"Sold {asset_sell_quantity} in {self.symbol}")
+            self.trade_history[str(date.today())+'sell'] = asset_sell_quantity
 
         else:
             print('Holding position')
+            self.trade_history[str(date.today())+'hold'] = 0
 
     def trader(self) -> None:
         '''
@@ -242,15 +311,15 @@ class Bot:
         '''
         self.set_all()
         self.get_trade_decision()
-        self.trade(trade_dec='buy')
+        self.trade()
 
-    def trader_loop(self, days=7) -> None:
+    def continuous_trade_test(self, days=7) -> None:
         '''
         Function to perform multiple trades
         '''
-        while True:
+        while not self.stop_event.is_set():
             self.trader()
-            sleep(days * 24 * 60 * 60)
+            self.stop_event.wait(days * 24 * 60 * 60)
 
 
 def main():
