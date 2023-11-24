@@ -1,5 +1,5 @@
 from bot import Bot
-from flask import Flask
+from flask import Flask, jsonify
 from threading import Thread, Event
 import json
 
