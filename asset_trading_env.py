@@ -89,8 +89,8 @@ class AssetTradingEnv(gym.Env):
 
         total_reward = self.history_info_obj.get_step_and_col(
             self._step-1, 'total_reward')
-        step_reward = self.calc_reward(portfolio_balance)
-        total_reward += risk_value + step_reward 
+        step_reward = self.calc_reward(portfolio_balance, trade_duration)
+        total_reward += risk_value + step_reward
         # print("Signal", signal,
         #       "Risk:", risk_value,
         #       "Step Reward:", step_reward,
@@ -211,13 +211,14 @@ class AssetTradingEnv(gym.Env):
         return self.history_info_obj.get_step_and_col(self._step,
                                                       'step_reward')
 
-    def calc_reward(self, p_current: float) -> float:
+    def calc_reward(self, p_current: float, trade_duration: int) -> float:
         """
         Function for calculating reward
 
         Args:
-            p_current: current step
-
+            p_current: Current Portfolio Value
+            trade_duration: Trade Duration Length
+            day_gain: Used to calculate the single day gain
         Returns:
             Reward for given step
         """
@@ -232,13 +233,20 @@ class AssetTradingEnv(gym.Env):
         # random.seed(42)
         # reward = random.randrange(-100, 100)/100
 
+        # print("Standard Deviation:", self.standard_deviation_reward(p_current))
+        # print("ATR:", self.atr_reward_reward(p_current))
+
         # Risk Analysis
         self.risk_data.update_risk_data(p_current)
         risk_analysis = self.risk_data.run_risk_analysis(p_current)
         risk_value = risk_analysis["risk_reward"]
 
+        # Calculate trade reward
+        day_trade_reward = self.trade_reward(p_current)
+
         # need to update when other reward functions get added
-        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current) + round(risk_value)
+        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current) + \
+        round(risk_value) + day_trade_reward
 
     def atr_reward_reward(self, p_current: float) -> float:
         """
@@ -334,9 +342,27 @@ class AssetTradingEnv(gym.Env):
         #print(reward)
         return reward
 
-    def calc_risk(self):
-        pass
-    
+    def trade_reward(self, portfolio_value: float) -> float:
+        """
+        reward = percent ^ (2/trade_duration)
+        :param portfolio_value:
+        :return:
+        """
+
+        REWARD_FACTOR = 1
+
+        # Calculate
+        prior_portfolio_value = self.history_info_obj.get_step_and_col(self._step - 1, 'portfolio_balance')
+        percent = ((portfolio_value / prior_portfolio_value) - 1) * 100
+
+        # Used to calculate the days reward
+        trade_reward = (abs(percent) ** 2)
+
+        if percent < 0:
+            return -trade_reward
+
+        return trade_reward
+
     def create_csv(self, file_path, headers):
         model_dir = './results/'
         os.makedirs(model_dir, exist_ok=True)
@@ -349,6 +375,7 @@ class AssetTradingEnv(gym.Env):
         with open('./results/'+file_path, 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(data)
+
 
 class HistoryInfo():
     def __init__(self, extras_cols: dict, extras_array: np.array) -> None:
