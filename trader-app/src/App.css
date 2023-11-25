@@ -320,3 +320,11 @@ button:active {
   padding: 0;
   color: rgb(165, 165, 165);
 }
+
+.status-active {
+  color: green;
+}
+
+.status-stopped {
+  color: red;
+}
