@@ -42,7 +42,7 @@ function SideBottom() {
     };
 
     const handleContinuousClick = () => {
-        axios.get(`http://localhost:5000/start_trading?days=${days}`)
+        axios.get('http://localhost:5000/start_trading?days=' + days)
             .then(response => {
                 if (response.data === 'Success') {
                     console.log('Trade started successfully');
