@@ -18,8 +18,8 @@ function App() {
         <section className='graph-info'>
           <Graphs/>
           <Info/>
-          <ManualTrade/>
         </section>
+        <ManualTrade/>
       </section>
       <aside className='sidebar'>
         <SideTop/>

@@ -1,3 +1,7 @@
+:root {
+  --main-yl: #f5d100;
+}
+
 body, html {
   overflow: auto;
   height: 100vh;
@@ -11,17 +15,17 @@ body, html {
 }
 
 .container {
-  height: 100%;
+  height: 100vh;
+  width: 100vw;
   display: grid;
-  grid-template-rows: repeat(9, 1fr) 0.5fr;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: 1fr 7fr 1fr;
+  grid-template-columns: 1fr 7fr;
   gap: 5px;
   row-gap: 0;
   overflow: hidden;
   box-sizing: border-box;
   /* grid-template-rows: repeat(10, minmax(100px, 1fr));
   grid-template-columns: repeat(10, minmax(100px, 1fr)); */
-
 }
 
 *, *::before, *::after {
@@ -30,7 +34,7 @@ body, html {
 
 .header {
   color: black;
-  grid-column: 1 / 11;
+  grid-column: 1 / 4;
   grid-row: 1;
   display: flex;
   flex-direction: row;
@@ -42,7 +46,8 @@ body, html {
 .sidebar {
   display: flex;
   flex-direction: column;
-  grid-row: 2 / 10;
+  grid-row: 2/3;
+  grid-column: 1 ;
   min-width: 150px;
   overflow-y: auto;
 }
@@ -52,58 +57,37 @@ body, html {
 }
 
 .header, .sidebar {
-  background-color: #f5d100;
+  background-color: var(--main-yl);
 }
 
 
 .content {
-  grid-row: 2 / 10;
-  grid-column: 2 / 11;
+  grid-row: 2 / 3;
+  grid-column: 2 / 3;
   display: grid;
-  grid-template-rows: repeat(10, 1fr);
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: 3fr 1fr;
+  grid-template-columns: 1fr;
   padding: 10px;
   overflow: auto;
 }
 
-.footer {
-  background-color: black;
-  display: flex;
-  flex-direction: column;
-  color: white;
-  grid-row: 10;
-  gap: calc(10% - 0.005vh);
-  grid-column: 1 / 11;
-  align-items: center;
-  text-align: center;
-  justify-content: center;
-  padding: 13px;
-}
-
-.footer > a {
-  text-decoration: none;
-  color: white;
-  padding: 0;
-}
-
-
-.footer p {
-  margin: 0;
-  padding: 0;
-  color: rgb(165, 165, 165);
-}
-
-.graphs-info {
-  grid-row: 1 / 7;
-  grid-column: 1 / 11;
+.graph-info {
+  grid-row: 1;
   display: grid;
-  grid-template-rows: 1fr 0.4fr;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   text-align: center;
   align-items: center;
 }
 
+.graph-section {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  height: 100%;
+}
 
 #graph1 {
   grid-row: 1;
@@ -116,14 +100,27 @@ body, html {
 }
 
 .graphs {
-  margin: 30px;
+  margin: 20px;
   box-shadow: 0px 5px 5px 0px #000000, 0px -5px 5px 0px #000000;
-  width: 60%;
-  height: 80%;
+  width: 70%;
+  height: 70%;
   align-self: center;
   justify-self: center;
   min-height: 100px;
   min-width: 330px;
+}
+
+.info-section {
+  grid-row: 2;
+  grid-column: 1;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  text-align: center;
+  align-items: center;
+  height: 100%;
+
 }
 
 .info {
@@ -150,13 +147,12 @@ body, html {
 
 
 .manualtrade {
-  grid-row: 8 / 11;
-  grid-column: 1 / 11;
+  grid-row: 2;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  background-color:  #f5d100;
+  background-color:  var(--main-yl);
   border-radius: 10px;
   padding-left: 40px;
   padding-right: 40px;
@@ -264,7 +260,7 @@ button:active {
 }
 
 
-.sidebar > div {
+.sidebar > section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -275,7 +271,7 @@ button:active {
   margin: 10px;
   font-weight: bold;
   font-size: max(1vw, 14px);
-  background-color: #f5d100;
+  background-color: var(--main-yl);
 }
 
 #days-input, #sell-input, #buy-input{
@@ -287,7 +283,7 @@ button:active {
   border-radius: 10px;
   padding: 10px;
   font-weight: bold;
-  background-color: #f5d100;
+  background-color: var(--main-yl);
   -webkit-appearance: none;
   -moz-appearance: textfield;
 }
@@ -296,4 +292,31 @@ button:active {
 #days-input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.footer {
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  grid-row: 3;
+  gap: calc(10% - 0.005vh);
+  grid-column: 1 / 11;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 13px;
+}
+
+.footer > a {
+  text-decoration: none;
+  color: white;
+  padding: 0;
+}
+
+
+.footer p {
+  margin: 0;
+  padding: 0;
+  color: rgb(165, 165, 165);
 }

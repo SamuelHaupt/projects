@@ -264,7 +264,6 @@ button:active {
 .sidebar {
     display: grid;
     grid-template-rows: 1fr 1fr;
-
 }
 
 
