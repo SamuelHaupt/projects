@@ -1,5 +1,5 @@
 from bot import Bot
-from flask import Flask
+from flask import Flask, jsonify
 from threading import Thread, Event
 import json
 
@@ -34,71 +34,74 @@ class TradingApp(AiTraderApp):
 
         @self.app.route('/get_balance')
         def get_balance():
-            return str(self.bot.get_account_balance())
+            balance = self.bot.get_account_balance()
+            return jsonify(({ 'balance': balance }))
         
         @self.app.route('/get_buying_power')
         def get_buying_power():
-            return str(self.bot.get_buying_power())
+            buying_power = self.bot.get_buying_power()
+            return jsonify(({ 'buying_power': buying_power }))
         
         @self.app.route('/get_all_assets')
         def get_all_assets():
-            return str(self.bot.get_all_assets())
+            all_assets = self.bot.get_all_assets()
+            return jsonify(({ 'all_assets': all_assets }))
         
         @self.app.route('/get_target_asset')
         def get_target_asset():
-            return str(self.bot.get_target_asset())
+            target_asset = self.bot.get_target_asset()
+            return jsonify(({ 'target_asset': target_asset }))
         
         @self.app.route('/get_asset_balance')
         def get_asset_balance():
-            return str(self.bot.get_asset_balance())
-        
+            asset_balance = self.bot.get_asset_balance()
+            return jsonify(({ 'asset_balance': asset_balance }))
+
         @self.app.route('/get_asset_price')
         def get_asset_price():
-            return str(self.bot.get_asset_price())
+            asset_price = self.bot.get_asset_price()
+            return jsonify(({ 'asset_price': asset_price }))
         
         @self.app.route('/get_trade_decision')
         def get_trade_decision():
-            return str(self.bot.get_trade_decision())
+            trade_decision = self.bot.get_trade_decision()
+            return jsonify(({ 'trade_decision': trade_decision }))
         
         @self.app.route('/auto_trade')
         def trade():
             self.bot.trade()
-            return "Trade Successful"
+            return "Success"
         
         @self.app.route('/sell_trade/<int:quantity>')
         def sell_trade(quantity):
             self.bot.sell_trade(asset_sell_quantity=quantity, trade_decision='sell')
-            return "Sell Successful"
+            return "Success"
         
         @self.app.route('/buy_trade/<int:quantity>')
         def buy_trade(quantity):
             self.bot.buy_trade(asset_buy_quantity=quantity, trade_decision='buy')
-            return "Buy Successful"
+            return "Success"
         
         @self.app.route('/stop_trade')
         def stop_trade():
             self.bot.stop_trade()
-            return "Trade Stopped"
-        
-        @self.app.route('/get_trade_status')
-        def get_trade_status():
-            return str(self.bot.get_trade_status())
+            return "Stopped"
         
         @self.app.route('/get_trade_history')
         def get_trade_history():
-            return str(self.bot.get_trade_history())
-        
-        @self.app.route('/get_trade_history')
-        def get_trade_history():
-            return str(self.bot.get_trade_history())
+            trade_history = self.bot.get_trade_history()
+            return jsonify(({ 'trade_history': trade_history }))
         
         @self.app.route('/get_monthly_history')
         def get_monthly_history():
-            return str(self.bot.get_monthly_history())
+            montkly_history = self.bot.get_monthly_history()
+            return jsonify(({ 'monthly_history': montkly_history }))
+
         
         @self.app.route('/get_quarter_history')
         def get_quarter_history():
-            return str(self.bot.get_quarter_history())
+            quarter_history = self.bot.get_quarter_history()
+            return jsonify(({ 'quarter_history': quarter_history }))
         
         @app.route('/start_trading/<int:days>')
         def start_trading(days):
