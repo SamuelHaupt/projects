@@ -94,8 +94,8 @@ class TradingApp(AiTraderApp):
         
         @self.app.route('/get_monthly_history')
         def get_monthly_history():
-            montkly_history = self.bot.get_monthly_history()
-            return jsonify(({ 'monthly_history': montkly_history }))
+            monthly_history = self.bot.get_monthly_history()
+            return jsonify(({ 'monthly_history': monthly_history }))
 
         
         @self.app.route('/get_quarter_history')
