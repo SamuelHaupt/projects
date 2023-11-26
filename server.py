@@ -1,12 +1,15 @@
 from bot import Bot
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 from threading import Thread, Event
 import json
+from datetime import datetime, timedelta
 
 
 class AiTraderApp:
     def __init__(self):
         self.app = Flask(__name__)
+        CORS(self.app, resources={r"/*": {"origins": "*"}})
         self.setup_routes()
 
     def setup_routes(self):
@@ -21,19 +24,24 @@ class AiTraderApp:
 class TradingApp(AiTraderApp):
     def __init__(self, bot):
         super().__init__()
-        self.bot = bot()
+        self.bot = bot
         self.trade_stop_event = Event()
+        self.next_trade = 'N/A'
+        bot.set_all()
+        bot.get_trade_decision()
+
 
     def continuous_trade(self,days=7):
         while not self.trade_stop_event.is_set():
             self.bot.trader()
+            self.next_trade = (datetime.now() + timedelta(days)).strftime("%Y-%m-%d")
             self.trade_stop_event.wait(days * 24 * 60 * 60)
 
     def setup_routes(self):
         super().setup_routes()
 
-        @self.app.route('/get_balance')
-        def get_balance():
+        @self.app.route('/get_account_balance')
+        def get_account_balance():
             balance = self.bot.get_account_balance()
             return jsonify(({ 'balance': balance }))
         
@@ -65,14 +73,18 @@ class TradingApp(AiTraderApp):
         @self.app.route('/get_trade_decision')
         def get_trade_decision():
             trade_decision = self.bot.get_trade_decision()
+            self.trade_dec = trade_decision
+            print(str(trade_decision) + "55555")
             return jsonify(({ 'trade_decision': trade_decision }))
         
         @self.app.route('/auto_trade')
         def trade():
+            
             self.bot.trade()
             return "Success"
         
         @self.app.route('/sell_trade')
+        @cross_origin()
         def sell_trade(quantity):
             quantity = request.args.get('quantity')
             self.bot.sell_trade(asset_sell_quantity=quantity, trade_decision='sell')
@@ -89,10 +101,10 @@ class TradingApp(AiTraderApp):
             self.bot.stop_trade()
             return "Stopped"
         
-        @self.app.route('/get_trade_history')
-        def get_trade_history():
-            trade_history = self.bot.get_trade_history()
-            return jsonify(({ 'trade_history': trade_history }))
+        @self.app.route('/get_latest_trades')
+        def get_latest_trades():
+            latest_trades = self.bot.get_trade_history()
+            return jsonify(({ 'latest_trades': latest_trades }))
         
         @self.app.route('/get_monthly_history')
         def get_monthly_history():
@@ -100,7 +112,7 @@ class TradingApp(AiTraderApp):
             return jsonify(({ 'monthly_history': montkly_history }))
 
         
-        @self.app.route('/get_quarter_history')
+        @self.app.route('/get_quarterly_history')
         def get_quarter_history():
             quarter_history = self.bot.get_quarter_history()
             return jsonify(({ 'quarter_history': quarter_history }))
@@ -118,15 +130,18 @@ class TradingApp(AiTraderApp):
             self.trade_stop_event.set()
             return "Trading stopped"
         
-        @self.app.route('/get_trading_status')
-        def get_trading_status():
+        @self.app.route('/get_trade_status')
+        def get_trade_status():
             return str(not self.trade_stop_event.is_set())
         
-
         @self.app.route('/get_total_value')
         def get_total_value():
             total_value = self.bot.get_total_value()
             return jsonify(({ 'total_value': total_value }))
+        
+        @self.app.route('/get_next_trade_date')
+        def get_next_trade_date():
+            return self.next_trade
         
 
 if __name__ == '__main__':

@@ -150,6 +150,7 @@ class Bot:
         self.set_account_balance()
         self.set_asset_monthly_history()
         self.set_asset_quarter_history()
+        self.set_trade_decision()
     
 
     ########################################################
@@ -196,6 +197,7 @@ class Bot:
         '''
         Function gets the trade decision.
         '''
+        self.set_trade_decision()
         return self.trade_decision
     
     def get_monthly_history(self) -> list:
