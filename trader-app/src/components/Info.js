@@ -4,7 +4,7 @@ function Info() {
   const [buyingPower, setBuyingPower] = useState(0);
   const [assetPrice, setAssetPrice] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
-  const [latestTrades, setlatestTrades] = useState(0);
+  const [lastTrade, setLastTrade] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:5000/get_buying_power')
@@ -41,13 +41,16 @@ function Info() {
   useEffect(() => {
     axios.get('http://localhost:5000/get_latest_trades')
       .then(response => {
-        if (response.data && response.data.last_trade !== undefined) {
-          setLastTrade(response.data.latest_trades);
+        if (response.data && response.data.latest_trades) {
+          const trades = response.data.latest_trades;
+          const formattedTrades = Object.entries(trades).map(([date, tradeType]) => `${date}: ${tradeType}`);
+          setLastTrade(formattedTrades);
         }
       })
       .catch(error => console.error('Error fetching latest_trades:', error));
-  }
-  , []);
+  }, []);
+
+  const tradeDisplay = lastTrade.join(', ');
 
 
   return (
@@ -62,7 +65,7 @@ function Info() {
             <p>Total Portfolio</p>
             <p>{totalValue}</p>
             <p>Latest Trades</p>
-            <p>{latestTrades}</p>
+            <p>{tradeDisplay}</p>
         </div>
     </section>
   );

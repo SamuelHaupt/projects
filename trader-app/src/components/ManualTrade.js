@@ -63,10 +63,10 @@ function ManualTrade() {
                 <input type="number" id="sell-input" value={sellAmount} onChange={handleSellAmountChange}></input>
             </div>
             <div id="buy-button-div">
-                <button id="buybutton">Buy</button>
+                <button id="buybutton" onClick={handleBuyClick}>Buy</button>
             </div>
             <div id="sell-button-div">
-                <button id="sellbutton">Sell</button>
+                <button id="sellbutton" onClick={handleSellClick}>Sell</button>
             </div>
         </div>
     </section>
