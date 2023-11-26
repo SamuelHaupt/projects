@@ -12,21 +12,21 @@ function Graphs() {
             .then(response => {
                 if (response.data && response.data.monthly_history) {
                     const history = response.data.monthly_history;
-                    const labels = history.map(item => item.date); 
-                    const data = history.map(item => item.price); 
+                    const labels = Object.keys(history).map(key => new Date(key).toLocaleDateString()); 
+                    const data = Object.values(history); 
                     setMonthlyHistory({ labels, data });
                 }
             })
             .catch(error => console.error('Error fetching monthly history:', error));
     }, []);
-
+    
     useEffect(() => {
         axios.get('http://localhost:5000/get_quarterly_history')
             .then(response => {
                 if (response.data && response.data.quarterly_history) {
                     const history = response.data.quarterly_history;
-                    const labels = history.map(item => item.date); 
-                    const data = history.map(item => item.price); 
+                    const labels = Object.keys(history).map(key => new Date(key).toLocaleDateString()); 
+                    const data = Object.values(history); 
                     setQuarterlyHistory({ labels, data });
                 }
             })
