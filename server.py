@@ -1,5 +1,5 @@
 from bot import Bot
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from threading import Thread, Event
 import json
 
@@ -72,13 +72,15 @@ class TradingApp(AiTraderApp):
             self.bot.trade()
             return "Success"
         
-        @self.app.route('/sell_trade/<int:quantity>')
+        @self.app.route('/sell_trade')
         def sell_trade(quantity):
+            quantity = request.args.get('quantity')
             self.bot.sell_trade(asset_sell_quantity=quantity, trade_decision='sell')
             return "Success"
         
-        @self.app.route('/buy_trade/<int:quantity>')
+        @self.app.route('/buy_trade')
         def buy_trade(quantity):
+            quantity = request.args.get('quantity')
             self.bot.buy_trade(asset_buy_quantity=quantity, trade_decision='buy')
             return "Success"
         
@@ -103,8 +105,9 @@ class TradingApp(AiTraderApp):
             quarter_history = self.bot.get_quarter_history()
             return jsonify(({ 'quarter_history': quarter_history }))
         
-        @app.route('/start_trading/<int:days>')
+        @app.route('/start_trading')
         def start_trading(days):
+            days = request.args.get('days')
             self.trade_stop_event.clear()
             t = Thread(target=self.continuous_trade, args=(days))
             t.start()
@@ -118,6 +121,12 @@ class TradingApp(AiTraderApp):
         @app.route('/get_trading_status')
         def get_trading_status():
             return str(not self.trade_stop_event.is_set())
+        
+
+        @app.route('/get_total_value')
+        def get_total_value():
+            total_value = self.bot.get_total_value()
+            return jsonify(({ 'total_value': total_value }))
         
 
 if __name__ == '__main__':

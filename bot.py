@@ -41,8 +41,8 @@ class Bot:
 
         self.trade_decision = None
         self.trade_history = {}
-        self.asset_monthly_history = []
-        self.asset_quarter_history = []
+        self.asset_monthly_history = {}
+        self.asset_quarter_history = {}
         self.cont_trade = False
 
 
@@ -103,7 +103,7 @@ class Bot:
         '''
         Function gets the monthly history of the asset.
         '''
-        self.asset_monthly_history = []
+        self.asset_monthly_history = {}
         end_date = datetime.now(timezone('UTC')) - pd.Timedelta(days=1)
         start_date = end_date - pd.Timedelta(days=30)
         request_params = StockBarsRequest(
@@ -114,13 +114,13 @@ class Bot:
         )
         bars = self.stock_historical_data_client.get_stock_bars(request_params)
         for bar in bars:
-            self.asset_monthly_history.append(bar.close)
+            self.asset_monthly_history[bar.timestamp] = bar.close
 
     def set_asset_quarter_history(self) -> None:
         '''
         Function gets the monthly history of the asset.
         '''
-        self.asset_monthly_history = []
+        self.asset_monthly_history = {}
         end_date = datetime.now(timezone('UTC')) - pd.Timedelta(days=1)
         start_date = end_date - pd.Timedelta(days=90)
         request_params = StockBarsRequest(
@@ -131,7 +131,7 @@ class Bot:
         )
         bars = self.stock_historical_data_client.get_stock_bars(request_params)
         for bar in bars:
-            self.asset_quarter_history.append(bar.close)
+            self.asset_quarter_history[bar.timestamp] = bar.close
 
     def set_all(self) -> None:
         '''
@@ -214,6 +214,12 @@ class Bot:
         Function gets the trade history.
         '''
         return self.trade_history
+    
+    def get_total_value(self) -> float:
+        '''
+        Function gets the total value of the account.
+        '''
+        return self.account_balance + self.tqqq_balance * self.asset_price
     
     
 
