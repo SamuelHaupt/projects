@@ -21,7 +21,7 @@ class AiTraderApp:
 class TradingApp(AiTraderApp):
     def __init__(self, bot):
         super().__init__()
-        self.bot = bot
+        self.bot = bot()
         self.trade_stop_event = Event()
 
     def continuous_trade(self,days=7):
@@ -105,7 +105,7 @@ class TradingApp(AiTraderApp):
             quarter_history = self.bot.get_quarter_history()
             return jsonify(({ 'quarter_history': quarter_history }))
         
-        @app.route('/start_trading')
+        @self.app.route('/start_trading')
         def start_trading(days):
             days = request.args.get('days')
             self.trade_stop_event.clear()
@@ -113,24 +113,24 @@ class TradingApp(AiTraderApp):
             t.start()
             return "Trading started"
         
-        @app.route('/stop_trading')
+        @self.app.route('/stop_trading')
         def stop_trading():
             self.trade_stop_event.set()
             return "Trading stopped"
         
-        @app.route('/get_trading_status')
+        @self.app.route('/get_trading_status')
         def get_trading_status():
             return str(not self.trade_stop_event.is_set())
         
 
-        @app.route('/get_total_value')
+        @self.app.route('/get_total_value')
         def get_total_value():
             total_value = self.bot.get_total_value()
             return jsonify(({ 'total_value': total_value }))
         
 
 if __name__ == '__main__':
-    my_bot = Bot(secret_key='', key='') 
+    my_bot = Bot(secret_key='KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE', key='PKIS1O7AVH1BVIXTP2Z0') 
     app = TradingApp(my_bot)
     app.run()
 
