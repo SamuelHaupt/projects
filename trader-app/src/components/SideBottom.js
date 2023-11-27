@@ -9,8 +9,8 @@ function SideBottom() {
     useEffect(() => {
         axios.get('http://localhost:5000/get_trade_status')
             .then(response => {
-                if (response.data && response.data.trade_status !== undefined) {
-                    setTradeStatus(response.data.trade_status);
+                if (response.status && response.status !== undefined) {
+                    setTradeStatus(response.data.status);
                 }
             })
             .catch(error => console.error('Error fetching trade status:', error));
@@ -19,8 +19,8 @@ function SideBottom() {
     useEffect(() => {
         axios.get('http://localhost:5000/get_next_trade_date')
             .then(response => {
-                if (response.data && response.data.next_trade_date !== undefined) {
-                    setNextTradeDate(response.data.next_trade_date);
+                if (response.data && response.data.next_trade !== undefined) {
+                    setNextTradeDate(response.data.next_trade);
                 }
             })
             .catch(error => console.error('Error fetching next trade date:', error));
@@ -42,7 +42,7 @@ function SideBottom() {
     };
 
     const handleContinuousClick = () => {
-        axios.get('http://localhost:5000/start_trading?days=' + days)
+        axios.post('http://localhost:5000/start_trading', { days: days })
             .then(response => {
                 if (response.data === 'Success') {
                     console.log('Trade started successfully');

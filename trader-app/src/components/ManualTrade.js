@@ -25,18 +25,22 @@ function ManualTrade() {
     }
 
     const handleBuyClick = () => {
-        axios.post('http://localhost:5000/buy_trade?amount=' + buyAmount)
+        axios.post('http://localhost:5000/buy_trade', { amount: buyAmount })
             .then(response => {
-                if (response.data === 'Success') {
+                if (response.data.status === 'Success') {
+                    let msg = response.data.message;
                     console.log('Buy executed successfully');
-                    alert('Buy executed successfully');
+                    alert(msg);
+                } else {
+                    console.error('Unexpected response:', response.data);
                 }
             })
             .catch(error => console.error('Error executing buy:', error));
     };
+    
 
     const handleSellClick = () => {
-        axios.post('http://127.0.0.1:5000/sell_trade?amount=' + sellAmount)
+        axios.post('http://localhost:5000/sell_trade?amount=' + sellAmount)
             .then(response => {
                 if (response.data === 'Success') {
                     console.log('Sell executed successfully');
