@@ -76,7 +76,7 @@ function SideBottom() {
             <p>Status</p>
             <p id="status" className={getStatusClass()}>{tradeStatus}</p>
         </div>
-        <div cclassNamelass="next-trade-date-container">
+        <div className="next-trade-date-container">
             <p>Next Trade Date</p>
             <p id="next-trade-date">{nextTradeDate}</p>
         </div>

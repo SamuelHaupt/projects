@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 function ManualTrade() {
-    const [suggestedAction, setSuggestedAction] = useState('Buy');
+    const [suggestedAction, setSuggestedAction] = useState('N/A');
     const [buyAmount, setBuyAmount] = useState(1);
     const [sellAmount, setSellAmount] = useState(1);
 
@@ -25,7 +25,7 @@ function ManualTrade() {
     }
 
     const handleBuyClick = () => {
-        axios.get('http://localhost:5000/buy_trade?amount=' + buyAmount)
+        axios.post('http://localhost:5000/buy_trade?amount=' + buyAmount)
             .then(response => {
                 if (response.data === 'Success') {
                     console.log('Buy executed successfully');
@@ -36,7 +36,7 @@ function ManualTrade() {
     };
 
     const handleSellClick = () => {
-        axios.get('http://localhost:5000/sell_trade?amount=' + sellAmount)
+        axios.post('http://127.0.0.1:5000/sell_trade?amount=' + sellAmount)
             .then(response => {
                 if (response.data === 'Success') {
                     console.log('Sell executed successfully');
@@ -47,7 +47,7 @@ function ManualTrade() {
     };
 
     return (
-        <section class="manualtrade">
+        <section className="manualtrade">
         <label id="manuallable">
             <div>Manual Trade</div>
         </label>

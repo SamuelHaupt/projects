@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import axios from 'axios';
 
 function Info() {
   const [buyingPower, setBuyingPower] = useState(0);
@@ -54,14 +55,14 @@ function Info() {
 
 
   return (
-    <section class="info-section">
-        <div class="info" id="info1">
+    <section className="info-section">
+        <div className="info" id="info1">
             <p>Buying Power</p>
             <p>{buyingPower}</p>
             <p>Asset Price</p>
             <p>{assetPrice}</p>
         </div>
-        <div class="info" id="info2">
+        <div className="info" id="info2">
             <p>Total Portfolio</p>
             <p>{totalValue}</p>
             <p>Latest Trades</p>

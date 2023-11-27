@@ -18,8 +18,8 @@ function SideTop() {
     useEffect(() => {
         axios.get('http://localhost:5000/get_account_balance') 
             .then(response => {
-                if (response.data && response.data.account_balance !== undefined) {
-                    setAccountBalance(response.data.account_balance);
+                if (response.data && response.data.balance !== undefined) {
+                    setAccountBalance(response.data.balance);
                 }
             })
             .catch(error => console.error('Error fetching account balance:', error));
