@@ -279,7 +279,7 @@ class Bot:
             elif asset_buy_quantity > (
                     self.account_balance) / self.asset_price:
                 print("Not enough money to buy that much")
-                return
+                return 0
             market_order_data = MarketOrderRequest(
                 symbol=self.symbol,
                 qty=asset_buy_quantity,
@@ -289,7 +289,7 @@ class Bot:
             )
             self.trading_client.submit_order(market_order_data)
             print(f"Bought {asset_buy_quantity} in {self.symbol}")
-            self.trade_history[str(date.today())+'buy'] = asset_buy_quantity
+            self.trade_history['buy'] = asset_buy_quantity
 
         elif trade_dec == 'sell':
             if self.tqqq_balance is None:
@@ -298,7 +298,7 @@ class Bot:
                 asset_sell_quantity = self.tqqq_balance / 2
             elif asset_sell_quantity > self.tqqq_balance:
                 print("Not enough assets to sell that much")
-                return
+                return 0
             market_order_data = MarketOrderRequest(
                 symbol=self.symbol,
                 qty=asset_sell_quantity,
@@ -308,7 +308,7 @@ class Bot:
             )
             self.trading_client.submit_order(market_order_data)
             print(f"Sold {asset_sell_quantity} in {self.symbol}")
-            self.trade_history[str(date.today())+'sell'] = asset_sell_quantity
+            self.trade_history['sell'] = asset_sell_quantity
 
         else:
             print('Holding position')
