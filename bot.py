@@ -16,7 +16,7 @@ from pytz import timezone
 
 class Bot:
     def __init__(self, secret_key, key, paper_trade=True,
-                 model_path="models/20231110194307_ppo_trading_agent"):
+                 model_path="models/20231126160832_ppo_trading_agent"):
         # Bot variables
         self.symbol = 'TQQQ'
         self.model_path = model_path
@@ -346,10 +346,11 @@ class Bot:
         # print(f"Account balance: {self.account_balance}")
         # self.set_asset_price()
         # print(f"Asset price: {self.asset_price}")
-        self.set_asset_monthly_history()
-        print(f"Asset monthly history: {self.asset_monthly_history}")
+        # self.set_asset_monthly_history()
+        # print(f"Asset monthly history: {self.asset_monthly_history}")
         # self.set_asset_quarter_history()
         # print(f"Asset quarter history: {self.asset_quarter_history}")
+        self.set_trade_decision()
 
 
 

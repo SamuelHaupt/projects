@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 class AiTraderApp:
     def __init__(self):
         self.app = Flask(__name__)
-        CORS(self.app, resources={r"/*": {"origins": "*"}})
+        CORS(self.app)
         self.setup_routes()
 
     def setup_routes(self):
@@ -27,9 +27,15 @@ class TradingApp(AiTraderApp):
         self.bot = bot
         self.trade_stop_event = Event()
         self.next_trade = 'N/A'
+        self.trade_dec = self.bot.get_trade_decision()
         bot.set_all()
-        bot.get_trade_decision()
 
+    def get_trade_decision(self):
+        return self.trade_dec
+    
+    def set_trade_decision(self):
+        trade_decision = self.bot.get_trade_decision()
+        self.trade_dec = trade_decision
 
     def continuous_trade(self,days=7):
         while not self.trade_stop_event.is_set():
@@ -72,34 +78,34 @@ class TradingApp(AiTraderApp):
         
         @self.app.route('/get_trade_decision')
         def get_trade_decision():
-            trade_decision = self.bot.get_trade_decision()
-            self.trade_dec = trade_decision
-            print(str(trade_decision) + "55555")
+            trade_decision = self.get_trade_decision()
             return jsonify(({ 'trade_decision': trade_decision }))
         
         @self.app.route('/auto_trade')
         def trade():
-            
-            self.bot.trade()
-            return "Success"
+            self.bot.trade(trade_dec=self.trade_dec)
+            response = jsonify({'message': 'Trade Successful'})
+            return response
         
-        @self.app.route('/sell_trade')
-        @cross_origin()
+        @self.app.route('/sell_trade', methods=['POST'])
         def sell_trade(quantity):
             quantity = request.args.get('quantity')
-            self.bot.sell_trade(asset_sell_quantity=quantity, trade_decision='sell')
-            return "Success"
+            self.bot.trade(asset_sell_quantity=quantity, trade_dec='sell')
+            response = jsonify({'message': 'Sold {} TQQQ'.format(quantity)})
+            return response
         
-        @self.app.route('/buy_trade')
-        def buy_trade(quantity):
+        @self.app.route('/buy_trade', methods=['POST'])
+        def buy_trade():
             quantity = request.args.get('quantity')
-            self.bot.buy_trade(asset_buy_quantity=quantity, trade_decision='buy')
-            return "Success"
-        
+            self.bot.trade(asset_buy_quantity=quantity, trade_dec='buy')
+            response = jsonify({'message': 'Bought {} TQQQ'.format(quantity)})
+            return response
+
         @self.app.route('/stop_trade')
         def stop_trade():
             self.bot.stop_trade()
-            return "Stopped"
+            response = jsonify({'message': 'Trade Stopped'})
+            return response
         
         @self.app.route('/get_latest_trades')
         def get_latest_trades():
@@ -123,16 +129,19 @@ class TradingApp(AiTraderApp):
             self.trade_stop_event.clear()
             t = Thread(target=self.continuous_trade, args=(days))
             t.start()
-            return "Trading started"
+            response = jsonify({'message': 'Trading started'})
+            return response
         
         @self.app.route('/stop_trading')
         def stop_trading():
             self.trade_stop_event.set()
-            return "Trading stopped"
+            response = jsonify({'message': 'Trading stopped'})
+            return response
         
         @self.app.route('/get_trade_status')
         def get_trade_status():
-            return str(not self.trade_stop_event.is_set())
+            status = self.trade_stop_event.is_set()
+            response = jsonify({'status': 'Stopped' if status else 'Active'})
         
         @self.app.route('/get_total_value')
         def get_total_value():
