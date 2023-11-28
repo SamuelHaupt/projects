@@ -44,6 +44,10 @@ function Info() {
       .then(response => {
         if (response.data && response.data.latest_trades) {
           const trades = response.data.latest_trades;
+          if (Object.keys(trades).length === 0) {
+            setLastTrade(['N/A']);
+            return;
+          }
           const formattedTrades = Object.entries(trades).map(([date, tradeType]) => `${date}: ${tradeType}`);
           setLastTrade(formattedTrades);
         }
