@@ -329,3 +329,59 @@ button:active {
 .status-stopped {
   color: red;
 }
+
+#train-output-container {
+  display: grid;
+  grid-template-rows: 1fr 8fr;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.2vh;
+  width: 90%;
+  padding: 10px;
+  margin: 10px;
+  font-weight: bold;
+  font-size: max(1vw, 14px);
+}
+
+#trainside-sec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 50px;
+  width: 80%;
+  padding: 10px;
+  margin: 10px;
+  font-weight: bold;
+  font-size: max(1vw, 14px);
+}
+
+.header > div > ul {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10vw;
+  padding: 10px;
+  margin: 10px;
+  font-weight: bold;
+  font-size: max(1vw, 14px);
+  list-style: none;
+}
+
+.header > div > ul > li > a {
+  text-decoration: none;
+  color: rgb(112, 47, 0);
+}
+
+.header > div > ul > li > a:hover {
+  color: rgb(0, 0, 0);
+}
+
+.header > div > ul > li > a:visited {
+  color: rgb(112, 47, 0);
+}

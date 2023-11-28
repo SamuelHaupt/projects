@@ -1,6 +1,7 @@
 from sb3_contrib import RecurrentPPO
 from data_processor import DataProcessor
 from asset_trading_env import AssetTradingEnv
+from agent_module import PPOAgentModule
 import pandas as pd
 import alpaca_trade_api as tradeapi
 from alpaca.trading.client import TradingClient
@@ -150,7 +151,6 @@ class Bot:
         self.set_account_balance()
         self.set_asset_monthly_history()
         self.set_asset_quarter_history()
-        self.set_trade_decision()
     
 
     ########################################################
@@ -327,6 +327,26 @@ class Bot:
         self.set_all()
         self.get_trade_decision()
         self.trade()
+
+    def trainer(self ,start='2011-06-01', stop='2020-01-01'):
+        dp = DataProcessor()
+        symbol = 'TQQQ'
+        start_date = '2011-01-01'
+        today = str(date.today())
+        stop_date = today
+        tqqq = dp.download_data_df_from_yf(
+            symbol, start_date, stop_date)
+        df = dp.preprocess_data(tqqq)
+        # Reset Index to reference Date and select data from date range
+        df.reset_index(inplace=True)
+        training_df = df[(df['Date'] > start) & (df['Date'] <= stop)]
+
+        #  load training environment
+        training_env = AssetTradingEnv(data_df=training_df)
+
+        # Train model
+        agent = PPOAgentModule(training_env)
+        agent.train(1_000_000)
 
     def continuous_trade_test(self, days=7) -> None:
         '''

@@ -1,11 +1,14 @@
 from bot import Bot
+import trainer
+import sys
+import io
+from contextlib import contextmanager
 import time
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 from threading import Thread, Event
 import json
 from datetime import datetime, timedelta
-
 
 class AiTraderApp:
     def __init__(self):
@@ -21,6 +24,18 @@ class AiTraderApp:
     def run(self):
         self.app.run(debug=True)
 
+class OutputCapture:
+    def __init__(self):
+        self.contents = ''
+
+    def write(self, st):
+        self.contents += st
+
+    def flush(self):
+        pass
+
+output_capture = OutputCapture()
+sys.stdout = output_capture
 
 class TradingApp(AiTraderApp):
     def __init__(self, bot):
@@ -183,6 +198,26 @@ class TradingApp(AiTraderApp):
         def get_next_trade_date():
             response = jsonify({'next_trade': self.next_trade})
             return response
+        
+        @self.app.route('/run_trainer', methods=['POST'])
+        def run_trainer():
+            data = request.json
+            start_date = data['start']
+            stop_date = data['end']
+
+            # new thread so server doesnt slow down
+            def run_trainer_in_thread():
+                self.bot.trainer(start=start_date, stop=stop_date)
+
+            thread = Thread(target=run_trainer_in_thread)
+            thread.start()
+
+            response = jsonify({'status': 'Success'})
+            return response
+  
+        @self.app.route('/get_console_output')
+        def get_console_output():
+            return jsonify({"output": output_capture.contents})
         
 
 if __name__ == '__main__':
