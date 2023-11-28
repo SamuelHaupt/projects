@@ -347,8 +347,8 @@ def main():
     Returns:
         None
     '''
-    key = 'PKIS1O7AVH1BVIXTP2Z0'
-    secret_key = 'KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE'
+    key = ''
+    secret_key = ''
     bot = Bot(secret_key, key)
 
 
