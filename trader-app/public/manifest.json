@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Trader App",
+  "name": "App for trading bot for TQQQ",
   "icons": [
     {
       "src": "favicon.ico",
