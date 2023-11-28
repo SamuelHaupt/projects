@@ -5,7 +5,7 @@ function Info() {
   const [buyingPower, setBuyingPower] = useState(0);
   const [assetPrice, setAssetPrice] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
-  const [lastTrade, setLastTrade] = useState([]);
+  const [lastTrade, setLastTrade] = useState(['N/A']);
 
   useEffect(() => {
     axios.get('http://localhost:5000/get_buying_power')

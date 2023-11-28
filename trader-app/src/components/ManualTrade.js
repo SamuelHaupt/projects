@@ -10,7 +10,8 @@ function ManualTrade() {
         axios.get('http://localhost:5000/get_trade_decision')
             .then(response => {
                 if (response.data && response.data.trade_decision !== undefined) {
-                    setSuggestedAction(response.data.trade_decision);
+                    const tradeDecision = response.data.trade_decision;
+                    setSuggestedAction(tradeDecision.charAt(0).toUpperCase() + tradeDecision.slice(1));
                 }
             })
             .catch(error => console.error('Error fetching suggested action:', error));
@@ -25,6 +26,10 @@ function ManualTrade() {
     }
 
     const handleBuyClick = () => {
+        if (isNaN(buyAmount) || buyAmount <= 0) {
+            alert('Buy amount must be a valid number greater than 0');
+            return;
+        }
         axios.post('http://localhost:5000/buy_trade', { amount: buyAmount })
             .then(response => {
                 if (response.data.status === 'Success') {
@@ -40,15 +45,34 @@ function ManualTrade() {
     
 
     const handleSellClick = () => {
-        axios.post('http://localhost:5000/sell_trade?amount=' + sellAmount)
+        if (isNaN(sellAmount) || sellAmount <= 0) {
+            alert('Sell amount must be a valid number greater than 0');
+            return;
+        }
+        axios.post('http://localhost:5000/sell_trade' ,{ amount: sellAmount})
             .then(response => {
-                if (response.data === 'Success') {
+                if (response.data.status === 'Success') {
                     console.log('Sell executed successfully');
                     alert('Sell executed successfully');
                 }
             })
             .catch(error => console.error('Error executing sell:', error));
     };
+
+    const getTradeDec = () => {
+        switch (suggestedAction) {
+            case 'buy':
+                return 'Buy';
+            case 'sell':
+                return 'Sell';
+            case 'hold':
+                return 'Hold';
+            default:
+                return 'N/A';
+        }
+    };
+
+
 
     return (
         <section className="manualtrade">

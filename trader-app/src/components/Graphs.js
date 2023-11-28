@@ -12,7 +12,7 @@ function Graphs() {
             .then(response => {
                 if (response.data && response.data.monthly_history) {
                     const history = response.data.monthly_history;
-                    const labels = Object.keys(history).map(key => new Date(key).toLocaleDateString()); 
+                    const labels = Object.keys(history).map(key => key.split('-')[2]);
                     const data = Object.values(history); 
                     setMonthlyHistory({ labels, data });
                 }
@@ -23,9 +23,9 @@ function Graphs() {
     useEffect(() => {
         axios.get('http://localhost:5000/get_quarterly_history')
             .then(response => {
-                if (response.data && response.data.quarterly_history) {
-                    const history = response.data.quarterly_history;
-                    const labels = Object.keys(history).map(key => new Date(key).toLocaleDateString()); 
+                if (response.data && response.data.quarter_history) {
+                    const history = response.data.quarter_history;
+                    const labels = Object.keys(history).map(key => key.split('-')[1]);
                     const data = Object.values(history); 
                     setQuarterlyHistory({ labels, data });
                 }
@@ -60,13 +60,17 @@ function Graphs() {
         ],
     };
 
+    const options = {
+        maintainAspectRatio: false,
+    };
+
     return (
         <section className="graph-section">
             <figure className="graphs" id="graph1">
-                <Line data={data} />
+                <Line data={data} options={options} />            
             </figure>
             <figure className="graphs" id="graph2">
-                <Line data={data2} />
+                <Line data={data2} options={options} />           
             </figure>
         </section>
     );

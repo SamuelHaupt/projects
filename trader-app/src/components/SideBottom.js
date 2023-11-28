@@ -33,24 +33,50 @@ function SideBottom() {
     const handleStopClick = () => {
         axios.get('http://localhost:5000/stop_trading')
             .then(response => {
-                if (response.data === 'Success') {
+                if (response.data.status === 'Success') {
                     console.log('Trade stopped successfully');
                     alert('Trade stopped successfully');
+                    setTradeStatus('Stopped');
+                    setNextTradeDate('N/A');
                 }
             })
             .catch(error => console.error('Error stopping trade:', error));
     };
 
     const handleContinuousClick = () => {
+        if (isNaN(days) || days <= 0) {
+            alert('Days must be a valid number greater than 0');
+            return;
+        }
         axios.post('http://localhost:5000/start_trading', { days: days })
             .then(response => {
-                if (response.data === 'Success') {
+                if (response.data.status === 'Success') {
                     console.log('Trade started successfully');
                     alert('Trade started successfully');
+    
+                    setTimeout(() => {
+                        axios.get('http://localhost:5000/get_trade_status')
+                            .then(response => {
+                                if (response.data && response.data.status !== undefined) {
+                                    setTradeStatus(response.data.status);
+                                }
+                            })
+                            .catch(error => console.error('Error fetching trade status:', error));
+    
+                        axios.get('http://localhost:5000/get_next_trade_date')
+                            .then(response => {
+                                if (response.data && response.data.next_trade !== undefined) {
+                                    setNextTradeDate(response.data.next_trade);
+                                }
+                            })
+                            .catch(error => console.error('Error fetching next trade date:', error));
+                    }, 2000);
                 }
             })
             .catch(error => console.error('Error starting trade:', error));
     };
+    
+    
 
     const getStatusClass = () => {
         switch (tradeStatus) {
