@@ -1,4 +1,5 @@
 from bot import Bot
+import time
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 from threading import Thread, Event
@@ -29,7 +30,14 @@ class TradingApp(AiTraderApp):
         self.trading_state = False
         self.next_trade = 'N/A'
         self.trade_dec = self.bot.get_trade_decision()
-        bot.set_all()
+        self.bot.set_all()
+        self.set_all_thread = Thread(target=self.run_set_all_periodically)
+        self.set_all_thread.start()
+
+    def run_set_all_periodically(self):
+        while True:
+            self.bot.set_all()
+            time.sleep(43200)
 
     def get_trade_decision(self):
         return self.trade_dec
