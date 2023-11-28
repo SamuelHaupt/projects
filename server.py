@@ -90,7 +90,7 @@ class TradingApp(AiTraderApp):
         @self.app.route('/auto_trade')
         def trade():
             self.bot.trade(trade_dec=self.trade_dec)
-            response = jsonify({'message': 'Trade Successful'})
+            response = jsonify({'status': 'Success'})
             return response
         
         @self.app.route('/sell_trade', methods=['POST'])
@@ -119,7 +119,7 @@ class TradingApp(AiTraderApp):
         @self.app.route('/stop_trade')
         def stop_trade():
             self.bot.stop_trade()
-            response = jsonify({'message': 'Trade Stopped'})
+            response = jsonify({'status': 'Success'})
             return response
         
         @self.app.route('/get_latest_trades')
@@ -129,12 +129,14 @@ class TradingApp(AiTraderApp):
         
         @self.app.route('/get_monthly_history')
         def get_monthly_history():
-            montkly_history = self.bot.get_monthly_history()
-            return jsonify(({ 'monthly_history': montkly_history }))
+            self.bot.set_asset_monthly_history()
+            monthly_history = self.bot.get_monthly_history()
+            return jsonify(({ 'monthly_history': monthly_history }))
 
         
         @self.app.route('/get_quarterly_history')
         def get_quarter_history():
+            self.bot.set_asset_quarter_history()
             quarter_history = self.bot.get_quarter_history()
             return jsonify(({ 'quarter_history': quarter_history }))
         
@@ -147,14 +149,14 @@ class TradingApp(AiTraderApp):
             t = Thread(target=self.continuous_trade, args=(days,))
             t.start()
             print(self.trade_stop_event.is_set())
-            response = jsonify({'data': 'Success'})
+            response = jsonify({'status': 'Success'})
             return response
         
         @self.app.route('/stop_trading')
         def stop_trading():
             self.trade_stop_event.set()
             self.trading_state = False
-            response = jsonify({'message': 'Trading stopped',})
+            response = jsonify({'status': 'Success',})
             return response
         
         @self.app.route('/get_trade_status')

@@ -132,7 +132,7 @@ class Bot:
         for bar in bars['TQQQ']:
             date_key = bar.timestamp.date()
             formatted_date = date_key.strftime('%Y-%m-%d')
-            self.asset_monthly_history[formatted_date] = bar.close
+            self.asset_quarter_history[formatted_date] = bar.close
 
     def set_all(self) -> None:
         '''
@@ -289,7 +289,9 @@ class Bot:
             )
             self.trading_client.submit_order(market_order_data)
             print(f"Bought {asset_buy_quantity} in {self.symbol}")
-            self.trade_history['buy'] = asset_buy_quantity
+            self.trade_history = {}
+            rounded_buy_quantity = round(asset_buy_quantity, 2)
+            self.trade_history['Buy'] = rounded_buy_quantity
 
         elif trade_dec == 'sell':
             if self.tqqq_balance is None:
@@ -308,11 +310,15 @@ class Bot:
             )
             self.trading_client.submit_order(market_order_data)
             print(f"Sold {asset_sell_quantity} in {self.symbol}")
-            self.trade_history['sell'] = asset_sell_quantity
+            self.trade_history = {}
+            rounded_sell_quantity = round(asset_sell_quantity, 2)
+            self.trade_history['Sell'] = rounded_sell_quantity
+            print(f"Sold {asset_sell_quantity} in {self.symbol}")
 
         else:
             print('Holding position')
-            self.trade_history[str(date.today())+'hold'] = 0
+            self.trade_history = {}
+            self.trade_history['Hold'] = 0
 
     def trader(self) -> None:
         '''
@@ -330,28 +336,6 @@ class Bot:
             self.trader()
             self.stop_event.wait(days * 24 * 60 * 60)
 
-    def test_func(self) -> None:
-        '''
-        Function to test the bot.
-        '''
-        # self.set_buying_power()
-        # print(f"Buying power: {self.buying_power}")
-        # self.set_all_assets()
-        # print(f"All assets: {self.all_assets}")
-        # self.set_target_asset()
-        # print(f"Target asset: {self.target_asset}")
-        # self.set_asset_balance()
-        # print(f"Asset balance: {self.tqqq_balance}")
-        # self.set_account_balance()
-        # print(f"Account balance: {self.account_balance}")
-        # self.set_asset_price()
-        # print(f"Asset price: {self.asset_price}")
-        # self.set_asset_monthly_history()
-        # print(f"Asset monthly history: {self.asset_monthly_history}")
-        # self.set_asset_quarter_history()
-        # print(f"Asset quarter history: {self.asset_quarter_history}")
-        self.set_trade_decision()
-
 
 
 
@@ -366,8 +350,7 @@ def main():
     key = 'PKIS1O7AVH1BVIXTP2Z0'
     secret_key = 'KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE'
     bot = Bot(secret_key, key)
-    bot.test_func()
-    # bot.trader()
+
 
 
 if __name__ == '__main__':
