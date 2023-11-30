@@ -1,10 +1,9 @@
 from bot import Bot
-import trainer
 import sys
 import io
 from contextlib import contextmanager
 import time
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS, cross_origin
 from threading import Thread, Event
 import json
@@ -12,14 +11,14 @@ from datetime import datetime, timedelta
 
 class AiTraderApp:
     def __init__(self):
-        self.app = Flask(__name__)
+        self.app = Flask(__name__, static_folder='build', static_url_path='')
         CORS(self.app)
         self.setup_routes()
 
     def setup_routes(self):
         @self.app.route('/')
         def index():
-            return "Ai Trader App"
+            return send_from_directory(self.app.static_folder, 'index.html')
 
     def run(self):
         self.app.run(debug=True)
