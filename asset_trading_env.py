@@ -245,7 +245,7 @@ class AssetTradingEnv(gym.Env):
         day_trade_reward = self.trade_reward(p_current)
 
         # need to update when other reward functions get added
-        return 0.2*self.standard_deviation_reward(p_current) + 0.8*self.atr_reward_reward(p_current) + \
+        return 0.0*self.standard_deviation_reward(p_current) + 1.0*self.atr_reward_reward(p_current) + \
         round(risk_value) + day_trade_reward
 
     def atr_reward_reward(self, p_current: float) -> float:
@@ -303,40 +303,35 @@ class AssetTradingEnv(gym.Env):
             return reward
 
         # loads an array with previous n days close price and calculate trailing mean and standard deviation
-        for i in range(n_days):
-            trailing_close.append(self.history_info_obj.get_step_and_col(prev_step-i, 'close'))
-            trailing_signals.append(self.history_info_obj.get_step_and_col(prev_step-i, 'signal'))
+        trailing_close = [self.history_info_obj.get_step_and_col(prev_step - i, 'close') for i in range(n_days)]
+        trailing_signals = [self.history_info_obj.get_step_and_col(prev_step - i, 'signal') for i in range(n_days)]
+        trailing_close_series = pd.Series(trailing_close)
+        trailing_ewm = trailing_close_series.ewm(span=n_days, adjust=False).mean().mean()
         trailing_avg = np.mean(trailing_close)
         trailing_std = np.std(trailing_close)
-
-        # punish if agent is buying/holding for extended period price doesn't move
-        # if -1 not in trailing_signals \
-        #     and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg+trailing_std \
-        #     and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg-trailing_std:
-        #     reward -= 50
-        #     print(reward)
-        #     return reward
-
+        
+        # scaler for std deviation threshold
+        k=1
         # reward if bought previously and price swings up
         if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
-            and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+trailing_std:
+            and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_ewm + (k * trailing_ewm.std()):
             reward += 1
             if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
-                and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(2*trailing_std):
+                and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_ewm + (2 * k * trailing_ewm.std()):
                 reward += 10
                 if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == 1 \
-                    and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_avg+(3*trailing_std):
+                    and self.history_info_obj.get_step_and_col(prev_step, "close") > trailing_ewm + (3 * k * trailing_ewm.std()):
                     reward += 100
 
         # punish if bought previously and price swings down
         if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
-            and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-trailing_std:
+            and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_ewm + (k * trailing_ewm.std()):
             reward -= 1
             if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
-                and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(2*trailing_std):
+                and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_ewm + (2 * k * trailing_ewm.std()):
                 reward -= 10
                 if self.history_info_obj.get_step_and_col(prev_step - 1, "signal") == -1 \
-                    and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_avg-(3*trailing_std):
+                    and self.history_info_obj.get_step_and_col(prev_step, "close") < trailing_ewm + (3 * k * trailing_ewm.std()):
                     reward -= 100
 
         #print(reward)

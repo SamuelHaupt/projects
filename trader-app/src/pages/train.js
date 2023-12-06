@@ -5,23 +5,7 @@ import TrainSide from '../components/TrainSide';
 import Footer from '../components/Footer';
 import TrainOutput from '../components/TrainOutput';
 
-function ConsoleOutput() {
-    const [output, setOutput] = useState('');
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            axios.get('http://localhost:5000/get_console_output')
-                 .then(response => {
-                     setOutput(response.data.output);
-                 })
-                 .catch(error => {
-                     console.error('Error fetching data: ', error);
-                 });
-        }, 2000);
-
-        return () => clearInterval(interval);
-    }, []);
-
+const Train = () => {
     return (
         <div className='container'>
             <header className="header">
@@ -38,4 +22,4 @@ function ConsoleOutput() {
     );
 }
 
-export default ConsoleOutput;
+export default Train;
