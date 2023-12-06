@@ -116,3 +116,35 @@ for _ in range(len(preprocessed_df)):
         print(key, ": ", value)
 ```
 
+### Use bot.py
+1. Create an account at [Alpaca](https://alpaca.markets/).
+2. Replace the key and secretkey with values given by Alpaca.
+3. Use the main function to call various methods to interact with the market.
+```py
+def main():
+    '''
+    main function of the bot.
+    '''
+    key = ''
+    secret_key = ''
+    bot = Bot(secret_key, key)
+    bot.trader()
+    bot.trade(asset_buy_quantity=None, trade_dec='buy')
+```
+
+### Use server.py
+1. Create an account at [Alpaca](https://alpaca.markets/).
+2. Replace the key and secretkey with values given by Alpaca.
+3. Run server.py using python. 
+4. Open the link given by server.py in the console window. 
+5. Use the UI to interact with bot.py and Alpaca. 
+```py
+if __name__ == '__main__':
+    my_bot = Bot(secret_key='', key='') 
+    app = TradingApp(my_bot)
+    app.run()
+```
+![UI](https://i.imgur.com/e5zIdhw.png)
+
+
+
