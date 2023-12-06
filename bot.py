@@ -347,16 +347,6 @@ class Bot:
         agent = PPOAgentModule(training_env)
         agent.train(1_000_000)
 
-    def continuous_trade_test(self, days=7) -> None:
-        '''
-        Function to perform multiple trades
-        '''
-        while not self.stop_event.is_set():
-            self.trader()
-            self.stop_event.wait(days * 24 * 60 * 60)
-
-
-
 
 def main():
     '''
@@ -366,14 +356,7 @@ def main():
     Returns:
         None
     '''
-    key = 'PKIS1O7AVH1BVIXTP2Z0'
-    secret_key = 'KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE'
+    key = ''
+    secret_key = ''
     bot = Bot(secret_key, key)
     bot.set_asset_price()
-
-
-
-
-if __name__ == '__main__':
-
-    main()
