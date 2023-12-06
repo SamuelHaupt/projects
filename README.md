@@ -46,16 +46,15 @@ These variables are use to adjust the parameters of the model. Once the model ha
 ```
 
 Once main.py is run, you will see these two options:
-
-'[*********************100%%**********************]'  1 of 1 completed
-
-'[*********************100%%**********************]'  1 of 1 completed
-
+```
+[*********************100%%**********************]  1 of 1 completed
+[*********************100%%**********************]  1 of 1 completed
 1. Train
 2. Test
+```
 
 Choice 1: Train the model on the above parameters.
-
+```
  Using device: cpu
  Training.
  Start Time: 2023-12-06 07:51:54.753794
@@ -64,12 +63,14 @@ Choice 1: Train the model on the above parameters.
  End Time: 2023-12-06 07:52:27.954726
  Training complete.
  Model saved at path: models/20231206075227_ppo_trading_agent
+```
 
 Choice 2: Test the model on the above parameters.
-
+```
 Testing model on testing data.
 |  Market Return:   102.07% |   Portfolio Return:   -25.22% |  Reward: -8128.764280654095
-
+...
+```
 
 ### Use data_processor.py
 
