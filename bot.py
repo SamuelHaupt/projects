@@ -3,10 +3,10 @@ from data_processor import DataProcessor
 from asset_trading_env import AssetTradingEnv
 from agent_module import PPOAgentModule
 import pandas as pd
-import alpaca_trade_api as tradeapi
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
+from alpaca.data.requests import StockLatestTradeRequest
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
@@ -25,8 +25,6 @@ class Bot:
         # Account variables
         self.paper_trade = paper_trade
         self.trading_client = TradingClient(key, secret_key, paper=paper_trade)
-        self.rest_client = tradeapi.REST(key, secret_key, 
-                                         base_url='https://paper-api.alpaca.markets')
         self.stock_historical_data_client = StockHistoricalDataClient(
             key, secret_key)
         self.account = self.trading_client.get_account()
@@ -88,8 +86,9 @@ class Bot:
         Returns:
             Float: current price of TQQQ
         '''
-        last_trade = self.rest_client.get_latest_trade(self.symbol)
-        self.asset_price = float(last_trade.price)
+        request = StockLatestTradeRequest(symbol_or_symbols=self.symbol)
+        asset_data = self.stock_historical_data_client.get_stock_latest_trade(request)
+        self.asset_price = float(asset_data['TQQQ'].price)
 
     def set_account_balance(self) -> float:
         '''
@@ -348,16 +347,6 @@ class Bot:
         agent = PPOAgentModule(training_env)
         agent.train(1_000_000)
 
-    def continuous_trade_test(self, days=7) -> None:
-        '''
-        Function to perform multiple trades
-        '''
-        while not self.stop_event.is_set():
-            self.trader()
-            self.stop_event.wait(days * 24 * 60 * 60)
-
-
-
 
 def main():
     '''
@@ -370,9 +359,4 @@ def main():
     key = ''
     secret_key = ''
     bot = Bot(secret_key, key)
-
-
-
-if __name__ == '__main__':
-
-    main()
+    bot.set_asset_price()
