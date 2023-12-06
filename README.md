@@ -25,6 +25,7 @@ There are 6 variables to adjust to run main.py
  ```
 
 -In tester()
+
 5. start = '2011-06-01' : line 28
 6. stop = '2020-01-01' : line 29   
 ```py
