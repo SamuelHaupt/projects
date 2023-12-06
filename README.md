@@ -10,6 +10,7 @@ There are 6 variables to adjust to run main.py
 ```
 
 -In trainer()
+
 2. start = '2011-06-01' : line 13
 3. stop = '2020-01-01' : line 14
 4. agent.train(1_000_000) : line 25
