@@ -11,7 +11,7 @@ There are 6 variables to adjust to run main.py
 
 -In 'trainer()'
 2. start = '2011-06-01' : line 13
-3. start = '2020-01-01' : line 14
+3. stop = '2020-01-01' : line 14
 4. agent.train(1_000_000) : line 25
     ```py
     def trainer(df: pd.DataFrame):
@@ -25,7 +25,7 @@ There are 6 variables to adjust to run main.py
 
 -In 'tester()'
 5. start = '2011-06-01' : line 28
-6. start = '2020-01-01' : line 29
+6. stop = '2020-01-01' : line 29
 ```py
 def tester(df: pd.DataFrame):
     start = '2020-01-02'
