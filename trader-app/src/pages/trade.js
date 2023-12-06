@@ -9,10 +9,10 @@ import Header from '../components/HeaderS';
  
 const Trade = () => {
     return (
-    <div className='container'>
-      <header className="header">
-        <Header/>
-      </header>
+      <div className='container'>
+        <header className="header">
+          <Header/>
+        </header>
       <section className='content'>
         <section className='graph-info'>
           <Graphs/>

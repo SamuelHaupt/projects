@@ -16,8 +16,9 @@ class AiTraderApp:
         self.setup_routes()
 
     def setup_routes(self):
-        @self.app.route('/')
-        def index():
+        @self.app.route('/', defaults={'path': ''})
+        @self.app.route('/<path:path>')
+        def index(path):
             return send_from_directory(self.app.static_folder, 'index.html')
 
     def run(self):
@@ -220,7 +221,7 @@ class TradingApp(AiTraderApp):
         
 
 if __name__ == '__main__':
-    my_bot = Bot(secret_key='', key='') 
+    my_bot = Bot(secret_key='KcjdBN7YUwdLYxDwhmHLMGeuU44FOG67ASdMp3uE', key='PKIS1O7AVH1BVIXTP2Z0') 
     app = TradingApp(my_bot)
     app.run()
 
