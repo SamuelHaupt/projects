@@ -1,5 +1,8 @@
 # CS467_F2023_CryptoTradingBot
 
+### main.py is the file to run when traing and testing the bot.
+
+
 ### Use data_processor.py
 
 1. Initialize DataProcessor.
