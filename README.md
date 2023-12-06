@@ -13,7 +13,7 @@ There are 6 variables to adjust to run main.py
 2. start = '2011-06-01' : line 13
 3. stop = '2020-01-01' : line 14
 4. agent.train(1_000_000) : line 25
-    ```py
+   ```py
     def trainer(df: pd.DataFrame):
         start = '2011-06-01'
         stop = '2020-01-01'
@@ -25,12 +25,12 @@ There are 6 variables to adjust to run main.py
 
 -In 'tester()'
 5. start = '2011-06-01' : line 28
-6. stop = '2020-01-01' : line 29
-```py
-def tester(df: pd.DataFrame):
-    start = '2020-01-02'
-    stop = '2023-11-30'
-```
+6. stop = '2020-01-01' : line 29   
+   ```py
+   def tester(df: pd.DataFrame):
+       start = '2020-01-02'
+       stop = '2023-11-30'
+   ```
 
 These variables are use to adjust the parameters of the model. Once the model has been trained, it will be saved in the models folder for use. Copy the model from the console and paste the model filename on line 43 after the "models/xxxx.zip" The model will be ready for testing. 
 
