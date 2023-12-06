@@ -144,7 +144,7 @@ if __name__ == '__main__':
     app = TradingApp(my_bot)
     app.run()
 ```
-
+![UI](https://i.imgur.com/e5zIdhw.png)
 
 
 
