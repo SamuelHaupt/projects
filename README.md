@@ -13,7 +13,9 @@ There are 6 variables to adjust to run main.py
 
 2. start = '2011-06-01' : line 13
 3. stop = '2020-01-01' : line 14
-4. agent.train(1_000_000) : line 25
+4. agent.train(5_000) : line 25
+
+   The 5_000 argument in the agent.train(5_000) represents the timesteps for the model training. The higher the number, the more training...and more time to complete the training. We left it at 5_000 for quick assessment, but real training consists of much larger numbers.
 ```py
  def trainer(df: pd.DataFrame):
      start = '2011-06-01'
@@ -21,7 +23,7 @@ There are 6 variables to adjust to run main.py
      ...
      # Train model
      agent = PPOAgentModule(training_env)
-     agent.train(1_000_000)
+     agent.train(5_000)
  ```
 
 -In tester()
