@@ -146,5 +146,77 @@ if __name__ == '__main__':
 ```
 ![UI](https://i.imgur.com/e5zIdhw.png)
 
+### Using backtesting.py
+```py
+import talib
+import datetime
+from backtesting import Backtest, Strategy 
+from backtesting.lib import crossover
+import pandas as pd
+import yfinance as yf
+import math
+import numpy as np
+```
+Necessary Dependencies
+```py
+def download_and_add_atr(symbol, start_date, end_date, periods, time_shifts):
+    # Download data
+    data_df = yf.download(
+        tickers=symbol,
+        start=start_date,
+        end=end_date,
+        interval='1d',
+        auto_adjust=True,
+        rounding=True
+    )
+    data_df.sort_index(ascending=True, inplace=True)
+    data_df.drop_duplicates(inplace=True)
+```
+Similar to the bot itself, the backtests need to download and preprocess data. The bot strips some columns that the backtesting library requires so I couldn’t use the bot’s preprocessor, but used the same steps. Download from yfinance, dropna’s add some new columns as indicators.
+```py
+# Define parameters
 
+# different symbols to test back tests with
+#symbol = "TQQQ"
+#symbol = "GOOG"
+# symbol = "^GSPC"
+# symbol = "MSFT"
+# symbol = "BTC_USD"
+symbol = 'BTC-USD'
 
+# Can use different start and stop dates
+# start_date = "2018-01-30"
+#start_date = "2021-01-30"
+#end_date = "2022-01-30"
+#end_date = "2021-11-09"
+start_date = "2022-01-30"
+end_date = "2022-12-31"
+```
+Here are some some quick ways to change between different assets and time periods
+```py
+class ATRStrategy(Strategy):
+    atr_period = 14  # Period for ATR calculation
+
+    def init(self):
+        # Extract high, low, and close as numpy arrays
+        high = np.array(self.data.High)
+        low = np.array(self.data.Low)
+        close = np.array(self.data.Close)
+
+        # Calculate ATR using TA-Lib
+        self.atr = self.I(talib.ATR, high, low, close, timeperiod=self.atr_period)
+
+    def next(self):
+        if not self.position and self.data.Close[-1] > self.data.Close[-2] + self.atr[-1]:
+            self.buy()
+        elif self.position and self.data.Close[-1] < self.data.Close[-2] - self.atr[-1]:
+            self.position.close()
+```
+A smaller, example strategy. Uses TA-Lib to calculate Average True Range, buys or sells based on that range.
+```py
+bt = Backtest(data_df, ATRStrategy, cash=100000)
+stats = bt.run()
+print(stats)
+bt.plot(filename=filename)
+```
+Method to run the test and plot the results
