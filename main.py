@@ -22,7 +22,7 @@ def main():
 
         # Train model
         agent = PPOAgentModule(training_env)
-        agent.train(1_000_000)
+        agent.train(5_000)
 
     def tester(df: pd.DataFrame):
         start = '2020-01-02'
