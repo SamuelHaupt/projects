@@ -4,6 +4,8 @@ We built a robot to trade high volatility assets, especially 3x ETFs, using rein
 
 ## Installation:
 
+Instructions are for linux/unix based systems.
+
 1. Install dependencies: `pip install -r requirements.txt`
 2. Test if intallation was successful:
     + Run python by inputting: `python` or `python3` (on a MacBook Pro).
