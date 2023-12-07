@@ -147,6 +147,7 @@ bot.trade(asset_buy_quantity=None, trade_dec='buy')
 Image 1: Alpaca User Interface. Select single or continuous to automate trading. Using the manual functionality to suggest to the neural network when to buy and sell. 
 
 ### Using `backtesting.py` to test strategies against model:
+May need to pip install TA-LIB as standalone package using: `pip install ta-lib`
 
 ```py
 import talib
