@@ -37,7 +37,7 @@ def main():
 
         # Load model and agent
         print("Testing model on testing data.")
-        for test in range(20):
+        for test in range(1):
             agent = PPOAgentModule(
                 testing_env,
                 model_path="models/20231206075227_ppo_trading_agent.zip")
