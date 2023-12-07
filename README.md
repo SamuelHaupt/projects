@@ -6,8 +6,9 @@ We built a robot to trade high volatility assets, especially 3x ETFs, using rein
 
 Instructions are for linux/unix based systems.
 
-1. Install dependencies: `pip install -r requirements.txt`
-2. Test if intallation was successful:
+1. Clone repo
+2. Install dependencies: `pip install -r requirements.txt`
+3. Test if intallation was successful:
     + Run python by inputting: `python` or `python3` (on a MacBook Pro).
     + Import Stable Baseline3: `import sb3_contrib`.
     + If you receive an error when importing `sb3_contrib`, then you need to fix errors related to the installation of all dependencies in `requirements.txt`.
@@ -27,7 +28,7 @@ Here are the locations which you can modify, if desired:
 13: start = '2011-06-01'
 14: stop = '2020-01-01'
 ...
-25: agent.train(1_000_000)
+25: agent.train(5_000)
 ...
 28: start = '2020-01-02'
 29: stop = '2023-11-30'
