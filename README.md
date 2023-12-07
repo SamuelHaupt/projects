@@ -147,7 +147,7 @@ if __name__ == '__main__':
     app.run()
 ```
 ![UI](https://i.imgur.com/e5zIdhw.png)
-Image 1: UI Interface Example
+Image 1: Bot UI Linked with Aplaca API
 
 ### Using backtesting.py
 ```py
