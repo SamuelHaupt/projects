@@ -145,6 +145,7 @@ if __name__ == '__main__':
     app.run()
 ```
 ![UI](https://i.imgur.com/e5zIdhw.png)
+Image 1: UI Interface Example
 
 ### Using backtesting.py
 ```py
