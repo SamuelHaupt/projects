@@ -17,7 +17,7 @@ from pytz import timezone
 
 class Bot:
     def __init__(self, secret_key, key, paper_trade=True,
-                 model_path="models/20231126160832_ppo_trading_agent"):
+                 model_path="models/20231206075227_ppo_trading_agent"):
         # Bot variables
         self.symbol = 'TQQQ'
         self.model_path = model_path
