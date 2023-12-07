@@ -10,6 +10,7 @@ Instructions are for linux/unix based systems.
 2. Install dependencies: `pip install -r requirements.txt`
 3. Test if intallation was successful:
     + Run python by inputting: `python` or `python3` (on a MacBook Pro).
+    + Import yfinance: `import yfinance`.
     + Import Stable Baseline3: `import sb3_contrib`.
     + If you receive an error when importing `sb3_contrib`, then you need to fix errors related to the installation of all dependencies in `requirements.txt`.
 
