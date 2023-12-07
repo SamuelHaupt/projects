@@ -221,7 +221,7 @@ class TradingApp(AiTraderApp):
         
 
 if __name__ == '__main__':
-    my_bot = Bot(secret_key='', key='') 
+    my_bot = Bot(secret_key='AiCY6AYOYAbhoMM9MgzoA8pGoUYp3KckmN5Tz9Qb', key='PKFC7PWLKDDXQA6OYRIO') 
     app = TradingApp(my_bot)
     app.run()
 
