@@ -1,63 +1,53 @@
-# CS467_F2023_CryptoTradingBot
+# AI Trading Bot
 
-### main.py is the file to run when training and testing the bot.
-There are 6 variables to adjust to run main.py 
+We built a robot to trade high volatility assets, especially 3x ETFs, using reinforcement learning algorithms that aims to maximize returns while minimizing risk to initial capital. We focused our efforts on recurrent Proximal Policy Optimization (PPO) where the agent updates policies throughout its training.
 
-1. symbol = 'TQQQ' : line 10
-```py
- dp = DataProcessor()
- symbol = 'TQQQ'
-```
+## Installation:
 
--In trainer()
+Instructions are for linux/unix based systems.
 
-2. start = '2011-06-01' : line 13
-3. stop = '2020-01-01' : line 14
-4. agent.train(5_000) : line 25
+1. Install dependencies: `pip install -r requirements.txt`
+2. Test if intallation was successful:
+    + Run python by inputting: `python` or `python3` (on a MacBook Pro).
+    + Import Stable Baseline3: `import sb3_contrib`.
+    + If you receive an error when importing `sb3_contrib`, then you need to fix errors related to the installation of all dependencies in `requirements.txt`.
 
-   The 5_000 argument in the agent.train(5_000) represents the timesteps for the model training. The higher the number, the more training...and more time to complete the training. We left it at 5_000 for quick assessment, but real training consists of much larger numbers.
-```py
- def trainer(df: pd.DataFrame):
-     start = '2011-06-01'
-     stop = '2020-01-01'
-     ...
-     # Train model
-     agent = PPOAgentModule(training_env)
-     agent.train(5_000)
- ```
+## Use `main.py` for main entry-point to application:
 
--In tester()
+Start with `main.py`. There are only six variables to adjust, if desired. However, none need to be adjusted in order to run our project.
 
-5. start = '2011-06-01' : line 28
-6. stop = '2020-01-01' : line 29   
-```py
-def tester(df: pd.DataFrame):
-    start = '2020-01-02'
-    stop = '2023-11-30'
-```
+> You can select other stock symbols if you wish to run our application on other assets. However, we built our application to use `TQQQ`, which is a 3x version of QQQ, which takes the top 100 assets in the Nasdaq.
 
-These variables are use to adjust the parameters of the model. Once the model has been trained, it will be saved in the models folder for use. Copy the model from the console and paste the model filename on line 43 after the "models/xxxx.zip" The model will be ready for testing. 
+Here are the locations which you can modify, if desired:
 
 ```py
- # Load model and agent
-    print("Testing model on testing data.")
-    for test in range(20):
-        agent = PPOAgentModule(
-            testing_env,
-            model_path="models/20231206075227_ppo_trading_agent.zip")
-        agent.test(testing_env, testing_df)
+...
+10: symbol = 'TQQQ'
+...
+13: start = '2011-06-01'
+14: stop = '2020-01-01'
+...
+25: agent.train(1_000_000)
+...
+28: start = '2020-01-02'
+29: stop = '2023-11-30'
 ```
 
-Once main.py is run, you will see these two options:
-```
-[*********************100%%**********************]  1 of 1 completed
-[*********************100%%**********************]  1 of 1 completed
-1. Train
-2. Test
+When running the application from the main entry point, you will be provided with two options to select: "1" (train) or "2" (test). The difference between these two is train doesn't require a pre-loaded model, whereas test does. Select "1" to start. This will train the model over 1 million iterations, which will take up to 10 hours. Shorten this to 40 thousand steps (or less) to finish the training in under 20 minutes. After the model finishes training, the agent will save the model in a zip file, for example, `models/20231206075227_ppo_trading_agent.zip`. Change the file path and name to the freshly zipped model as indicated below:
+
+```py
+43: model_path='models/20231206075227_ppo_trading_agent.zip'
 ```
 
-Choice 1: Train the model on the above parameters.
-```
+> Important Note: Make sure to include `models/` in the file path for `model_path`. Otherwise, the application will not see the saved model.
+
+Next, select "2" to test the model to determine the success of the trained model.
+
+### Example outputs for each choice
+
++ Choice 1 - Train:
+
+```py
  Using device: cpu
  Training.
  Start Time: 2023-12-06 07:51:54.753794
@@ -68,14 +58,19 @@ Choice 1: Train the model on the above parameters.
  Model saved at path: models/20231206075227_ppo_trading_agent
 ```
 
-Choice 2: Test the model on the above parameters.
-```
++ Choice 2 - Test:
+
+```py
 Testing model on testing data.
 |  Market Return:   102.07% |   Portfolio Return:   -25.22% |  Reward: -8128.764280654095
 ...
 ```
 
-### Use data_processor.py:
+## Stand-alone access to other modules
+
+The above description provides enough detail to how to run the application. The following instructions are detailed information on how to run each module separately from the main entry-point.
+
+### Use `data_processor.py` to download asset data other than `TQQQ`:
 
 1. Initialize DataProcessor.
 2. Use instantiated DataProcessor and call `download_data_df_from_yf()` with symbol, start_date, and end_date. Symbol correlates to stock symbol, such as `TQQQ`. Start and end dates should be in the format "YY-MM-DD". The downloaded data is returned from the call.
@@ -95,7 +90,7 @@ data_df = data_processor.download_data_df_from_yf(
 preprocessed_df = data_processor.preprocess_data(data_df)
 ```
 
-### Use asset_trading_env.py:
+### Use `asset_trading_env.py` to build a custom asset trading environment:
 
 1. After downloading and preprocessing the data, pass the data to the environment and initialize.
     + Initial balance and render mode are both defaulted values. Set them differently if desired. However, setting render_mode to anything else other than 'human' will not change the functionality of render.
@@ -118,38 +113,38 @@ for _ in range(len(preprocessed_df)):
         print(key, ": ", value)
 ```
 
-### Use bot.py
+### Use `server.py` and `bot.py` to deploy the Alpaca trading user interface:
+
 1. Create an account at [Alpaca](https://alpaca.markets/).
-2. Replace the key and secretkey with values given by Alpaca.
-3. Use the main function to call various methods to interact with the market.
+2. Replace the `key` and `secretkey` in both `server.py` and `bot.py` with values given by Alpaca.
+3. Run the server a terminal: `python3 server.py`.
+4. Run the bot in a separate terminal: `python3 bot.py` 
+5. Click on or copy and paste local website address from the output of `server.py` terminal to a web browser.
+6. Select options to buy and sell with Alpaca.
+
++ `server.py`:
+
 ```py
-def main():
-    '''
-    main function of the bot.
-    '''
-    key = ''
-    secret_key = ''
-    bot = Bot(secret_key, key)
-    bot.trader()
-    bot.trade(asset_buy_quantity=None, trade_dec='buy')
+my_bot = Bot(secret_key='REPLACE_ME', key='REPLACE_ME') 
+app = TradingApp(my_bot)
+app.run()
 ```
 
-### Use server.py
-1. Create an account at [Alpaca](https://alpaca.markets/).
-2. Replace the key and secretkey with values given by Alpaca.
-3. Run server.py using python. 
-4. Open the link given by server.py in the console window. 
-5. Use the UI to interact with bot.py and Alpaca. 
++ `bot.py`:
+
 ```py
-if __name__ == '__main__':
-    my_bot = Bot(secret_key='', key='') 
-    app = TradingApp(my_bot)
-    app.run()
+key = 'REPLACE_ME'
+secret_key = 'REPLACE_ME'
+bot = Bot(secret_key, key)
+bot.trader()
+bot.trade(asset_buy_quantity=None, trade_dec='buy')
 ```
+
 ![UI](https://i.imgur.com/e5zIdhw.png)
-Image 1: Bot UI Linked with Aplaca API
+Image 1: Alpaca User Interface. Select single or continuous to automate trading. Using the manual functionality to suggest to the neural network when to buy and sell. 
 
-### Using backtesting.py
+### Using `backtesting.py` to test strategies against model:
+
 ```py
 import talib
 import datetime
@@ -160,7 +155,7 @@ import yfinance as yf
 import math
 import numpy as np
 ```
-Necessary Dependencies
+
 ```py
 def download_and_add_atr(symbol, start_date, end_date, periods, time_shifts):
     # Download data
@@ -175,7 +170,9 @@ def download_and_add_atr(symbol, start_date, end_date, periods, time_shifts):
     data_df.sort_index(ascending=True, inplace=True)
     data_df.drop_duplicates(inplace=True)
 ```
+
 Similar to the bot itself, the backtests need to download and preprocess data. The bot strips some columns that the backtesting library requires so I couldn’t use the bot’s preprocessor, but used the same steps. Download from yfinance, dropna’s add some new columns as indicators.
+
 ```py
 # Define parameters
 
@@ -195,7 +192,9 @@ symbol = 'BTC-USD'
 start_date = "2022-01-30"
 end_date = "2022-12-31"
 ```
-Here are some some quick ways to change between different assets and time periods
+
+Here are some quick ways to change between different assets and time periods
+
 ```py
 class ATRStrategy(Strategy):
     atr_period = 14  # Period for ATR calculation
@@ -215,11 +214,12 @@ class ATRStrategy(Strategy):
         elif self.position and self.data.Close[-1] < self.data.Close[-2] - self.atr[-1]:
             self.position.close()
 ```
-A smaller, example strategy. Uses TA-Lib to calculate Average True Range, buys or sells based on that range.
+
+A smaller example strategy. Uses TA-Lib to calculate Average True Range, buys or sells based on that range.
+
 ```py
 bt = Backtest(data_df, ATRStrategy, cash=100000)
 stats = bt.run()
 print(stats)
 bt.plot(filename=filename)
 ```
-Method to run the test and plot the results
