@@ -1,0 +1,9 @@
+.python-version
+__pycache__/
+team-project.code-workspace
+.DS_Store
+render_logs/
+models/
+venv/
+results/
+trader-app/.gitignore

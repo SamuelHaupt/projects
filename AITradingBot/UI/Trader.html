@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Trader</title>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            TTQ Trader
+        </div>
+
+        <div class="content">
+            <div class="graphs-info">
+                <div id="graph1" class="graphs">Graph1</div>
+                <div id="graph2" class="graphs">Graph2</div>
+                <div class="info" id="info1">
+                    <p>1</p>
+                    <p>2</p>
+                    <p>3</p>
+                    <p>4</p>
+                </div>
+                <div class="info" id="info2">
+                    <p>1</p>
+                    <p>2</p>
+                    <p>3</p>
+                    <p>4</p>
+                </div>
+            </div>
+            
+            <div class="manualtrade">
+                <div id="manuallable">
+                    <div>Manual Trade</div>
+                </div>
+                <div id="suggestedaction-container">
+                    <p>Suggested Action</p>
+                    <p id="suggestedaction">Buy</p>
+                </div>
+                <div id="manualbuttons">
+                    <div id="buyamounts">
+                        <input type="number" id="buy-input" value="1">
+                    </div>
+                    <div id="sellamounts">
+                        <input type="number" id="sell-input" value="1">
+                    </div>
+                    <div id="buy-button-div">
+                        <button id="buybutton">Buy</button>
+                    </div>
+                    <div id="sell-button-div">
+                        <button id="sellbutton">Sell</button>
+                    </div>
+                </div>   
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div id="sidetop">
+                <div class="account-balance-contaier">
+                    <p>Account Balance</p>
+                    <p id="account-balance">0</p>
+                </div>
+                <div class="asset-balance-container">
+                    <p>Asset Balance</p>
+                    <p id="asset-balance">0</p>
+                </div>
+                <div class="single-trade-button-container">
+                    <button id="single-trade">Single Trade</button>
+                </div>
+            </div>
+
+            <div id="sidebottom">
+                <div class="continous-trade-button-container">
+                    <button id="continous-trade">Continous</button>
+                </div>
+                <div class="days-input-container">
+                    <p>Days</p>
+                    <input type="number" id="days-input" value="1">
+                </div>
+                <div class="status-container">
+                    <p>Status</p>
+                    <p id="status">Idle</p>
+                </div>
+                <div class="next-trade-date-container">
+                    <p>Next Trade Date</p>
+                    <p id="next-trade-date">N/A</p>
+                </div>
+                <div class="stop-button-container">
+                    <button id="stop-button">Stop</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="footer">
+            <p>Trademark?</p>
+            <p id="names">Names</p>
+            <a href="http://github.com">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Github logo" width="16" height="16" style="background-color: transparent;">
+                Github
+            </a>
+        </div>
+    </div>
+    
+</body>
+</html>
