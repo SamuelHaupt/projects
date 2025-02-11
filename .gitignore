@@ -19,6 +19,11 @@
 .env.production.local
 exercise-tracker-app-script.txt
 payroll-management-app-script.txt
+AITTradingBot/team-project.code-workspace
+AITTradingBot/render_logs/
+AITTradingBot/models/
+AITTradingBot/venv/
+AITTradingBot/results/
 
 npm-debug.log*
 yarn-debug.log*
