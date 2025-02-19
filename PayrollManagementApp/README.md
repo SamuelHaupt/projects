@@ -1,5 +1,5 @@
 
-Payroll Management Appplication is meant to provide payroll management and HR tracking for companies of 1000 people or less. The major focus of the application was database design. Thus, the user interface provides a simple and structural approach to interact with the database.
+Payroll Management Application is meant to provide payroll management and HR tracking for companies of 1000 people or less. The major focus of the application was database design. Thus, the user interface provides a simple and structural approach to interact with the database.
 
 I built the project with a partner and we each contributed to the overall project using git. Version history will show branching and merging from each of our contributions to build a successful project.
 
